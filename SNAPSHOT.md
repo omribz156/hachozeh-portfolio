@@ -1,7 +1,9 @@
 # Portfolio Snapshot
 
 Prepared: 2026-09-26
-Status: locally verified candidate; see [VERIFICATION.md](VERIFICATION.md)
+Status: published; local and GitHub checks passed. See [VERIFICATION.md](VERIFICATION.md).
+
+Public repository: https://github.com/omribz156/hachozeh-portfolio
 
 This source snapshot preserves the Astro/Preact frontend, Fastify/PostgreSQL
 backend, market engine, Seer, Oracle, and their tests. It intentionally has no

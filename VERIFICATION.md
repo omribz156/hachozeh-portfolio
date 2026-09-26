@@ -1,7 +1,18 @@
-# Local Verification
+# Verification
 
 Date: 2026-09-26
 Scope: this curated portfolio candidate, not the live deployment.
+
+## GitHub Verification
+
+The public snapshot commit `aa9f6a8738d9f0d7461b8c8490deb74df07d8f29` passed both
+the `verify` and `static-security` jobs on GitHub's Ubuntu runner on 2026-09-26.
+[Completed workflow run](https://github.com/omribz156/hachozeh-portfolio/actions/runs/36230410924).
+The workflow installed dependencies, audited them, ran the backend and helper
+tests, checked types, built Astro, and ran the Semgrep review gate. No deployment
+or production database connection is part of the workflow.
+
+## Local Checks
 
 | Check | Result |
 | --- | --- |
@@ -46,7 +57,7 @@ example domains or a documentation-only IP address inside rejection tests.
 No production mutation, provider credential verification, database integration
 test, fresh database boot, or full end-to-end UI pass was performed. Installation
 lifecycle scripts were disabled. Build success is not production deployment
-proof. GitHub Actions has not run for this candidate yet.
+proof. Hosted checks are recorded separately above.
 
 CodeQL was not executed: this copy has no project-wide open-source license or
 established commercial entitlement. See GitHub's
