@@ -1,0 +1,18 @@
+---
+// /profile is the owner shortcut. Public profiles live at /@<handle>; guests go
+// through the normal auth overlay instead of falling into the root handle route.
+const auth = Astro.locals.auth;
+
+if (!auth?.authenticated) {
+  return Astro.redirect('/?overlay=login', 302);
+}
+
+const payload = auth.payload as any;
+const handle = payload?.currentUser?.user?.handle || '';
+
+if (handle) {
+  return Astro.redirect(`/@${encodeURIComponent(handle)}`, 302);
+}
+
+return Astro.redirect('/settings', 302);
+---

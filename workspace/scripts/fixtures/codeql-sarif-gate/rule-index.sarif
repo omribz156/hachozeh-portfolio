@@ -1,0 +1,29 @@
+{
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "CodeQL",
+          "version": "0.0.0",
+          "rules": [
+            {
+              "id": "R1",
+              "properties": {
+                "security-severity": "8.9"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleIndex": 0,
+          "message": {
+            "text": "Rule index severity fixture"
+          }
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="weather market image">
+  <defs>
+    <linearGradient id="g" x1="64" y1="60" x2="450" y2="464" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#18344a"/>
+      <stop offset=".55" stop-color="#174642"/>
+      <stop offset="1" stop-color="#0b111b"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#g)"/>
+  <circle cx="342" cy="170" r="58" fill="#f7c66a"/>
+  <path d="M164 334h204c42 0 76-34 76-76s-34-76-76-76c-18 0-35 6-48 17-22-42-66-70-117-70-73 0-132 59-132 132 0 40 18 76 46 100" fill="#e7edf4" opacity=".95"/>
+  <path d="M166 386h176M196 430h112" stroke="#6ee7b7" stroke-width="24" stroke-linecap="round"/>
+</svg>

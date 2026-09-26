@@ -1,0 +1,39 @@
+name: Verify Portfolio Snapshot
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      NAVI_ENV_FILE: /dev/null
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: npm audit --audit-level=low
+      - run: npm run security:codeql:gate:test
+      - run: npm --prefix systems/back run typecheck
+      - run: npm --prefix systems/back test -- --maxWorkers=2
+        env:
+          NODE_ENV: test
+      - run: npm --prefix systems/web run check
+      - run: node --test systems/web/src/lib/*.test.mjs workspace/security/*.test.mjs
+      - run: npm --prefix systems/web run build
+  static-security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          persist-credentials: false
+      - run: pipx install semgrep==1.172.0
+      - run: semgrep scan --config p/security-audit --config p/secrets --config p/nodejs --config p/react --config p/github-actions --metrics=off --disable-version-check --json --output "$RUNNER_TEMP/semgrep.json" .
+      - run: node workspace/security/check-semgrep-review.mjs "$RUNNER_TEMP/semgrep.json"

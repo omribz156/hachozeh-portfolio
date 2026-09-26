@@ -1,0 +1,169 @@
+/* ──────────────────────────────────────────────────────────────
+   patterns/probability-hero.css
+   The big "X% סיכוי ▲N" headline used on binary market-detail
+   pages. Probability is the page hero — the single most important
+   number a binary market answers. Sits above the chart, left-
+   aligned, with the qualifier word in a slimmer weight and the
+   signed delta as a small mint/coral pill.
+   When the market resolves, the hero switches to its
+   __resolution variant — verdict + date, replacing the live %.
+   When the viewer holds a position, an __roi sibling appears
+   inline on the right (small position-return chip).
+   BEM:
+     .hz-probability-hero           — wrapper
+     .hz-probability-hero__primary  — top row: value + qualifier + delta
+     .hz-probability-hero__value    — the big number
+     .hz-probability-hero__qualifier — "סיכוי" or equivalent
+     .hz-probability-hero__delta    — signed change pill
+     .hz-probability-hero__delta--up   — mint tint
+     .hz-probability-hero__delta--down — coral tint
+     .hz-probability-hero__roi      — viewer position ROI sibling
+     .hz-probability-hero__roi--up     — mint tint
+     .hz-probability-hero__roi--down   — coral tint
+     .hz-probability-hero__resolution  — verdict variant (resolved)
+     .hz-probability-hero__resolution-label — "נפתר →"
+     .hz-probability-hero__resolution-side  — winning side name
+     .hz-probability-hero__resolution-date  — resolved-at line
+   ────────────────────────────────────────────────────────────── */
+
+.hz-probability-hero {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.6rem 1.4rem;
+  padding-block: 0.3rem;
+}
+
+.hz-probability-hero__primary {
+  display: flex;
+  align-items: baseline;
+  gap: 0.55rem;
+  min-width: 0;
+}
+
+.hz-probability-hero__value {
+  font-family: var(--hz-font-mono);
+  font-size: clamp(2.4rem, 4.8vw, 3.4rem);
+  font-weight: 700;
+  letter-spacing: -0.045em;
+  line-height: 1;
+  color: var(--hz-text);
+}
+
+.hz-probability-hero__qualifier {
+  font-size: 1.05rem;
+  font-weight: 500;
+  color: var(--hz-text-soft);
+  letter-spacing: -0.01em;
+}
+
+.hz-probability-hero__delta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.18rem;
+  border-radius: var(--hz-radius-pill);
+  padding: 0.18rem 0.5rem;
+  font-family: var(--hz-font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.hz-probability-hero__delta--up {
+  background: rgb(var(--hz-action-buy-rgb) / 0.14);
+  color: var(--hz-action-buy);
+}
+
+.hz-probability-hero__delta--down {
+  background: rgb(var(--hz-action-sell-rgb) / 0.14);
+  color: var(--hz-action-sell-strong);
+}
+
+.hz-probability-hero__delta--flat {
+  background: rgb(255 255 255 / 0.05);
+  color: var(--hz-text-faint);
+}
+
+.hz-probability-hero__roi {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  border-radius: var(--hz-radius-pill);
+  padding: 0.28rem 0.7rem;
+  font-family: var(--hz-font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.hz-probability-hero__roi-label {
+  font-size: 0.76rem;
+  letter-spacing: 0;
+  font-weight: 600;
+  opacity: 0.78;
+}
+
+.hz-probability-hero__roi--up {
+  background: rgb(var(--hz-action-buy-rgb) / 0.14);
+  color: var(--hz-action-buy);
+}
+
+.hz-probability-hero__roi--down {
+  background: rgb(var(--hz-action-sell-rgb) / 0.14);
+  color: var(--hz-action-sell-strong);
+}
+
+.hz-probability-hero__roi--flat {
+  background: rgb(255 255 255 / 0.05);
+  color: var(--hz-text-faint);
+}
+
+/* Resolved variant — verdict replaces the % value. */
+.hz-probability-hero--resolved {
+  align-items: center;
+}
+
+.hz-probability-hero__resolution {
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+  min-width: 0;
+}
+
+.hz-probability-hero__resolution-headline {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-family: var(--hz-font-mono);
+  font-size: clamp(1.65rem, 3vw, 2.2rem);
+  font-weight: 700;
+  letter-spacing: -0.035em;
+  line-height: 1;
+}
+
+.hz-probability-hero__resolution-label {
+  color: var(--hz-text-soft);
+  font-weight: 600;
+}
+
+.hz-probability-hero__resolution-side {
+  color: var(--hz-action-buy);
+}
+
+.hz-probability-hero__resolution-side--lose {
+  color: var(--hz-action-sell-strong);
+}
+
+.hz-probability-hero__resolution-date {
+  font-family: var(--hz-font-mono);
+  font-size: 0.74rem;
+  color: var(--hz-text-faint);
+  letter-spacing: 0.02em;
+}
+
+@media (max-width: 640px) {
+  .hz-probability-hero {
+    gap: 0.45rem 0.85rem;
+  }
+}

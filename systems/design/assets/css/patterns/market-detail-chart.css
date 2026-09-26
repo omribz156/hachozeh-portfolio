@@ -1,0 +1,620 @@
+﻿/**
+ * market-detail-chart.css — Layer 2 wrapper styles.
+ *
+ * Covers all chart-card chrome: the card root, legend, footer stats,
+ * range tabs, line picker, settings menu, and status pills.
+ *
+ * What is NOT here:
+ *   - SVG canvas styles (.chart-card__svg and its children) — those live in
+ *     patterns/probability-chart.css (Layer 1 renderer, Slice 2.1).
+ */
+
+/* ── Card root ───────────────────────────────────────────────────────────── */
+
+.chart-card {
+  background: var(--hz-bg-raised);
+  border: 1px solid var(--hz-border-soft);
+  border-radius: 0.85rem;
+  padding: 1rem 0.9rem 1.1rem;
+}
+
+/* ── SVG wrap ────────────────────────────────────────────────────────────── */
+
+.chart-card__svg-wrap {
+  position: relative;
+  width: 100%;
+}
+
+/* ── Top legend ──────────────────────────────────────────────────────────── */
+/* Per-outcome chip above the chart: color dot · name · current value.
+ * Force LTR so chips read "dot · name · value" left-to-right and the
+ * descending order (highest value first) sits at the start of the row —
+ * matches Poly/Kalshi convention even on RTL pages. */
+
+.chart-card__legend {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 1rem;
+  margin: 0 0 0.85rem;
+  min-height: 1.3rem;
+  direction: ltr;
+}
+
+.chart-card__legend:empty {
+  display: none;
+}
+
+.chart-card__legend-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.78rem;
+  line-height: 1;
+  color: var(--hz-text);
+}
+
+.chart-card__legend-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.chart-card__legend-name {
+  color: var(--hz-text-soft, var(--hz-text));
+  max-width: 12rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.chart-card__legend-value {
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--hz-text);
+}
+
+/* ── Footer ──────────────────────────────────────────────────────────────── */
+/* Single footer row — stats (status pill / close-date / volume) +
+ * controls (line picker + range tabs + settings) in one strip.
+ * In RTL: HTML-first children render on the right, last on the left. */
+
+.chart-card__footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1.25rem;
+  /* Bumped vertical breathing room — was reading cramped next to Poly's
+   * footer. The chart canvas already has its own bottom whitespace via
+   * the X-axis pad; this margin/padding pair separates that from the
+   * controls strip more clearly. */
+  margin-top: 1.1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--hz-border-soft);
+  /* Single row, always. Earlier the footer wrapped to two lines whenever
+   * stats + controls exceeded the card width — most visible when range
+   * changes nudged label widths over the threshold and the stats dropped
+   * to a new row. Stats now shrinks/wraps internally; the controls
+   * cluster (which is the primary affordance) stays anchored right. */
+  flex-wrap: nowrap;
+}
+
+.chart-card__stats {
+  display: inline-flex;
+  align-items: center;
+  /* Tight inner gap — each group hugs its own edge of the footer. Polymarket
+   * sits volume + close-date together with maybe 0.6rem between them, then
+   * pushes the whole bundle to the left; the range tabs do the same to the
+   * right. The big empty space sits IN THE MIDDLE, not between the items
+   * within a group. Earlier 0.95rem horizontal gap made our footer read as
+   * "stretched across the whole width" even though both groups were the
+   * same total width as Poly's. */
+  gap: 0.35rem 0.65rem;
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--hz-text-muted);
+  /* min-width: 0 lets the stats group shrink below its intrinsic content
+   * size — without it, flex's "min size = content size" rule keeps the
+   * group rigid and forces the footer to wrap. */
+  min-width: 0;
+  /* flex: 0 1 auto — take the room you need, shrink if forced, but DON'T
+   * grow to fill the available space. Earlier `flex: 1 1 auto` made stats
+   * absorb all the empty middle and pushed individual items apart from
+   * each other. The hug-the-edge feel only works when the group sits at
+   * its content width and lets the parent's `justify-content:
+   * space-between` create the middle gap. */
+  flex: 0 1 auto;
+  flex-wrap: wrap;
+}
+
+.chart-card__stat {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  /* Keep each stat on a single line. Without this, the squeezed flex
+   * group breaks the inner text on every whitespace — "נפח מסחר:
+   * V₪ 27,184,114" becomes three stacked lines instead of one stat that
+   * wraps to the next row of the flex group. */
+  white-space: nowrap;
+  /* Clip cleanly when there's genuinely no room (e.g. multi-10 mobile
+   * where the line picker eats the controls slot). Without this, a too-
+   * long stat overflows its bounds visibly into the chart area above. */
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Narrow-viewport compression. Both groups stay side-by-side on mobile
+ * (stats on the left in RTL, controls cluster on the right), but each
+ * compresses to fit alongside instead of stacking. What's shed on mobile:
+ *   - Stat label prefixes ("נפח מסחר:", "מסתיים ב-") — icons carry meaning
+ *   - The close-date stat entirely — already in the timeline section
+ *     below the chart, so the chart footer doesn't need to repeat it
+ *   - The "קווים" label inside the line-picker button — keeps just the
+ *     "X/Y" count next to the picker glyph
+ *   - Range-tab padding + font — all six still fit
+ * Threshold 520px matches the iPhone/tablet boundary. */
+@media (max-width: 520px) {
+  .chart-card__footer {
+    gap: 0.35rem;
+    margin-top: 0.85rem;
+    padding-top: 0.75rem;
+  }
+
+  .chart-card__stats {
+    gap: 0.3rem 0.5rem;
+    font-size: 0.7rem;
+  }
+
+  .chart-card__stat {
+    gap: 0.25rem;
+  }
+
+  /* Close-date stat is dropped on mobile — the timeline section below the
+   * chart already shows "סגירת השוק · DD MMM" prominently. */
+  .chart-card__stat--date {
+    display: none;
+  }
+
+  /* Status pill is dropped on mobile — the trade ticket signals "open
+   * for trading" by its presence, so the pill duplicates a signal the
+   * page already carries. Resolved markets don't render the pill at
+   * all (see extractMarketMeta), so this rule only kicks in for open.
+   * Compound selector for specificity — base `.chart-card__status-pill`
+   * rule sits later in the file. */
+  .chart-card__stats .chart-card__status-pill {
+    display: none;
+  }
+
+  /* NEW pill (חדש) takes the volume's slot on mobile — freshness is a
+   * one-of-a-kind chart signal worth carrying when relevant, and the
+   * volume number is already on the page hero. So when the NEW pill is
+   * present, drop the volume stat next to it. When NEW is absent (the
+   * normal case for an older market), volume stays. */
+  .chart-card__stats:has(.chart-card__new-pill) .chart-card__stat--volume {
+    display: none;
+  }
+
+  .chart-card__new-pill {
+    padding: 0.14rem 0.4rem;
+    font-size: 0.6rem;
+  }
+
+  .chart-card__controls {
+    gap: 0.3rem;
+  }
+
+  .chart-card__range-tabs {
+    gap: 0.15rem;
+  }
+
+  .chart-card__range-tab {
+    font-size: 0.66rem;
+    padding: 0.22rem 0.45rem;
+    letter-spacing: 0.02em;
+  }
+
+  .chart-card__line-picker-button {
+    font-size: 0.66rem;
+    padding: 0.24rem 0.5rem;
+    gap: 0.3rem;
+  }
+
+  /* Drop the "קווים · " prefix on mobile — keep just the "4/10" count
+   * next to the picker glyph. Saves ~30px in the controls cluster, which
+   * is the difference between fit and overflow on multi-outcome markets. */
+  .chart-card__line-picker-text {
+    display: none;
+  }
+
+  .chart-card__settings-button {
+    width: 1.55rem;
+    height: 1.55rem;
+  }
+
+  .chart-card__settings-button svg {
+    width: 0.8rem;
+    height: 0.8rem;
+  }
+}
+
+/* ── Status pill ─────────────────────────────────────────────────────────── */
+
+.chart-card__status-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.18rem 0.6rem;
+  border-radius: 999px;
+  background: rgba(93, 211, 158, 0.12);
+  color: #5dd39e;
+  /* Allow the resolved pill ("הוכרע · <winner>") to grow wider than the
+   * open/closed pill without wrapping. max-width prevents runaway labels
+   * from overflowing the stats row on very wide winner labels. */
+  max-width: 22ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.chart-card__status-pill-dot {
+  flex-shrink: 0;
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: currentColor;
+  box-shadow: 0 0 6px currentColor;
+}
+
+/* ── NEW pill ────────────────────────────────────────────────────────────── */
+/* Brand amber "חדש" freshness badge. Adjacent to the status pill.
+ * Only shown when the market's first data point is within the past week. */
+
+.chart-card__new-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.18rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(232, 178, 87, 0.14);
+  color: var(--hz-brand, #e8b257);
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+/* ── Controls cluster ────────────────────────────────────────────────────── */
+/* Line picker + range tabs + settings sit shoulder-to-shoulder.
+ * Matches Polymarket's footer where the outcome chooser is inline with
+ * the timeframe tabs rather than floating in the middle of the strip. */
+
+.chart-card__controls {
+  display: inline-flex;
+  align-items: center;
+  /* Compact internal gap — range tabs + line picker + settings sit close
+   * together so the whole cluster reads as one tight group hugged to the
+   * right edge in RTL. */
+  gap: 0.3rem;
+  /* Controls (range tabs + line picker + settings) are the primary
+   * affordance — they never shrink or wrap. Stats absorbs all the
+   * shrinking on the other side. */
+  flex-shrink: 0;
+  flex-wrap: nowrap;
+}
+
+/* ── Range tabs ──────────────────────────────────────────────────────────── */
+
+.chart-card__range-tabs {
+  display: flex;
+  justify-content: center;
+  /* Tabs sit close together — the row reads as ONE control, not six. Poly
+   * uses near-zero gap between tabs so the active pill bounds the group's
+   * visual width. Earlier 0.3rem made the tabs look like independent chips
+   * spread across the footer width. */
+  gap: 0.1rem;
+}
+
+.chart-card__range-tab {
+  appearance: none;
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--hz-text-faint);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  /* Tight horizontal padding so the whole strip is shorter — letters
+   * carry the affordance, not the box around them. */
+  padding: 0.32rem 0.55rem;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.chart-card__range-tab--active {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--hz-border);
+  color: var(--hz-text);
+}
+
+/* ── Line picker ─────────────────────────────────────────────────────────── */
+
+.chart-card__line-picker {
+  position: relative;
+}
+
+.chart-card__line-picker-button {
+  appearance: none;
+  background: transparent;
+  border: 1px solid var(--hz-border-soft);
+  color: var(--hz-text-faint);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  padding: 0.32rem 0.7rem;
+  border-radius: 999px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.chart-card__line-picker-button:hover,
+.chart-card__line-picker-button[aria-expanded="true"] {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--hz-border);
+  color: var(--hz-text);
+}
+
+.chart-card__line-picker-glyph {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  background: currentColor;
+  clip-path: polygon(0% 20%, 60% 20%, 60% 0%, 100% 50%, 60% 100%, 60% 80%, 0% 80%);
+  opacity: 0.7;
+}
+
+.chart-card__line-menu {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  /* Anchor to the BUTTON's inline-start edge so the dropdown opens INTO
+   * the chart area instead of away from it. The controls cluster sits at
+   * the inline-end of the footer (right edge in RTL), so opening toward
+   * inline-end pushes the menu off the page — visible the moment the
+   * chart card sits anywhere near the viewport's right boundary. */
+  inset-inline-start: 0;
+  z-index: 10;
+  min-width: 12rem;
+  max-height: 18rem;
+  overflow-y: auto;
+  background: var(--hz-bg-raised);
+  border: 1px solid var(--hz-border);
+  border-radius: 0.6rem;
+  padding: 0.4rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(14px);
+}
+
+.chart-card__line-menu-title {
+  display: block;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.35;
+  color: var(--hz-text-faint);
+  padding: 0.25rem 0.5rem 0.4rem;
+}
+
+.chart-card__line-option {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.32rem 0.5rem;
+  border-radius: 0.4rem;
+  color: var(--hz-text);
+  font-size: 0.78rem;
+  font-weight: 500;
+  cursor: pointer;
+  text-align: start;
+}
+
+.chart-card__line-option:hover:not([disabled]) {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.chart-card__line-option[disabled] {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* The check chip: neutral grey at rest, animates to the line color
+ * when its outcome is selected. The fill slides in from the right
+ * (RTL-natural) and the inner dot pops in with a slight overshoot.
+ * Unselected rows have no color preview — the actual line color is
+ * rank-of-selected dependent; previewing a "would-be" color was misleading. */
+
+.chart-card__line-check {
+  width: 14px;
+  height: 14px;
+  border-radius: 4px;
+  border: 1px solid var(--hz-border);
+  background: transparent;
+  position: relative;
+  overflow: hidden;
+  flex-shrink: 0;
+  transition: border-color 180ms ease-out;
+}
+
+.chart-card__line-check::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--chart-line-color, transparent);
+  transform: translateX(100%);
+  transition: transform 220ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.chart-card__line-check::after {
+  content: "";
+  width: 6px;
+  height: 6px;
+  border-radius: 1px;
+  background: var(--hz-bg);
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(0);
+  /* Slight overshoot so the dot reads as "popped in," not "faded in."
+   * Delayed 60ms so the fill arrives first. */
+  transition: transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1) 60ms;
+  z-index: 1;
+}
+
+.chart-card__line-option--active .chart-card__line-check {
+  border-color: var(--chart-line-color);
+}
+
+.chart-card__line-option--active .chart-card__line-check::before {
+  transform: translateX(0);
+}
+
+.chart-card__line-option--active .chart-card__line-check::after {
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.chart-card__line-label {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.chart-card__line-value {
+  font-variant-numeric: tabular-nums;
+  color: var(--hz-text-faint);
+  font-weight: 700;
+}
+
+/* ── Settings ────────────────────────────────────────────────────────────── */
+/* Icon-only quiet utility button. Same chip language as the line picker
+ * so the cluster reads as a single group. */
+
+.chart-card__settings {
+  position: relative;
+}
+
+.chart-card__settings-button {
+  appearance: none;
+  background: transparent;
+  border: 1px solid var(--hz-border-soft);
+  color: var(--hz-text-faint);
+  width: 1.85rem;
+  height: 1.85rem;
+  padding: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chart-card__settings-button:hover,
+.chart-card__settings-button[aria-expanded="true"] {
+  background: rgba(255, 255, 255, 0.06);
+  border-color: var(--hz-border);
+  color: var(--hz-text);
+}
+
+.chart-card__settings-button svg {
+  width: 0.95rem;
+  height: 0.95rem;
+  display: block;
+}
+
+.chart-card__settings-menu {
+  position: absolute;
+  top: calc(100% + 0.4rem);
+  /* Same anchor flip as `.chart-card__line-menu` — open into the chart area
+   * not off the page edge. See the note there for the full reason. */
+  inset-inline-start: 0;
+  z-index: 10;
+  min-width: 14rem;
+  background: var(--hz-bg-raised);
+  border: 1px solid var(--hz-border);
+  border-radius: 0.6rem;
+  padding: 0.4rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(14px);
+}
+
+.chart-card__settings-menu-title {
+  display: block;
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.35;
+  color: var(--hz-text-faint);
+  padding: 0.25rem 0.5rem 0.4rem;
+}
+
+.chart-card__settings-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.45rem 0.5rem;
+  border-radius: 0.4rem;
+  cursor: pointer;
+  font-size: 0.82rem;
+  color: var(--hz-text);
+}
+
+.chart-card__settings-option:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.chart-card__settings-option input[type="checkbox"] {
+  appearance: none;
+  width: 1.8rem;
+  height: 1rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--hz-border-soft);
+  border-radius: 999px;
+  position: relative;
+  cursor: pointer;
+  transition: background 120ms ease;
+  flex-shrink: 0;
+}
+
+.chart-card__settings-option input[type="checkbox"]::after {
+  content: "";
+  position: absolute;
+  top: 1px;
+  inset-inline-start: 1px;
+  width: 0.75rem;
+  height: 0.75rem;
+  background: var(--hz-text-faint);
+  border-radius: 999px;
+  transition: transform 120ms ease, background 120ms ease;
+}
+
+.chart-card__settings-option input[type="checkbox"]:checked {
+  background: rgba(232, 178, 87, 0.3);
+  border-color: rgba(232, 178, 87, 0.5);
+}
+
+.chart-card__settings-option input[type="checkbox"]:checked::after {
+  transform: translateX(0.8rem);
+  background: var(--hz-brand);
+}
+
+/* In RTL the toggle thumb slides left when checked, not right. */
+[dir="rtl"] .chart-card__settings-option input[type="checkbox"]:checked::after {
+  transform: translateX(-0.8rem);
+}

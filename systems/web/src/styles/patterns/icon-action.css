@@ -1,0 +1,54 @@
+/* ──────────────────────────────────────────────────────────────
+   patterns/icon-action.css
+   Small pill-shaped icon-only button used in utility action rows —
+   download, share, comment, bookmark. Carries minimal chrome at
+   rest; expresses state via background + color rather than borders.
+   Two state modifiers:
+     --active — sticky-on state (e.g. "saved").
+     --flash  — transient confirmation pulse after an action lands.
+   Used on market-detail's header today; reusable wherever a row of
+   utility actions sits beside a title.
+   ────────────────────────────────────────────────────────────── */
+
+
+  .hz-icon-action {
+    display: inline-flex;
+    align-items: center;
+    border: 0;
+    border-radius: var(--hz-radius-pill);
+    background: rgba(255, 255, 255, 0.04);
+    padding: 0.42rem;
+    color: var(--hz-text-muted);
+    transition: all var(--hz-motion);
+  }
+
+  @media (hover: hover) {
+    .hz-icon-action:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: var(--hz-text);
+    }
+  }
+
+  /* Sticky "saved" state. Listed with :hover so it keeps its color while the
+     pointer is still on the button after a click — a lone .hz-icon-action--active
+     (0,1,0) loses to .hz-icon-action:hover (0,2,0), which is why the color only
+     showed once the mouse moved away. */
+  .hz-icon-action--active {
+    background: var(--hz-info-soft);
+    color: var(--hz-info);
+  }
+  @media (hover: hover) {
+    .hz-icon-action--active:hover {
+      background: var(--hz-info-soft);
+      color: var(--hz-info);
+    }
+  }
+  /* Fill the glyph solid when active (global default is FILL 0 / outline). */
+  .hz-icon-action--active .material-symbols-outlined {
+    font-variation-settings: "FILL" 1, "wght" 500, "GRAD" 0, "opsz" 24;
+  }
+
+  .hz-icon-action--flash {
+    background: var(--hz-action-buy-soft);
+    color: var(--hz-action-buy);
+  }

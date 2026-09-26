@@ -1,0 +1,454 @@
+---
+// /search — canonical search results surface (markets + profiles).
+// Standalone and interactive; NOT one of the SEO crawl bridges (traders / topics).
+// Kind switches the surface (markets | profiles); sort/status are server-driven
+// (anchor navigation → re-query), within-results is a client filter, follow hits
+// the social seam. Enriched per-row stats come from /api/search?enrich=1.
+import Layout from '../layouts/Layout.astro';
+import { fetchSearch } from '../lib/search.js';
+import '../styles/pages/search-stage.css';
+
+const url = Astro.url;
+const rawQ = (url.searchParams.get('q') || '').trim();
+const kind = url.searchParams.get('kind') === 'profiles' ? 'profiles' : 'markets';
+const sort = url.searchParams.get('sort') || (kind === 'profiles' ? 'accuracy' : 'relevance');
+const status = url.searchParams.get('status') || 'all';
+const cookie = Astro.request.headers.get('cookie');
+const viewerAuthed = Boolean(Astro.locals.auth?.authenticated);
+
+const hasQuery = rawQ.length >= 2;
+const data = hasQuery ? await fetchSearch(rawQ, kind, { sort, status, cookie }) : null;
+// Parent events lead the market lane (the grouping page is usually what someone
+// means when they type the race); child markets follow, kept distinct.
+const rows =
+  kind === 'profiles'
+    ? (data?.profiles ?? [])
+    : [...(data?.events ?? []), ...(data?.markets ?? [])];
+
+// ── link builders ──
+// URL stays clean (Poly-style /search?q=…): only params that DEVIATE from the
+// default appear. Defaults per surface are omitted entirely, so a plain search
+// is just /search?q=<term>, and switching tabs resets filters to that surface's
+// defaults rather than carrying an incompatible sort across.
+const DEFAULT_SORT = { markets: 'relevance', profiles: 'accuracy' };
+const DEFAULT_STATUS = { markets: 'all', profiles: 'all' };
+const buildHref = (over: { kind?: 'markets' | 'profiles'; sort?: string; status?: string } = {}) => {
+  const k = over.kind ?? kind;
+  const s = over.sort ?? sort;
+  const st = over.status ?? status;
+  const p = new URLSearchParams();
+  p.set('q', rawQ);
+  if (k !== 'markets') p.set('kind', k);
+  if (s !== DEFAULT_SORT[k]) p.set('sort', s);
+  if (st !== DEFAULT_STATUS[k]) p.set('status', st);
+  return `/search?${p.toString()}`;
+};
+const sortHref = (s) => buildHref({ sort: s });
+const statusHref = (st) => buildHref({ status: st });
+const clearHref = buildHref({ sort: DEFAULT_SORT[kind], status: DEFAULT_STATUS[kind] });
+
+const MARKET_SORTS = [
+  { key: 'relevance', label: 'רלוונטי', icon: 'sort' },
+  { key: 'volume', label: 'נפח', icon: 'bar_chart' },
+  { key: 'newest', label: 'חדשים', icon: 'auto_awesome' },
+  { key: 'closing', label: 'נסגרים', icon: 'schedule' },
+  { key: 'competitive', label: 'צמוד', icon: 'balance' },
+];
+const PROFILE_SORTS = [
+  { key: 'accuracy', label: 'דיוק', icon: 'target' },
+  { key: 'followers', label: 'עוקבים', icon: 'group' },
+  { key: 'newest', label: 'חדשים', icon: 'auto_awesome' },
+];
+const MARKET_STATUS = [
+  { key: 'open', label: 'פעילים' },
+  { key: 'resolved', label: 'הוכרעו' },
+  { key: 'all', label: 'הכל' },
+];
+const PROFILE_STATUS = [
+  { key: 'all', label: 'הכל' },
+  { key: 'verified', label: 'מאומתים בלבד' },
+];
+const sortOpts = kind === 'profiles' ? PROFILE_SORTS : MARKET_SORTS;
+const statusOpts = kind === 'profiles' ? PROFILE_STATUS : MARKET_STATUS;
+
+// ── render helpers ──
+const signalMeta = { new: { cls: 'new', label: 'חדש' }, closing: { cls: 'closing', label: 'נסגר בקרוב' } };
+const AV_TINTS = ['tint-a', 'tint-b', 'tint-c', 'tint-d'];
+const avatarTint = (h) => {
+  let s = 0;
+  for (let i = 0; i < (h || '').length; i += 1) s = (s + h.charCodeAt(i)) % 997;
+  return AV_TINTS[s % AV_TINTS.length];
+};
+const initials = (name) => {
+  const t = (name || '').trim();
+  if (!t) return 'ח';
+  const parts = t.split(/[\s_]+/).filter(Boolean);
+  if (parts.length >= 2) return (parts[0][0] + parts[1][0]).toUpperCase();
+  return t.slice(0, 2).toUpperCase();
+};
+const compact = (n) => {
+  const v = Number(n);
+  if (!isFinite(v)) return '—';
+  return v >= 1000 ? new Intl.NumberFormat('en-US', { notation: 'compact', maximumFractionDigits: 1 }).format(v) : String(v);
+};
+const pct = (frac) => (frac == null || !isFinite(Number(frac)) ? '—' : `${Math.round(Number(frac) * 100)}%`);
+
+const countLabel = kind === 'profiles' ? 'חזאים תואמים' : 'שווקים';
+// The pool is capped, so a saturated result set means "more exist" — show N+
+// rather than implying the shown count is the total.
+const hasMore = Boolean(data?.pagination?.hasMore);
+const pageTitle = hasQuery ? `חיפוש: ${rawQ} · החוזה` : 'חיפוש · החוזה';
+const pageDesc = hasQuery
+  ? `תוצאות חיפוש עבור "${rawQ}" בהחוזה — שווקים וחזאים.`
+  : 'חיפוש שווקים וחזאים בהחוזה.';
+---
+
+<Layout
+  title={pageTitle}
+  description={pageDesc}
+  canonicalPath="/search"
+  robots="noindex, follow"
+>
+  <div class="hz-search" data-search-root>
+
+    {hasQuery ? (
+      <>
+        <section class="hz-search-hero">
+          <div class="hz-search-hero__bar">
+            <h1 class="hz-search-hero__head">
+              <span class="hz-search-hero__title">תוצאות עבור <span class="q">"{rawQ}"</span></span>
+              <span class="hz-search-hero__count"><span class="sep">·</span> <b class="hz-search-num">{rows.length}{hasMore ? '+' : ''}</b> {countLabel}</span>
+            </h1>
+            {kind === 'markets' && (
+              <button
+                class="hz-search-hero__save"
+                type="button"
+                data-saved-filter
+                data-viewer-authed={viewerAuthed ? 'true' : 'false'}
+                aria-label="הצג רק שווקים ששמרתי"
+                aria-pressed="false"
+                title="הצג רק שווקים ששמרתי"
+              >
+                <span class="material-symbols-outlined">bookmark_border</span>
+              </button>
+            )}
+          </div>
+        </section>
+
+        <div class="hz-layout2">
+          <div class="hz-filter-wrap" data-filter-pop>
+            <aside class="hz-filters" role="dialog" aria-label="סינון ומיון">
+              <div class="hz-filters__head">
+                <span class="hz-filters__title">סינון ומיון</span>
+                <button class="hz-filters__close" type="button" data-filter-close aria-label="סגירה"><span class="material-symbols-outlined">close</span></button>
+              </div>
+              <div class="hz-rail__within">
+                <span class="material-symbols-outlined" aria-hidden="true">search</span>
+                <input type="text" placeholder={kind === 'profiles' ? 'סינון לפי שם משתמש' : 'סינון בתוך התוצאות'} data-within aria-label="סינון בתוך התוצאות" />
+              </div>
+              <div>
+                <div class="hz-rail__label">מיון</div>
+                <div class="hz-sort">
+                  {sortOpts.map((o) => (
+                    <a class={`hz-sort__opt ${sort === o.key ? 'is-active' : ''}`} href={sortHref(o.key)} data-astro-reload>
+                      <span class="material-symbols-outlined">{o.icon}</span> {o.label}
+                    </a>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <div class="hz-rail__label">{kind === 'profiles' ? 'אימות' : 'סטטוס שוק'}</div>
+                <div class="hz-seg">
+                  {statusOpts.map((o) => (
+                    <a class={`hz-seg__btn ${status === o.key ? 'is-active' : ''}`} href={statusHref(o.key)} data-astro-reload>{o.label}</a>
+                  ))}
+                </div>
+              </div>
+            </aside>
+            <a class="hz-rail__clear" href={clearHref} data-astro-reload>נקה סינון</a>
+          </div>
+
+          <section aria-label={kind === 'profiles' ? 'משתמשים' : 'שווקים'}>
+            {/* Shown when the bookmark toggle filters out everything (no saved
+                markets among the current results). Toggled by the search island. */}
+            <div class="hz-search-empty" data-saved-empty hidden>
+              <span class="material-symbols-outlined">bookmark_border</span>
+              <div class="hz-search-empty__title">אין כאן שווקים ששמרת</div>
+              <p class="hz-search-empty__body">אף אחת מהתוצאות לא נשמרה. לחצו על סימן הסימנייה בשוק כדי לשמור אותו.</p>
+            </div>
+            {rows.length === 0 ? (
+              <div class="hz-search-empty">
+                <span class="material-symbols-outlined">search_off</span>
+                <div class="hz-search-empty__title">לא נמצאו תוצאות עבור "{rawQ}"</div>
+                <p class="hz-search-empty__body">נסו מונח אחר, או עברו ל{kind === 'profiles' ? 'שווקים' : 'משתמשים'} בלשונית למעלה.</p>
+              </div>
+            ) : (
+              <div class="hz-rows" data-rows>
+                {kind === 'markets' && rows.map((m) => (
+                  <a class={`hz-row${m.kind === 'event' ? ' hz-row--event' : ''}`} href={m.href} data-title={m.title} data-market-key={m.kind === 'event' ? '' : m.id}>
+                    <span class="hz-thumb hz-thumb--amber">
+                      {m.thumbUrl ? <img src={m.thumbUrl} alt="" loading="lazy" /> : <span class="material-symbols-outlined">{m.kind === 'event' ? 'account_tree' : 'query_stats'}</span>}
+                    </span>
+                    <span class="hz-row__main">
+                      <span class="hz-row__cat">
+                        {m.kind === 'event' && <span class="hz-tag hz-tag--event">אירוע</span>}
+                        <span>{m.categoryLabel}</span>
+                        {m.signal && signalMeta[m.signal] && (
+                          <span class={`hz-tag hz-tag--${signalMeta[m.signal].cls}`}><span class="hz-tag__dot"></span>{signalMeta[m.signal].label}</span>
+                        )}
+                      </span>
+                      <span class="hz-row__title">{m.title}</span>
+                      <span class="hz-row__meta">
+                        {m.kind === 'event' ? (
+                          <span><span class="material-symbols-outlined">account_tree</span>{m.sub}</span>
+                        ) : (
+                          <>
+                            {m.volumeLabel && <span><span class="material-symbols-outlined">payments</span><span class="val hz-search-num">{m.volumeLabel}</span> נפח</span>}
+                            {m.commentCount > 0 && <span><span class="material-symbols-outlined">forum</span><span class="val hz-search-num">{m.commentCount}</span></span>}
+                            <span><span class="material-symbols-outlined">schedule</span>{m.closeLabel}</span>
+                          </>
+                        )}
+                      </span>
+                    </span>
+                    <span class="hz-row__side">
+                      {m.kind !== 'event' && (
+                        <span class="hz-prob">
+                          <span class="hz-prob__val">{m.chanceLabel ?? '—'}</span>
+                          {m.leadingOutcomeLabel && <span class="hz-prob__sub">{m.leadingOutcomeLabel}</span>}
+                        </span>
+                      )}
+                      <span class="hz-row__chev"><span class="material-symbols-outlined">chevron_left</span></span>
+                    </span>
+                  </a>
+                ))}
+
+                {kind === 'profiles' && rows.map((p) => (
+                  <a class="hz-row hz-prow" href={p.href} data-name={p.title}>
+                    <span class={`hz-thumb hz-thumb--round ${avatarTint(p.handle)}`}>
+                      {p.thumbUrl ? <img src={p.thumbUrl} alt="" loading="lazy" /> : <span class="hz-thumb__code">{initials(p.title)}</span>}
+                    </span>
+                    <span class="hz-row__main">
+                      <span class="hz-prow__name">
+                        {p.title}
+                        {p.verifiedTier && <span class="material-symbols-outlined" title="מאומת">verified</span>}
+                      </span>
+                      <span class="hz-row__meta">
+                        <span class="handle">@{p.handle}</span>
+                        <span><span class="material-symbols-outlined">gavel</span><span class="val hz-search-num">{compact(p.resolvedCount)}</span> הוכרעו</span>
+                        <span><span class="material-symbols-outlined">group</span><span class="val hz-search-num">{compact(p.followerCount)}</span> עוקבים</span>
+                      </span>
+                    </span>
+                    <span class="hz-row__side">
+                      <span class="hz-prob">
+                        <span class="hz-prob__val acc">{pct(p.accuracy)}</span>
+                        <span class="hz-prob__sub">דיוק</span>
+                      </span>
+                      {!p.isSelf && (
+                        <button
+                          class={`hz-follow ${p.isFollowing ? 'is-on' : ''}`}
+                          type="button"
+                          data-follow-btn
+                          data-user-id={p.userId}
+                          data-following={p.isFollowing ? 'true' : 'false'}
+                          data-viewer-authed={viewerAuthed ? 'true' : 'false'}
+                          aria-pressed={p.isFollowing ? 'true' : 'false'}
+                        >
+                          <span class="material-symbols-outlined">{p.isFollowing ? 'check' : 'add'}</span>
+                          <span data-follow-label>{p.isFollowing ? 'עוקב' : 'עקוב'}</span>
+                        </button>
+                      )}
+                    </span>
+                  </a>
+                ))}
+              </div>
+            )}
+          </section>
+        </div>
+
+        <button class="hz-filter-fab" type="button" data-filter-toggle aria-expanded="false" aria-haspopup="dialog">
+          <span class="material-symbols-outlined">tune</span> סינון
+        </button>
+        <div class="hz-filter-backdrop" data-filter-backdrop></div>
+      </>
+    ) : (
+      <div class="hz-search-empty">
+        <span class="material-symbols-outlined">search</span>
+        <div class="hz-search-empty__title">חיפוש שווקים וחזאים</div>
+        <p class="hz-search-empty__body">הקלידו לפחות שני תווים בשורת החיפוש כדי למצוא שווקים לפי נושא, או חזאים לפי שם.</p>
+      </div>
+    )}
+
+  </div>
+</Layout>
+
+<script>
+  import { navigate } from 'astro:transitions/client';
+
+  interface SearchRoot extends HTMLElement {
+    __savedKeys?: Set<string>;
+    __savedOn?: boolean;
+  }
+
+  // Search surface island. Owns: within-results client filter, the folded filter
+  // pill, the per-row follow action (mirrors profile-follow.js against the same
+  // seam), and smooth sort/status/tab navigation. Delegated on document so it
+  // survives ClientRouter soft-nav swaps; guarded so the handlers bind once.
+  (function () {
+    'use strict';
+    if (window.__naviSearchBound) return;
+    window.__naviSearchBound = true;
+
+    // Sort/status/tab/clear are same-/search-path query changes. ClientRouter's
+    // click-intercept no-ops on those (which is why the anchors carry
+    // data-astro-reload as a no-JS full-reload fallback), but the programmatic
+    // navigate() API drives the soft-nav correctly — instant swap, no refresh
+    // flash. preventDefault stops the fallback full-load; navigate() takes over.
+    document.addEventListener('click', function (e) {
+      const a = e.target instanceof Element ? e.target.closest('.hz-sort__opt, .hz-seg__btn, .hz-rail__clear') : null;
+      if (!a || !a.closest('[data-search-root]')) return;
+      const href = a.getAttribute('href');
+      if (!href) return;
+      e.preventDefault();
+      navigate(href);
+    });
+
+    function backendBase() {
+      var s = window.NaviAuthSession;
+      return (s && typeof s.getBackendBaseUrl === 'function' && s.getBackendBaseUrl()) || '';
+    }
+    function openLogin() {
+      if (window.NaviOverlays && typeof window.NaviOverlays.open === 'function') window.NaviOverlays.open('login');
+      else window.location.href = '/?overlay=login';
+    }
+
+    // ── combined row filter: within-text AND (optional) saved-only ──
+    // A row is visible only if it matches the within-results text AND, when the
+    // header bookmark toggle is on, its market is in the viewer's saved set.
+    // root.__savedKeys is the fetched Set of saved market keys (null until first
+    // toggle); root.__savedOn mirrors the toggle. No navigation — pure display.
+    function applyRowFilters(root) {
+      if (!root) return;
+      var input = root.querySelector('[data-within]');
+      var q = (input && input.value ? input.value : '').trim().toLowerCase();
+      var savedOn = root.__savedOn === true;
+      var savedKeys = root.__savedKeys || null;
+      var rows = root.querySelectorAll('[data-rows] .hz-row');
+      var shown = 0;
+      rows.forEach(function (r) {
+        var text = (r.getAttribute('data-title') || r.getAttribute('data-name') || '').toLowerCase();
+        var key = r.getAttribute('data-market-key') || '';
+        var matchesText = !q || text.indexOf(q) !== -1;
+        var matchesSaved = !savedOn || (savedKeys && key && savedKeys.has(key));
+        var visible = matchesText && matchesSaved;
+        r.style.display = visible ? '' : 'none';
+        if (visible) shown += 1;
+      });
+      // "no saved markets in these results" note — only while the toggle is on
+      // and nothing survived the saved filter.
+      var note = root.querySelector('[data-saved-empty]');
+      if (note) note.hidden = !(savedOn && shown === 0);
+    }
+
+    // within-results text input
+    document.addEventListener('input', function (e) {
+      var input = e.target instanceof Element ? e.target.closest('[data-within]') : null;
+      if (!input) return;
+      applyRowFilters(input.closest('[data-search-root]'));
+    });
+
+    // ── saved-only toggle (header bookmark glyph) ──
+    document.addEventListener('click', async function (e) {
+      var btn = e.target instanceof Element ? e.target.closest('[data-saved-filter]') : null;
+      if (!btn) return;
+      e.preventDefault();
+      var root = btn.closest<SearchRoot>('[data-search-root]');
+      if (!root) return;
+      // Saving is per-user; a guest has no saved set — bounce to login.
+      if (document.documentElement.dataset.authHint !== 'user' && btn.getAttribute('data-viewer-authed') !== 'true') {
+        openLogin();
+        return;
+      }
+      var turningOn = btn.getAttribute('aria-pressed') !== 'true';
+      // Fetch the saved-key set once, on first activation.
+      if (turningOn && !root.__savedKeys) {
+        btn.setAttribute('data-busy', '1');
+        try {
+          var res = await fetch(backendBase() + '/api/markets/saved', { credentials: 'include', headers: { accept: 'application/json' } });
+          var data = res.ok ? await res.json().catch(function () { return null; }) : null;
+          root.__savedKeys = new Set((data && Array.isArray(data.markets) ? data.markets : []).map(function (m) { return m.id; }));
+        } catch (err) {
+          root.__savedKeys = new Set();
+        }
+        btn.removeAttribute('data-busy');
+      }
+      root.__savedOn = turningOn;
+      btn.setAttribute('aria-pressed', turningOn ? 'true' : 'false');
+      btn.classList.toggle('is-saved', turningOn);
+      var icon = btn.querySelector('.material-symbols-outlined');
+      if (icon) icon.textContent = turningOn ? 'bookmark' : 'bookmark_border';
+      applyRowFilters(root);
+    });
+
+    // ── folded filter pill + backdrop ──
+    function setFilter(root, open) {
+      var pop = root.querySelector('[data-filter-pop]');
+      var back = root.querySelector('[data-filter-backdrop]');
+      var fab = root.querySelector('[data-filter-toggle]');
+      if (pop) pop.classList.toggle('is-open', open);
+      if (back) back.classList.toggle('is-open', open);
+      if (fab) fab.setAttribute('aria-expanded', open ? 'true' : 'false');
+    }
+    document.addEventListener('click', function (e) {
+      if (!(e.target instanceof Element)) return;
+      var root = e.target.closest('[data-search-root]');
+      if (!root) return;
+      if (e.target.closest('[data-filter-toggle]')) {
+        var pop = root.querySelector('[data-filter-pop]');
+        setFilter(root, !(pop && pop.classList.contains('is-open')));
+      } else if (e.target.closest('[data-filter-close]') || e.target.closest('[data-filter-backdrop]')) {
+        setFilter(root, false);
+      }
+    });
+
+    // ── follow / unfollow (per row, same seam as profile-follow.js) ──
+    document.addEventListener('click', async function (e) {
+      var btn = e.target instanceof Element ? e.target.closest<HTMLElement>('[data-follow-btn]') : null;
+      if (!btn) return;
+      e.preventDefault();
+      e.stopPropagation();
+      if (btn.dataset.busy === '1') return;
+      if (btn.getAttribute('data-viewer-authed') !== 'true') { openLogin(); return; }
+      var userId = btn.getAttribute('data-user-id') || '';
+      if (!userId) return;
+
+      var wasFollowing = btn.getAttribute('data-following') === 'true';
+      var next = !wasFollowing;
+      var label = btn.querySelector('[data-follow-label]');
+      var icon = btn.querySelector('.material-symbols-outlined');
+      function paint(following) {
+        btn.classList.toggle('is-on', following);
+        btn.setAttribute('data-following', following ? 'true' : 'false');
+        btn.setAttribute('aria-pressed', following ? 'true' : 'false');
+        if (label) label.textContent = following ? ' עוקב' : ' עקוב';
+        if (icon) icon.textContent = following ? 'check' : 'add';
+      }
+      btn.dataset.busy = '1';
+      paint(next); // optimistic
+      try {
+        var res = await fetch(backendBase() + '/api/social/users/' + encodeURIComponent(userId) + '/follow', {
+          method: next ? 'POST' : 'DELETE',
+          credentials: 'include',
+          headers: { 'content-type': 'application/json', accept: 'application/json' },
+          body: '{}',
+        });
+        if (!res.ok) throw new Error('follow');
+        var data = await res.json().catch(function () { return null; });
+        if (data && typeof data.following === 'boolean') paint(data.following);
+      } catch (err) {
+        paint(wasFollowing); // revert
+      } finally {
+        btn.dataset.busy = '';
+      }
+    });
+  })();
+</script>

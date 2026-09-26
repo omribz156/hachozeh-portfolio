@@ -1,0 +1,226 @@
+/* ──────────────────────────────────────────────────────────────
+   patterns/mobile-trade-launcher.css
+   Fixed-bottom CTA bar that opens the trade rail on mobile. The
+   rail itself becomes a centered modal at ≤960px (see page CSS);
+   this launcher is its trigger and lives outside the rail so it
+   stays visible while the user scrolls the page body.
+   Borrows the Polymarket / Kalshi mobile pattern: split Yes/No
+   pills for binary markets, single CTA for multi-outcome markets.
+   The same DOM mount carries both variants — the layout module
+   that owns the page (binary.js or shell.js's multi-outcome
+   default) renders the appropriate inner content during
+   renderStaticShell.
+   Hidden on desktop (>960px). Hidden when the modal is open
+   (body class `market-detail-page--ticket-open`).
+   BEM:
+     .hz-mobile-trade-launcher              — wrapper
+     .hz-mobile-trade-launcher__row         — flex row of CTAs
+     .hz-mobile-trade-launcher__button      — single-CTA variant
+     .hz-mobile-trade-launcher__pill        — binary pill
+     .hz-mobile-trade-launcher__pill--yes / --no — side semantics
+     .hz-mobile-trade-launcher__pill-label  — side text
+     .hz-mobile-trade-launcher__pill-price  — price tag
+   ────────────────────────────────────────────────────────────── */
+
+.hz-mobile-trade-launcher {
+  display: none;
+}
+
+@media (max-width: 960px) {
+  /* Hide the launcher entirely when it has no row content (the
+     case for multi-outcome markets — only binary markets render
+     the Yes/No pill duo into the mount). The :has() selector keeps
+     the container's `display: flex` only when there's a row to
+     anchor; otherwise it falls back to `display: none` and the
+     body's bottom-padding rule (also gated on the same :has)
+     leaves no space-reservation either. */
+  .hz-mobile-trade-launcher:not(:has(.hz-mobile-trade-launcher__row)) {
+    display: none;
+  }
+
+  .hz-mobile-trade-launcher {
+    position: fixed;
+    inset-inline: 0;
+    /* Sit above the shell's mobile bottom-tab bar instead of competing
+       with it for `bottom: 0`. The tabs handle safe-area on their own,
+       so we just clear their total visible height (content + inset). */
+    bottom: calc(var(--hz-shell-bottom-tabs-h, 5rem) + env(safe-area-inset-bottom, 0px));
+    z-index: 80;
+    display: flex;
+    padding: 0.6rem 0.75rem 0.7rem;
+    /* Thin gradient lead-in into a solid base so the bar reads as a
+       deliberate surface, not a translucent overlay. Content scrolling
+       below it stays legible through the lead-in but is decisively
+       cut off by the solid section under the pills. */
+    background:
+      linear-gradient(
+        180deg,
+        rgba(2, 8, 19, 0) 0%,
+        rgba(2, 8, 19, 0.86) 22%,
+        rgb(2, 8, 19) 60%,
+        rgb(2, 8, 19) 100%
+      );
+    border-top: 1px solid var(--hz-border-faint, rgba(255, 255, 255, 0.06));
+    backdrop-filter: blur(14px) saturate(1.1);
+    -webkit-backdrop-filter: blur(14px) saturate(1.1);
+    pointer-events: none;
+    transition:
+      opacity 180ms ease,
+      transform 180ms ease;
+  }
+
+  .market-detail-page--ticket-open .hz-mobile-trade-launcher {
+    opacity: 0;
+    transform: translateY(0.4rem);
+    pointer-events: none;
+  }
+
+  .hz-mobile-trade-launcher__row {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: stretch;
+    gap: 0.55rem;
+    pointer-events: auto;
+  }
+
+  .hz-mobile-trade-launcher__button,
+  .hz-mobile-trade-launcher__pill {
+    flex: 1 1 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    min-height: 3.05rem;
+    padding: 0.62rem 1rem;
+    border: 1px solid transparent;
+    border-radius: var(--hz-radius-pill, 999px);
+    background: var(--hz-bg-raised, #0f1a2c);
+    color: var(--hz-text);
+    font-family: var(--hz-font-ui);
+    font-weight: 700;
+    font-size: 0.95rem;
+    letter-spacing: -0.005em;
+    cursor: pointer;
+    transition:
+      background 160ms ease,
+      border-color 160ms ease,
+      transform 120ms ease;
+  }
+
+  .hz-mobile-trade-launcher__button:active,
+  .hz-mobile-trade-launcher__pill:active {
+    transform: scale(0.985);
+  }
+
+  /* Single-CTA variant: dark button with a bright leading verb. */
+  .hz-mobile-trade-launcher__button {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--hz-border-soft);
+  }
+
+  .hz-mobile-trade-launcher__button:hover {
+    background: rgba(255, 255, 255, 0.08);
+    border-color: var(--hz-border);
+  }
+
+  .hz-mobile-trade-launcher__button-verb {
+    color: var(--hz-text);
+    font-weight: 800;
+  }
+
+  .hz-mobile-trade-launcher__button-meta {
+    color: var(--hz-text-soft);
+    font-weight: 600;
+    font-size: 0.84rem;
+  }
+
+  /* Binary pills: tinted with side semantics. Stronger fill than the
+     desktop pill duo because the launcher background is a (near-)solid
+     bar — thin tints disappear visually here. */
+  .hz-mobile-trade-launcher__pill--yes {
+    background: rgb(var(--hz-action-buy-rgb, 16 185 129) / 0.32);
+    color: var(--hz-action-buy, #10b981);
+    border-color: rgb(var(--hz-action-buy-rgb, 16 185 129) / 0.6);
+  }
+
+  .hz-mobile-trade-launcher__pill--yes:hover {
+    background: rgb(var(--hz-action-buy-rgb, 16 185 129) / 0.42);
+    border-color: rgb(var(--hz-action-buy-rgb, 16 185 129) / 0.75);
+  }
+
+  .hz-mobile-trade-launcher__pill--no {
+    background: rgb(var(--hz-action-sell-rgb, 244 63 94) / 0.32);
+    color: var(--hz-action-sell-strong, #f43f5e);
+    border-color: rgb(var(--hz-action-sell-rgb, 244 63 94) / 0.6);
+  }
+
+  .hz-mobile-trade-launcher__pill--no:hover {
+    background: rgb(var(--hz-action-sell-rgb, 244 63 94) / 0.42);
+    border-color: rgb(var(--hz-action-sell-rgb, 244 63 94) / 0.75);
+  }
+
+  .hz-mobile-trade-launcher__pill-label {
+    font-weight: 800;
+    font-size: 1rem;
+  }
+
+  .hz-mobile-trade-launcher__pill-price {
+    font-family: var(--hz-font-mono);
+    font-weight: 700;
+    font-size: 0.88rem;
+    opacity: 0.92;
+  }
+
+  .hz-mobile-trade-launcher__pill[disabled],
+  .hz-mobile-trade-launcher__button[disabled] {
+    opacity: 0.55;
+    cursor: not-allowed;
+  }
+
+  /* ── Resolved-state floating outcome chip ──────────────────────────────
+   * When a binary market is resolved, the Yes/No pill duo is replaced by
+   * a single centered chip showing the winner. Same slot, same anchored
+   * position — but no trade affordance. Pattern matches Polymarket's
+   * `Outcome: <winner> ✓` chip below the chart on resolved markets. */
+  .hz-mobile-trade-launcher__row--resolved {
+    justify-content: center;
+  }
+
+  .hz-mobile-trade-launcher__outcome-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.7rem 1.1rem;
+    border-radius: 999px;
+    background: rgb(var(--hz-action-buy-rgb, 93 211 158) / 0.12);
+    border: 1px solid rgb(var(--hz-action-buy-rgb, 93 211 158) / 0.32);
+    color: var(--hz-text);
+    font-weight: 700;
+    font-size: 0.95rem;
+    pointer-events: auto;
+  }
+
+  .hz-mobile-trade-launcher__outcome-check {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 999px;
+    background: var(--hz-action-buy, #5dd39e);
+    color: var(--hz-bg, #0a0e16);
+    font-size: 0.75rem;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+}
+
+/* Body bottom padding so the launcher doesn't cover the last bit
+   of page content. Only applies at mobile and when the launcher
+   is mounted (= has a child element). Must clear both the launcher
+   (~5.2rem) AND the shell's bottom-tab bar that sits below it. */
+@media (max-width: 960px) {
+  .market-detail-page:has(.hz-mobile-trade-launcher__row) .market-detail-stage-page-shell {
+    padding-bottom: calc(5.2rem + var(--hz-shell-bottom-tabs-h, 5rem) + env(safe-area-inset-bottom, 0px));
+  }
+}

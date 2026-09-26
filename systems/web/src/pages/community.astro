@@ -1,0 +1,57 @@
+---
+// /community — the live, public community landing page: discussions + real-time
+// activity. The landing page is indexable; individual UGC threads stay noindex
+// until the community has enough substantive discussion content for a quality gate.
+import Layout from '../layouts/Layout.astro';
+import CommunityHome from '../components/community/CommunityHome.jsx';
+import { fetchCommunityHome } from '../lib/community.js';
+import {
+  buildAbsoluteUrl,
+  buildBreadcrumbJsonLd,
+  buildWebPageJsonLd,
+} from '../lib/seo.js';
+import '../styles/pages/community.css';
+import '../styles/pages/community-island.css';
+
+const cookie = Astro.request.headers.get('cookie');
+const initial = await fetchCommunityHome({ cookie });
+const communityDescription = 'קהילת החוזה — דיונים סביב שווקי תחזיות, פיד פעילות חי וחזאים עם רקורד ציבורי, בעברית.';
+const communityCanonicalUrl = buildAbsoluteUrl('/community');
+const communityImage = '/share/pages/community.png';
+const communityStructuredData = [
+  buildWebPageJsonLd({
+    title: 'קהילת החוזה — דיונים ותחזיות',
+    description: communityDescription,
+    canonicalUrl: communityCanonicalUrl,
+    imageUrl: buildAbsoluteUrl(communityImage),
+    type: 'CollectionPage',
+  }),
+  buildBreadcrumbJsonLd({
+    items: [
+      { name: 'החוזה', href: '/' },
+      { name: 'קהילה', href: '/community' },
+    ],
+  }),
+];
+
+const auth = Astro.locals.auth;
+const payload = auth?.payload as any;
+const u = payload?.currentUser?.user ?? null;
+const viewer = {
+  authenticated: Boolean(auth?.authenticated),
+  name: u?.displayName || u?.handle || 'אתה',
+  handle: u?.handle || null,
+  avatarUrl: u?.avatarUrl || null,
+};
+---
+
+<Layout
+  title="קהילת החוזה — דיונים ותחזיות"
+  description={communityDescription}
+  canonicalPath="/community"
+  image={communityImage}
+  robots="index, follow"
+  structuredData={communityStructuredData}
+>
+  <CommunityHome client:load initial={initial} viewer={viewer} />
+</Layout>

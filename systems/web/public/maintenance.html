@@ -1,0 +1,245 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>תחזוקה · החוזה</title>
+  <meta name="robots" content="noindex" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&family=Noto+Sans+Hebrew:wght@500;600;700;800&display=block" />
+
+  <style>
+  /* ─── reset ─── */
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { min-height: 100vh; }
+  h1, h2, h3, p, ol, ul, li { margin: 0; padding: 0; }
+  ol, ul { list-style: none; }
+  a { color: inherit; text-decoration: none; }
+
+  /* ─── tokens (minimal subset used by these pages) ─── */
+  :root {
+    color-scheme: dark;
+    font-size: clamp(13px, calc(0.4vw + 11.5px), 17px);
+
+    --hz-font-ui: "Arimo", "Noto Sans Hebrew", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --hz-font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+    --hz-bg: #13141a;
+    --hz-bg-soft: #16171d;
+    --hz-bg-deep: #0a0b10;
+
+    --hz-text: #f6f4ef;
+    --hz-text-soft: #d7d3c8;
+    --hz-text-muted: #9a958a;
+    --hz-text-faint: #5e5a52;
+    --hz-text-inverse: #1a1407;
+
+    --hz-brand: #e8b257;
+    --hz-brand-strong: #f5c771;
+
+    --hz-border-faint: rgba(255, 248, 232, 0.065);
+    --hz-border-soft: rgba(255, 248, 232, 0.12);
+    --hz-border: rgba(255, 248, 232, 0.18);
+    --hz-border-strong: rgba(255, 248, 232, 0.28);
+
+    --hz-surface-soft: rgba(255, 248, 232, 0.035);
+    --hz-surface-hover: rgba(255, 248, 232, 0.055);
+
+    --hz-radius-md: 0.82rem;
+    --hz-motion: 180ms ease;
+  }
+
+  /* ─── page shell ─── */
+  body {
+    background:
+      radial-gradient(circle at 78% -10%, rgba(232, 178, 87, 0.08), transparent 36rem),
+      radial-gradient(circle at 8% 12%, rgba(122, 174, 230, 0.05), transparent 30rem),
+      linear-gradient(180deg, var(--hz-bg-soft) 0%, var(--hz-bg) 70%, var(--hz-bg-deep) 100%);
+    color: var(--hz-text);
+    font-family: var(--hz-font-ui);
+    direction: rtl;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .eb-main {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    min-height: 0;
+  }
+  .eb-main--anchored {
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 16vh 10vw 0;
+  }
+  .eb-main--centered {
+    flex-direction: column;
+    text-align: center;
+  }
+
+  .eb-col {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+  }
+  .eb-col--anchored { max-width: 680px; gap: 32px; }
+  .eb-col--centered { max-width: 640px; align-items: center; gap: 32px; }
+
+  /* ─── typography helpers ─── */
+  .eb-display {
+    font-family: "Noto Sans Hebrew", var(--hz-font-ui);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.05;
+    color: var(--hz-text);
+  }
+  .eb-mono {
+    font-family: var(--hz-font-mono);
+    font-feature-settings: "tnum" 1;
+    letter-spacing: 0;
+  }
+  .eb-text-soft  { color: var(--hz-text-soft); }
+  .eb-text-muted { color: var(--hz-text-muted); }
+  .eb-text-faint { color: var(--hz-text-faint); }
+
+  /* ─── shared block primitives ─── */
+  .eb-cat {
+    display: inline-flex;
+    gap: 6px;
+    font-size: 12.5px;
+    font-weight: 600;
+    letter-spacing: 0;
+    line-height: 1.35;
+    color: var(--hz-text-muted);
+  }
+  .eb-cat--center { justify-content: center; }
+  .eb-cat__sep { color: var(--hz-text-faint); }
+
+  .eb-mark-row {
+    display: flex;
+    align-items: baseline;
+    gap: 24px;
+  }
+  .eb-mark {
+    font-family: var(--hz-font-mono);
+    font-size: 132px;
+    font-weight: 700;
+    line-height: 0.9;
+    color: var(--hz-text);
+    letter-spacing: -0.05em;
+  }
+  .eb-mark-row__hr {
+    height: 1px;
+    flex: 1;
+    background: var(--hz-border-faint);
+    margin-bottom: 28px;
+  }
+
+  .eb-h1 {
+    font-size: 44px;
+    line-height: 1.1;
+  }
+
+  .eb-body {
+    font-size: 17px;
+    line-height: 1.6;
+    max-width: 520px;
+  }
+
+  /* ─── buttons ─── */
+  .eb-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .eb-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border-radius: var(--hz-radius-md);
+    border: 1px solid var(--hz-border);
+    background: var(--hz-surface-soft);
+    color: var(--hz-text);
+    font-family: var(--hz-font-ui);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition:
+      background var(--hz-motion),
+      border-color var(--hz-motion),
+      color var(--hz-motion);
+  }
+  .eb-btn:hover {
+    background: var(--hz-surface-hover);
+    border-color: var(--hz-border-strong);
+  }
+  .eb-btn--primary {
+    background: var(--hz-brand);
+    color: var(--hz-text-inverse);
+    border-color: var(--hz-brand);
+    font-weight: 700;
+  }
+  .eb-btn--primary:hover { background: var(--hz-brand-strong); }
+
+  .eb-schematic {
+    width: 200px;
+    height: 200px;
+    display: block;
+  }
+  .eb-schematic__orbit {
+    transform-origin: 100px 100px;
+    animation: eb-orbit 14s linear infinite;
+  }
+  @keyframes eb-orbit {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .eb-schematic__orbit { animation: none; }
+  }
+  .eb-maint-h1 {
+    font-family: "Noto Sans Hebrew", var(--hz-font-ui);
+    font-weight: 800;
+    font-size: 64px;
+    letter-spacing: -0.03em;
+    line-height: 1.05;
+  }
+  .eb-maint-sub {
+    font-size: 16px;
+    line-height: 1.6;
+    max-width: 440px;
+  }
+</style>
+</head>
+<body>
+<main class="eb-main eb-main--centered">
+    <div class="eb-col eb-col--centered">
+      <svg class="eb-schematic" viewBox="0 0 200 200" aria-hidden="true">
+        <!-- corner brackets -->
+        <path d="M 20 20 L 20 60 M 20 20 L 60 20" stroke="var(--hz-border-strong)" stroke-width="1.5" fill="none" stroke-linecap="round" />
+        <path d="M 180 20 L 180 60 M 180 20 L 140 20" stroke="var(--hz-border-strong)" stroke-width="1.5" fill="none" stroke-linecap="round" />
+        <path d="M 20 180 L 20 140 M 20 180 L 60 180" stroke="var(--hz-border-strong)" stroke-width="1.5" fill="none" stroke-linecap="round" />
+        <path d="M 180 180 L 180 140 M 180 180 L 140 180" stroke="var(--hz-border-strong)" stroke-width="1.5" fill="none" stroke-linecap="round" />
+        <!-- crosshair -->
+        <line x1="100" y1="70"  x2="100" y2="130" stroke="var(--hz-brand)" stroke-width="1.5" stroke-linecap="round" />
+        <line x1="70"  y1="100" x2="130" y2="100" stroke="var(--hz-brand)" stroke-width="1.5" stroke-linecap="round" />
+        <!-- dashed orbit -->
+        <circle class="eb-schematic__orbit" cx="100" cy="100" r="22" stroke="var(--hz-brand)" stroke-width="1.5" fill="none" stroke-dasharray="3 4" opacity="0.7" />
+        <circle cx="100" cy="100" r="2.5" fill="var(--hz-brand)" />
+      </svg>
+
+      <h1 class="eb-display eb-maint-h1">אנחנו בתחזוקה</h1>
+      <p class="eb-text-muted eb-maint-sub">דברים טובים נבנים, נחזור בהקדם</p>
+    </div>
+  </main>
+</body>
+</html>

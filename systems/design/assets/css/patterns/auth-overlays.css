@@ -1,0 +1,439 @@
+/* ─────────────────────────────────────────────────────────────────────
+   Hachozeh · Auth Overlays (Quiet direction · A)
+   Drop-in CSS for the auth overlay panels.
+
+   IN-REPO LOCATION:
+     systems/web/src/styles/patterns/auth-overlays.css
+
+   What it styles:
+     - .navi-overlay-root        (the overlay mount)
+     - .navi-overlay-backdrop    (dim layer — no blur, matches How It Works)
+     - .navi-overlay-panel       (the panel itself, 420px Quiet variant)
+     - .navi-overlay-close       (top-left close X)
+     - .navi-overlay-title       (Noto Sans Hebrew display title)
+     - .navi-overlay-subtitle    (muted body)
+     - .navi-overlay-input       (underline-only email input)
+     - .navi-overlay-primary     (amber pill action)
+     - .navi-overlay-secondary   (outline action)
+     - .navi-overlay-google      (Google button)
+     - .navi-overlay-divider     (or-separator)
+     - .navi-overlay-otp         (6-box OTP container)
+     - .navi-overlay-otp-box     (single OTP digit input)
+     - .navi-overlay-breathing   (processing dot)
+     - .navi-overlay-progress    (processing bar)
+     - .navi-overlay-error-glyph (sober error icon)
+     - .navi-overlay-grant       (signup success "תיק תרגול" tile)
+
+   Token deps (already in your tokens.css):
+     --hz-bg, --hz-text, --hz-text-muted, --hz-text-faint, --hz-text-soft,
+     --hz-brand, --hz-brand-strong, --hz-brand-soft, --hz-brand-dim,
+     --hz-action-sell-strong, --hz-action-buy,
+     --hz-border-faint, --hz-border-soft, --hz-border-strong,
+     --hz-surface-soft, --hz-surface-hover,
+     --hz-font-ui, --hz-font-mono.
+
+   No Tailwind utility classes used here — pure CSS.
+   ───────────────────────────────────────────────────────────────────── */
+
+body.overlay-open { overflow: hidden; }
+
+.navi-overlay-root[data-active="false"] { display: none; }
+.navi-overlay-root[data-active="true"] {
+  position: fixed; inset: 0; z-index: 100;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px;
+}
+
+/* .navi-overlay-backdrop — SINGLE source of truth (the primitives duplicate was
+   removed). DEFAULT = dim only, NO page-behind blur — matched to the How It Works
+   scrim (how-it-works-overlay.css) so the overlay reads the same: a soft radial
+   dim, not a frosted blur. Blur is OPT-IN per overlay; see the blur block below. */
+.navi-overlay-backdrop {
+  position: absolute; inset: 0;
+  background: radial-gradient(circle at 50% 45%, rgba(7, 8, 12, 0.18), rgba(7, 8, 12, 0.42));
+  animation: navi-ov-fade-in 200ms ease;
+}
+
+/* ── Opt-in blur ──────────────────────────────────────────────────────────
+   Default is no blur (above). renderOverlay() stamps the active overlay name on
+   the root as [data-overlay="…"]; list the overlays that SHOULD frost the page
+   behind here — adding/removing one is a single selector. (none yet) */
+@keyframes navi-ov-fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+/* The centering shell spans the whole overlay but is visually empty around the
+   panel. With the close-X removed, tap-outside is the only dismiss — so let taps
+   on the empty shell fall THROUGH to the backdrop (which carries data-overlay-close)
+   instead of being swallowed. Only the panel itself stays interactive. */
+.navi-overlay-shell { position: relative; z-index: 1; pointer-events: none; }
+.navi-overlay-panel { pointer-events: auto; }
+
+.navi-overlay-panel {
+  width: 420px;
+  max-width: calc(100vw - 48px);
+  padding: 40px 36px;
+  background: rgba(19, 20, 26, 0.96);
+  backdrop-filter: blur(28px);
+  border-radius: 18px;
+  color: var(--hz-text);
+  position: relative;
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.5);
+  direction: rtl;
+  font-family: var(--hz-font-ui);
+  animation: navi-ov-panel-in 240ms cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+.navi-overlay-panel--wide { width: 520px; }
+@keyframes navi-ov-panel-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.985); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.navi-overlay-close {
+  position: absolute; top: 16px; left: 16px;
+  width: 30px; height: 30px;
+  border-radius: 8px;
+  background: transparent;
+  border: 1px solid var(--hz-border-faint);
+  color: var(--hz-text-muted);
+  cursor: pointer;
+  display: grid; place-items: center; padding: 0;
+  transition: border-color 140ms, color 140ms, background 140ms;
+}
+.navi-overlay-close:hover {
+  border-color: var(--hz-border-soft);
+  color: var(--hz-text);
+  background: var(--hz-surface-soft);
+}
+
+.navi-overlay-brand {
+  display: flex; justify-content: center;
+  margin-bottom: 32px;
+  font-size: 17px; font-weight: 800;
+  letter-spacing: 0; line-height: 1;
+}
+.navi-overlay-brand b { color: var(--hz-brand); font-weight: inherit; }
+
+.navi-overlay-title {
+  font-family: "Noto Sans Hebrew", var(--hz-font-ui);
+  font-size: 28px; font-weight: 700; margin: 0;
+  text-align: center; color: var(--hz-text);
+  line-height: 1.1; letter-spacing: 0;
+}
+.navi-overlay-subtitle {
+  font-size: 14px; color: var(--hz-text-muted);
+  text-align: center;
+  margin: 10px 0 30px; line-height: 1.55;
+}
+
+/* High specificity so we beat the Tailwind forms plugin's
+   `[type='email']` / `[type='text']` (specificity 0,1,1) defaults. */
+.navi-overlay-panel input.navi-overlay-input,
+.navi-overlay-panel [type='email'].navi-overlay-input,
+.navi-overlay-panel [type='text'].navi-overlay-input,
+.navi-overlay-panel [type='tel'].navi-overlay-input {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%; height: 44px;
+  background-color: var(--hz-surface-soft);
+  border: 1px solid var(--hz-border-soft);
+  border-radius: 10px;
+  color: var(--hz-text);
+  /* 16px (not 15) is deliberate: iOS Safari auto-zooms any focused text input
+     whose computed font-size is < 16px. With our viewport (initial-scale=1, no
+     maximum-scale lock — kept unlocked for pinch-zoom a11y), that zoom + pan
+     offset persists after the auth overlay closes, leaving the page draggable
+     past its bounds until a reflow (reload/nav). 16px removes the trigger
+     without disabling user zoom. Do not drop below 16px. */
+  font-size: 16px; line-height: 1.5;
+  font-family: inherit;
+  padding: 0 14px;
+  outline: none;
+  box-shadow: none;
+  text-align: right; direction: rtl;
+  transition: border-color 180ms, background-color 180ms;
+}
+.navi-overlay-panel input.navi-overlay-input:focus,
+.navi-overlay-panel [type='email'].navi-overlay-input:focus,
+.navi-overlay-panel [type='text'].navi-overlay-input:focus,
+.navi-overlay-panel [type='tel'].navi-overlay-input:focus {
+  border-color: var(--hz-brand);
+  background-color: rgba(232, 178, 87, 0.04);
+  box-shadow: none;
+}
+.navi-overlay-panel input.navi-overlay-input::placeholder {
+  color: var(--hz-text-faint);
+  opacity: 1;
+}
+
+.navi-overlay-panel input.navi-overlay-otp-input {
+  margin: 8px 0 22px;
+  height: 54px;
+  font-family: var(--hz-font-mono);
+  font-size: 20px;
+  font-weight: 600;
+  text-align: center;
+  direction: ltr;
+}
+
+.navi-overlay-label {
+  display: block;
+  font-size: 12px; font-weight: 600;
+  color: var(--hz-text-muted);
+  margin-bottom: 8px;
+  letter-spacing: 0;
+}
+
+.navi-overlay-primary {
+  width: 100%; height: 46px;
+  border-radius: 10px;
+  background: var(--hz-brand); color: #1a1407;
+  border: none;
+  font-size: 14px; font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  letter-spacing: 0;
+  transition: background 180ms, opacity 180ms;
+}
+.navi-overlay-primary:hover:not(:disabled) { background: var(--hz-brand-strong); }
+.navi-overlay-primary:disabled { opacity: 0.45; cursor: not-allowed; }
+
+.navi-overlay-secondary {
+  width: 100%; height: 44px;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--hz-text-soft);
+  border: 1px solid var(--hz-border-soft);
+  font-size: 14px; font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: border-color 180ms, background 180ms;
+}
+.navi-overlay-secondary:hover {
+  border-color: var(--hz-border-strong);
+  background: var(--hz-surface-soft);
+}
+
+.navi-overlay-google {
+  width: 100%; height: 46px;
+  border-radius: 10px;
+  background: transparent;
+  border: 1px solid var(--hz-border-soft);
+  color: var(--hz-text);
+  font-size: 14px; font-weight: 600;
+  font-family: inherit;
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  cursor: pointer;
+  transition: border-color 180ms, background 180ms;
+}
+.navi-overlay-google:hover {
+  border-color: var(--hz-border-strong);
+  background: var(--hz-surface-soft);
+}
+
+.navi-overlay-divider {
+  display: flex; align-items: center; gap: 14px;
+  margin: 22px 0;
+  color: var(--hz-text-faint);
+  font-size: 12px; font-weight: 600; letter-spacing: 0;
+}
+.navi-overlay-divider::before,
+.navi-overlay-divider::after {
+  content: ""; flex: 1; height: 1px;
+  background: var(--hz-border-faint);
+}
+
+.navi-overlay-switch {
+  font-size: 13px; color: var(--hz-text-muted);
+  text-align: center; margin: 22px 0 0;
+}
+.navi-overlay-switch button {
+  background: none; border: 0; padding: 0;
+  color: var(--hz-brand-strong);
+  font-weight: 700; font-family: inherit; font-size: inherit;
+  cursor: pointer;
+  margin-right: 4px;
+  transition: color 140ms;
+}
+.navi-overlay-switch button:hover { color: var(--hz-brand); }
+
+.navi-overlay-footer-links {
+  display: flex; justify-content: center; gap: 20px;
+  margin-top: 16px;
+  font-size: 11px; font-weight: 500;
+  color: var(--hz-text-faint);
+}
+.navi-overlay-footer-links a {
+  color: var(--hz-text-faint);
+  text-decoration: none;
+  transition: color 140ms;
+}
+.navi-overlay-footer-links a:hover { color: var(--hz-text-soft); }
+
+.navi-overlay-legal {
+  font-size: 11px; color: var(--hz-text-faint);
+  text-align: center; line-height: 1.6;
+  margin: 16px 0 0;
+}
+.navi-overlay-legal a { color: var(--hz-text-muted); text-decoration: underline; }
+.navi-overlay-legal a:hover { color: var(--hz-text-soft); }
+
+.navi-overlay-error-banner {
+  margin-bottom: 16px;
+  font-size: 13px;
+  color: var(--hz-action-sell-strong);
+  line-height: 1.5;
+}
+
+/* ───── OTP boxes ───── */
+.navi-overlay-otp {
+  display: flex; gap: 8px; justify-content: center;
+  margin: 8px 0 22px;
+  direction: ltr;
+}
+/* Same specificity bump for OTP boxes — forms plugin defaults fight here too. */
+.navi-overlay-panel input.navi-overlay-otp-box,
+.navi-overlay-panel [type='text'].navi-overlay-otp-box {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 44px; height: 54px;
+  border-radius: 8px;
+  border: 1px solid var(--hz-border-soft);
+  background-color: var(--hz-surface-soft);
+  color: var(--hz-text);
+  font-family: var(--hz-font-mono);
+  font-size: 22px; font-weight: 600; line-height: 1;
+  text-align: center;
+  outline: none;
+  box-shadow: none;
+  padding: 0;
+  transition: border-color 180ms, background-color 180ms;
+}
+.navi-overlay-panel input.navi-overlay-otp-box:focus {
+  border-color: var(--hz-brand);
+  background-color: rgba(232, 178, 87, 0.06);
+  box-shadow: none;
+}
+.navi-overlay-panel input.navi-overlay-otp-box[data-has-value="true"] {
+  border-color: var(--hz-brand-dim);
+  background-color: rgba(232, 178, 87, 0.05);
+}
+
+.navi-overlay-otp-box {
+  width: 44px; height: 54px;
+  border-radius: 8px;
+  border: 1px solid var(--hz-border-soft);
+  background: var(--hz-surface-soft);
+  color: var(--hz-text);
+  font-family: var(--hz-font-mono);
+  font-size: 22px; font-weight: 600;
+  text-align: center;
+  outline: none;
+  padding: 0;
+  transition: border-color 180ms, background 180ms;
+}
+.navi-overlay-otp-box:focus {
+  border-color: var(--hz-brand);
+  background: rgba(232, 178, 87, 0.06);
+}
+.navi-overlay-otp-box[data-has-value="true"] {
+  border-color: var(--hz-brand-dim);
+  background: rgba(232, 178, 87, 0.05);
+}
+.navi-overlay-otp-resend {
+  font-size: 13px; color: var(--hz-text-muted);
+  text-align: center; margin: 0;
+}
+.navi-overlay-otp-resend button {
+  background: none; border: 0; padding: 0;
+  color: inherit; font: inherit;
+  cursor: pointer; font-weight: 500;
+}
+.navi-overlay-otp-resend button.is-ready {
+  color: var(--hz-brand-strong); font-weight: 700;
+}
+.navi-overlay-otp-resend button.is-ready:hover { color: var(--hz-brand); }
+
+/* ───── Processing ───── */
+.navi-overlay-processing { text-align: center; padding: 24px 0 0; }
+.navi-overlay-breathing {
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--hz-brand);
+  animation: hz-pulse-soft 1.4s ease-in-out infinite;
+  display: inline-block;
+  margin-bottom: 24px;
+}
+@keyframes hz-pulse-soft {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.35; }
+}
+.navi-overlay-progress {
+  width: 100%; height: 2px; border-radius: 2px;
+  background: var(--hz-border-faint);
+  overflow: hidden;
+}
+.navi-overlay-progress > span {
+  display: block; height: 100%; background: var(--hz-brand);
+  border-radius: 2px;
+  width: 8%;
+  animation: navi-ov-progress 1.4s cubic-bezier(0.3, 0.7, 0.4, 1) forwards;
+}
+@keyframes navi-ov-progress {
+  0%   { width: 8%; }
+  50%  { width: 60%; }
+  100% { width: 90%; }
+}
+
+/* ───── Error ───── */
+.navi-overlay-error-head {
+  display: flex; align-items: center; gap: 10px;
+  margin-bottom: 16px;
+}
+.navi-overlay-error-glyph {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: rgba(231, 122, 138, 0.10);
+  border: 1px solid rgba(231, 122, 138, 0.32);
+  color: var(--hz-action-sell-strong);
+  display: grid; place-items: center;
+  font-family: var(--hz-font-mono);
+  font-size: 18px; font-weight: 700;
+}
+.navi-overlay-error-title {
+  font-family: "Noto Sans Hebrew", var(--hz-font-ui);
+  font-size: 18px; font-weight: 700; margin: 0;
+  color: var(--hz-text);
+}
+.navi-overlay-error-body {
+  font-size: 14px; color: var(--hz-text-soft);
+  line-height: 1.6; margin: 0 0 24px;
+}
+.navi-overlay-error-actions {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+}
+
+/* ───── Success ───── */
+.navi-overlay-success { text-align: center; padding: 12px 0 0; }
+.navi-overlay-success-title {
+  font-family: "Noto Sans Hebrew", var(--hz-font-ui);
+  font-size: 32px; font-weight: 700;
+  margin: 0 0 12px;
+  letter-spacing: 0;
+  color: var(--hz-text);
+}
+.navi-overlay-grant {
+  display: inline-flex; align-items: baseline; gap: 10px;
+  padding: 10px 18px; border-radius: 10px;
+  background: var(--hz-brand-soft);
+  border: 1px solid rgba(232, 178, 87, 0.24);
+}
+.navi-overlay-grant-label {
+  font-size: 11.5px; font-weight: 700; letter-spacing: 0;
+  color: var(--hz-brand-strong);
+}
+.navi-overlay-grant-value {
+  font-family: var(--hz-font-mono); font-weight: 600;
+  font-size: 18px; color: var(--hz-brand-strong);
+  font-variant-numeric: tabular-nums;
+}
+.navi-overlay-grant-unit {
+  font-family: var(--hz-font-mono); font-weight: 600;
+  font-size: 13px; color: var(--hz-brand); opacity: 0.7;
+}

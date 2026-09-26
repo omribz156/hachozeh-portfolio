@@ -1,0 +1,195 @@
+/* ──────────────────────────────────────────────────────────────
+   pages/trending-stage.css
+   Layout + composition for /pages/trending.html only.
+   Patterns (hero/card/carousel/social) are imported separately.
+   ────────────────────────────────────────────────────────────── */
+
+
+
+  /* page atmosphere comes from base tokens */
+  body.hz-page--trending {
+    background: var(--hz-page-atmosphere);
+  }
+
+  .hz-trending {
+    width: min(100%, 1280px);
+    margin-inline: auto;
+    padding-inline: clamp(0.75rem, 2vw, 1.75rem);
+    padding-block: var(--hz-space-6) var(--hz-space-12);
+  }
+
+  .hz-trending__intro {
+    max-width: 52rem;
+    margin-bottom: var(--hz-space-6);
+  }
+  .hz-trending__intro-eyebrow {
+    margin: 0 0 var(--hz-space-2);
+    color: var(--hz-brand-strong);
+    font-size: 0.78rem;
+    font-weight: 800;
+  }
+  .hz-trending__intro h1 {
+    margin: 0;
+    color: var(--hz-text);
+    font-size: clamp(2rem, 4vw, 3.45rem);
+    font-weight: 900;
+    letter-spacing: 0;
+    line-height: 1.02;
+  }
+  .hz-trending__intro p {
+    margin: var(--hz-space-3) 0 0;
+    color: var(--hz-text-muted);
+    font-size: clamp(1rem, 1.45vw, 1.16rem);
+    font-weight: 650;
+    line-height: 1.7;
+  }
+
+  /* ── FEED EYEBROW — surface identity for breaking / new
+     trending is the default and renders no eyebrow (see trending-stage.js). */
+  .hz-trending__eyebrow {
+    display: flex;
+    align-items: baseline;
+    gap: var(--hz-space-3);
+    margin-bottom: var(--hz-space-4);
+  }
+  .hz-trending__eyebrow-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.18rem 0.55rem;
+    border-radius: var(--hz-radius-pill);
+    background: var(--hz-brand-soft);
+    color: var(--hz-brand-strong);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0;
+  }
+  .hz-trending__eyebrow-text {
+    color: var(--hz-text-muted);
+    font-size: 0.86rem;
+    font-weight: 600;
+  }
+
+  /* ── HERO ZONE — 65% / 35% split, RTL ── */
+  .hz-trending__hero-zone {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) clamp(17rem, 22vw, 20rem);
+    gap: clamp(0.65rem, 1.2vw, 1rem);
+    align-items: stretch;
+    /* Extra room below the cards: the carousel nav (dots + chips) and the
+       community CTA are absolutely floated into this band (top:100%), so the
+       margin must clear them — otherwise they ride onto the filter divider. */
+    margin-bottom: calc(var(--hz-space-8) + 2rem);
+  }
+
+  /* Below tablet: hero + social vanish; cards take the whole page.
+     See guide/surfaces/discovery/trending-front-page.md "Responsive contract". */
+  @media (max-width: 1024px) {
+    .hz-trending__hero-zone {
+      display: none;
+    }
+  }
+
+  /* ── FILTER ROW — chips + sort ── */
+  .hz-trending__filters {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--hz-space-4);
+    margin-bottom: var(--hz-space-5);
+    padding-block: var(--hz-space-3);
+    border-block: 1px solid var(--hz-border-faint);
+  }
+  .hz-trending__chips {
+    display: flex;
+    gap: 0.45rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .hz-trending__chips::-webkit-scrollbar { display: none; }
+
+  .hz-trending__chip {
+    padding: 0.42rem 0.85rem;
+    border: 1px solid var(--hz-border-soft);
+    border-radius: var(--hz-radius-pill);
+    background: transparent;
+    color: var(--hz-text-muted);
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all var(--hz-motion);
+  }
+  .hz-trending__chip:hover {
+    color: var(--hz-text);
+    border-color: var(--hz-border);
+  }
+  .hz-trending__chip.is-active {
+    background: var(--hz-brand-soft);
+    border-color: rgba(var(--hz-brand-rgb) / 0.3);
+    color: var(--hz-brand-strong);
+  }
+
+  .hz-trending__sort {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    color: var(--hz-text-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+  .hz-trending__sort select {
+    appearance: none;
+    border: 1px solid var(--hz-border-soft);
+    border-radius: var(--hz-radius-sm);
+    background: transparent;
+    color: var(--hz-text);
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 600;
+    padding: 0.32rem 0.7rem;
+    cursor: pointer;
+  }
+
+  /* Filter row flips to column at the same break as cards-to-1col (clean phone break).
+     See guide/surfaces/discovery/trending-front-page.md "Responsive Contract". */
+  @media (max-width: 900px) {
+    .hz-trending__filters { flex-direction: column; align-items: stretch; }
+    .hz-trending__sort { align-self: flex-end; }
+  }
+
+  /* ── MARKET STREAM — desktop is 4 wide; once the opening goes (≤1024) we jump
+     straight to 2-col so each card has real room. No 3-col middle state.
+     See guide/surfaces/discovery/trending-front-page.md "Responsive Contract". */
+  .hz-trending__stream {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--hz-space-3);
+  }
+  @media (max-width: 1024px) { .hz-trending__stream { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 900px)  { .hz-trending__stream { grid-template-columns: 1fr; } }
+
+  .hz-trending__empty {
+    padding-block: var(--hz-space-8);
+    border-top: 1px solid var(--hz-border-faint);
+    color: var(--hz-text-muted);
+    font-size: 0.95rem;
+    font-weight: 650;
+  }
+
+  .hz-trending__stream-hint {
+    margin-top: var(--hz-space-8);
+    text-align: center;
+    color: var(--hz-text-faint);
+    font-size: 0.82rem;
+  }
+  .hz-trending__stream-hint::before {
+    content: "";
+    display: block;
+    width: 2rem;
+    height: 2px;
+    margin: 0 auto var(--hz-space-3);
+    background: var(--hz-border-soft);
+    border-radius: var(--hz-radius-pill);
+  }

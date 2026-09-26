@@ -1,0 +1,118 @@
+/* Hachozeh — Direction B · Analyst Dossier
+   Two-pane: sticky credential rail (start side) + scrolling proof column.
+   Prefix: .db-  Sits on tokens.css + shared.css. RTL, logical props. */
+
+.db-wrap { position: relative; max-width: 1080px; margin: 0 auto; padding: var(--hz-space-10) var(--hz-space-8) var(--hz-space-12); }
+.db-grid { display: grid; grid-template-columns: minmax(0, 1fr) 320px; column-gap: var(--hz-space-10); row-gap: var(--hz-space-5); align-items: start; }
+
+/* ── credential rail ── */
+.db-rail { grid-column: 2; grid-row: 1 / span 2; position: sticky; top: var(--hz-space-6); display: flex; flex-direction: column; gap: var(--hz-space-5); }
+.db-card {
+  border: 1px solid var(--hz-border-soft); border-radius: var(--hz-radius-xl);
+  background: linear-gradient(180deg, var(--hz-bg-raised), var(--hz-bg-soft));
+  box-shadow: var(--hz-shadow-rail); position: relative;
+}
+.db-card::before { content: ""; position: absolute; inset: 0 18px auto; height: 3px; background: linear-gradient(90deg, var(--hz-brand-strong), var(--hz-brand)); z-index: 1; border-radius: 0 0 var(--hz-radius-pill) var(--hz-radius-pill); }
+
+/* identity header — top of the right (proof) column on desktop */
+.db-identity { grid-column: 1; grid-row: 1; display: flex; align-items: center; gap: var(--hz-space-6); }
+.db-identity .db-identity-text { min-width: 0; }
+.db-identity .db-id-name { font-size: clamp(1.6rem, 2.4vw, 2rem); font-weight: 700; letter-spacing: -0.02em; margin: 0; }
+.db-identity .db-id-meta { display: flex; align-items: center; flex-wrap: wrap; gap: var(--hz-space-3); margin-block-start: var(--hz-space-3); }
+.db-identity .db-id-tier { display: inline-flex; align-items: center; gap: 0.45em; font-size: 0.8rem; font-weight: 600; color: var(--hz-brand-strong); background: var(--hz-brand-soft); padding: 0.3em 0.8em; border-radius: var(--hz-radius-pill); }
+.db-identity .db-cardbadges { justify-content: flex-start; padding: 0; border: 0; margin-block-start: var(--hz-space-4); }
+
+/* dossier hero accuracy */
+.db-acc { padding: var(--hz-space-6) var(--hz-space-6) var(--hz-space-5); text-align: center; border-bottom: 1px solid var(--hz-border-faint); border-radius: var(--hz-radius-xl) var(--hz-radius-xl) 0 0; background: radial-gradient(120% 100% at 50% -10%, rgba(var(--hz-brand-rgb), 0.12), transparent 65%); }
+.db-acc .l { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--hz-brand-strong); }
+.db-acc .n { font-family: var(--hz-font-mono); font-weight: 700; font-size: 3.6rem; line-height: 0.9; letter-spacing: -0.03em; margin-block-start: var(--hz-space-2); }
+.db-acc .n .pct { font-size: 0.32em; color: var(--hz-brand-strong); }
+.db-acc .bar { height: 0.4rem; border-radius: var(--hz-radius-pill); background: rgba(255,248,232,0.08); overflow: hidden; margin-block-start: var(--hz-space-3); }
+.db-acc .bar > i { display: block; height: 100%; width: 73%; border-radius: inherit; background: linear-gradient(90deg, var(--hz-brand), var(--hz-brand-strong)); }
+.db-acc .cap { font-size: 0.82rem; color: var(--hz-text-muted); margin-block-start: var(--hz-space-3); }
+.db-acc .cap b { color: var(--hz-text-soft); font-family: var(--hz-font-mono); font-weight: 600; }
+
+/* compact accuracy breakdown inside the rail card */
+.db-cardbreak { padding: var(--hz-space-5) var(--hz-space-6) var(--hz-space-6); border-top: 1px solid var(--hz-border-faint); display: flex; flex-direction: column; gap: var(--hz-space-4); }
+.db-cardbreak .h { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--hz-text-muted); display: flex; align-items: baseline; justify-content: space-between; gap: var(--hz-space-3); }
+.db-cardbreak .h .sub { font-weight: 500; letter-spacing: 0; text-transform: none; font-size: 0.72rem; color: var(--hz-text-faint); }
+.cb-row { display: flex; flex-direction: column; gap: 0.4rem; }
+.cb-line { display: flex; align-items: baseline; justify-content: space-between; gap: var(--hz-space-3); }
+.cb-nm { font-size: 0.92rem; font-weight: 600; color: var(--hz-text-soft); }
+.cb-rk { font-family: var(--hz-font-mono); font-size: 0.78rem; font-weight: 600; color: var(--hz-text-faint); margin-inline-start: 0.3em; }
+.cb-row.feat .cb-nm { color: var(--hz-text); }
+.cb-row.feat .cb-rk { color: var(--hz-brand-strong); }
+.cb-pct { font-family: var(--hz-font-mono); font-weight: 700; font-size: 1rem; color: var(--hz-text); direction: ltr; unicode-bidi: isolate; }
+.cb-pct .s { font-size: 0.62em; color: var(--hz-text-muted); }
+.cb-track { height: 0.3rem; border-radius: var(--hz-radius-pill); background: rgba(255,248,232,0.07); overflow: hidden; }
+.cb-track > i { display: block; height: 100%; border-radius: inherit; background: var(--hz-brand-dim); }
+.cb-row.feat .cb-track > i { background: linear-gradient(90deg, var(--hz-brand), var(--hz-brand-strong)); }
+
+/* mini badge shelf under the card */
+.db-badgeshelf { border: 1px solid var(--hz-border-faint); border-radius: var(--hz-radius-lg); background: var(--hz-surface-soft); padding: var(--hz-space-5); }
+.db-badgeshelf .h { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--hz-text-faint); margin-block-end: var(--hz-space-4); }
+.db-badgerow { display: flex; flex-wrap: wrap; gap: var(--hz-space-3); }
+.db-glyph { position: relative; width: 2.1rem; height: 2.1rem; border-radius: var(--hz-radius-sm); display: grid; place-items: center; font-size: 1rem; background: var(--hz-brand-soft); color: var(--hz-brand-strong); cursor: default; transition: transform var(--hz-motion); }
+.db-glyph.mint { background: var(--hz-action-buy-soft); color: var(--hz-action-buy-strong); }
+.db-glyph.info { background: var(--hz-info-soft); color: var(--hz-info); }
+.db-glyph:hover, .db-glyph:focus-visible { transform: translateY(-3px); outline: none; z-index: 5; }
+
+/* hover popover — reuses the achievements badge-detail language */
+.db-badgepop { position: absolute; bottom: calc(100% + 9px); left: 50%; transform: translateX(-50%) translateY(5px); width: 236px; padding: var(--hz-space-4); background: var(--hz-surface-3); border: 1px solid var(--hz-border-soft); border-radius: var(--hz-radius-md); box-shadow: var(--hz-shadow-overlay); opacity: 0; visibility: hidden; pointer-events: none; transition: opacity var(--hz-motion), transform var(--hz-motion); z-index: 30; text-align: start; }
+.db-badgepop::after { content: ""; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 7px solid transparent; border-top-color: var(--hz-surface-3); }
+.db-glyph:hover .db-badgepop, .db-glyph:focus-visible .db-badgepop { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+.db-badgepop .pt { display: block; font-weight: 700; font-size: 0.9rem; color: var(--hz-text); }
+.db-badgepop .pd { display: block; font-size: 0.8rem; color: var(--hz-text-soft); line-height: 1.5; margin-block-start: var(--hz-space-2); }
+
+/* edge badges: anchor the popover inward so the card's clip never cuts it */
+#cardBadges .db-glyph:first-child .db-badgepop { left: auto; right: 0; transform: translateX(0) translateY(5px); }
+#cardBadges .db-glyph:first-child:hover .db-badgepop, #cardBadges .db-glyph:first-child:focus-visible .db-badgepop { transform: translateX(0) translateY(0); }
+#cardBadges .db-glyph:first-child .db-badgepop::after { left: auto; right: 10px; transform: translateX(0); }
+#cardBadges .db-glyph:last-child .db-badgepop { left: 0; right: auto; transform: translateX(0) translateY(5px); }
+#cardBadges .db-glyph:last-child:hover .db-badgepop, #cardBadges .db-glyph:last-child:focus-visible .db-badgepop { transform: translateX(0) translateY(0); }
+#cardBadges .db-glyph:last-child .db-badgepop::after { left: 10px; right: auto; transform: translateX(0); }
+
+/* ── proof column ── */
+.db-main { grid-column: 1; grid-row: 2; display: flex; flex-direction: column; gap: var(--hz-space-8); min-width: 0; }
+.db-sh { display: flex; align-items: baseline; justify-content: space-between; gap: var(--hz-space-4); margin-block-end: var(--hz-space-5); }
+.db-sh .ttl { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.01em; }
+.db-sh .ttl .eyebrow { display: block; margin-block-end: 0.25rem; }
+.db-sh .aside { font-size: 0.82rem; color: var(--hz-text-muted); }
+
+/* accuracy breakdown as ranked horizontal rows */
+.db-cat { display: grid; grid-template-columns: 1.4rem 1fr auto; align-items: center; gap: var(--hz-space-4); padding: var(--hz-space-5) 0; border-bottom: 1px solid var(--hz-border-faint); }
+.db-cat:first-child { border-top: 1px solid var(--hz-border-faint); }
+.db-cat .ord { font-family: var(--hz-font-mono); font-size: 0.85rem; color: var(--hz-text-faint); }
+.db-cat .body { min-width: 0; }
+.db-cat .top { display: flex; align-items: baseline; gap: var(--hz-space-3); }
+.db-cat .nm { font-weight: 600; font-size: 1rem; }
+.db-cat .mk { font-size: 0.8rem; color: var(--hz-text-muted); }
+.db-cat .rk { font-family: var(--hz-font-mono); font-size: 0.74rem; color: var(--hz-text-muted); background: rgba(255,248,232,0.05); border: 1px solid var(--hz-border-faint); padding: 0.15em 0.5em; border-radius: var(--hz-radius-sm); }
+.db-cat .track { height: 0.4rem; border-radius: var(--hz-radius-pill); background: rgba(255,248,232,0.06); overflow: hidden; margin-block-start: var(--hz-space-3); }
+.db-cat .track > i { display: block; height: 100%; border-radius: inherit; background: var(--hz-brand); }
+.db-cat.feat .track > i { background: linear-gradient(90deg, var(--hz-brand), var(--hz-brand-strong)); }
+.db-cat .pctn { font-family: var(--hz-font-mono); font-weight: 700; font-size: 1.7rem; letter-spacing: -0.02em; min-width: 4rem; text-align: start; }
+.db-cat .pctn .s { font-size: 0.5em; color: var(--hz-text-muted); }
+.db-cat.feat .nm { color: var(--hz-brand-strong); }
+.db-cat.feat .rk { color: var(--hz-brand-strong); border-color: var(--hz-brand-dim); }
+
+/* segmented control for proof tabs */
+.db-seg { display: inline-flex; gap: 0.2rem; padding: 0.25rem; border: 1px solid var(--hz-border-faint); border-radius: var(--hz-radius-pill); background: var(--hz-surface-soft); }
+.db-seg button { border: 0; background: transparent; color: var(--hz-text-muted); font-family: inherit; font-size: 0.85rem; font-weight: 600; cursor: pointer; padding: 0.4em 0.95em; border-radius: var(--hz-radius-pill); transition: all var(--hz-motion); display: inline-flex; align-items: center; gap: 0.45em; }
+.db-seg button .cnt { font-family: var(--hz-font-mono); font-size: 0.78rem; opacity: 0.8; }
+.db-seg button[aria-selected="true"] { background: var(--hz-brand); color: var(--hz-text-inverse); }
+.db-panel { display: none; margin-block-start: var(--hz-space-5); }
+.db-panel.on { display: block; }
+
+@media (max-width: 920px) {
+  .db-grid { grid-template-columns: minmax(0, 1fr); row-gap: var(--hz-space-7); }
+  /* Promote .db-main's children (bio-sect, positions) into the grid so the rail
+     can slot BETWEEN the stat-strip and positions. Mobile rhythm via order:
+     identity → bio/social/stats → rail → positions. Desktop is untouched. */
+  .db-main { display: contents; }
+  .db-identity { grid-column: 1; grid-row: auto; order: 1; }
+  .db-bio-sect { order: 2; }
+  /* extra breathing room between the 3 stats and the accuracy card (on top of row-gap) */
+  .db-rail { grid-column: 1; grid-row: auto; position: static; order: 3; margin-block-start: var(--hz-space-4); }
+  .db-main > section:last-child { order: 4; }
+}

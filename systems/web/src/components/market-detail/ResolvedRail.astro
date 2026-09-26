@@ -1,0 +1,7 @@
+---
+import ResolvedRail from './ResolvedRail.jsx';
+import '../../styles/patterns/resolved-rail.css';
+const { winnerLabel = '' } = Astro.props;
+---
+
+<ResolvedRail client:load winnerLabel={winnerLabel} />

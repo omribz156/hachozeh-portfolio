@@ -1,0 +1,141 @@
+.hz-viewer-positions {
+  margin-top: 16px;
+  border: 1px solid var(--hz-border-faint);
+  border-radius: 8px;
+  background: var(--hz-surface-soft);
+  overflow: hidden;
+}
+
+.hz-viewer-positions__header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px 18px;
+  border-bottom: 1px solid var(--hz-border-faint);
+}
+
+.hz-viewer-positions__header h2 {
+  margin: 0;
+  color: var(--hz-text-strong);
+  font-size: var(--hz-text-lg);
+}
+
+.hz-viewer-positions__header a {
+  color: var(--hz-brand);
+  font-size: var(--hz-text-sm);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.hz-viewer-positions__rows {
+  display: grid;
+}
+
+.hz-viewer-positions__row {
+  display: grid;
+  grid-template-columns: minmax(120px, 1.3fr) repeat(4, minmax(88px, 1fr)) auto;
+  gap: 12px;
+  align-items: center;
+  padding: 14px 18px;
+}
+
+.hz-viewer-positions__row + .hz-viewer-positions__row {
+  border-top: 1px solid var(--hz-border-faint);
+}
+
+.hz-viewer-positions__row span {
+  display: block;
+  color: var(--hz-text-faint);
+  font-size: var(--hz-text-xs);
+  font-weight: 800;
+}
+
+.hz-viewer-positions__row b,
+.hz-viewer-positions__side {
+  color: var(--hz-text-strong);
+  font-weight: 800;
+}
+
+.hz-viewer-positions__price {
+  margin-top: 4px;
+}
+
+.hz-viewer-positions__pnl--up {
+  color: var(--hz-action-buy);
+}
+
+.hz-viewer-positions__pnl--down {
+  color: var(--hz-action-sell-strong);
+}
+
+/* Sell CTA — soft golden, ties the action to the brand without shouting.
+   Gold wash + gold text + soft gold border; more padding gives it breathing
+   room. One rule covers desktop + mobile (the breakpoint only re-lays the grid). */
+.hz-viewer-positions__row button {
+  min-height: 44px; /* 44px thumb floor (was 38px) — sell is a real-money tap */
+  padding: 0 20px;
+  border-radius: 8px;
+  border: 1px solid rgb(var(--hz-brand-rgb) / 0.4);
+  background: var(--hz-brand-soft);
+  color: var(--hz-brand);
+  font-weight: 800;
+  cursor: pointer;
+  transition: background var(--hz-motion), border-color var(--hz-motion);
+}
+
+@media (hover: hover) {
+  .hz-viewer-positions__row button:hover {
+    background: rgb(var(--hz-brand-rgb) / 0.2);
+    border-color: rgb(var(--hz-brand-rgb) / 0.6);
+  }
+}
+
+/* ── mobile: collapse to a peek card-row (matches portfolio/profile
+   @767 pattern — one identity column + one value column, everything
+   else drops off since the user is already on market-detail; tap the
+   sell button for the rest). Breakpoint + shape mirror
+   pages/portfolio.css .pf-position-row and profile-portfolio-tables.css. */
+@media (max-width: 767px) {
+  .hz-viewer-positions__row {
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "side value" "sell sell";
+    row-gap: 10px;
+    column-gap: 0.8rem;
+    padding-block: 0.7rem 0.8rem;
+    padding-inline: 14px;
+  }
+
+  .hz-viewer-positions__row > div:first-child {
+    grid-area: side;
+    min-width: 0;
+  }
+
+  /* כמות + עלות ממוצעת drop off on mobile — same "one diagnostic
+     number, tap through for the rest" call as the portfolio table. */
+  .hz-viewer-positions__row > div:nth-child(2),
+  .hz-viewer-positions__row > div:nth-child(3) {
+    display: none;
+  }
+
+  /* תשואה (pnl) becomes the mobile value column — it's the number
+     that matters at a glance; שווי is still reachable via the sell
+     sheet / portfolio. */
+  .hz-viewer-positions__row > div:nth-child(4) {
+    display: none;
+  }
+
+  .hz-viewer-positions__row > div:nth-child(5) {
+    grid-area: value;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    text-align: end;
+  }
+
+  .hz-viewer-positions__row button {
+    grid-area: sell;
+    width: 100%;
+  }
+}

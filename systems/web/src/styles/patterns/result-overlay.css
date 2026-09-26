@@ -1,0 +1,198 @@
+/* ───────────────────────────────────────────────────────────────
+   result-overlay.css — market resolution result overlay (Milestone 2)
+   The payoff moment: opened from a resolution notification. Win = quietly
+   celebratory, loss = calm + honest. Carries the track-record DELTA so the
+   resolution reads as progress, not just an outcome. Token-driven, RTL.
+   Layer: hz.patterns
+   ─────────────────────────────────────────────────────────────── */
+@layer hz.patterns {
+
+.hz-result-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 96;
+  display: none;
+  /* Dim matches the auth-overlay scrim exactly (auth-overlays.css
+     .navi-overlay-backdrop) — same radial gradient, same rgba stops — so the
+     win/loss reveal reads with the same depth of dim as login/signup. */
+  background: radial-gradient(circle at 50% 45%, rgba(7, 8, 12, 0.18), rgba(7, 8, 12, 0.42));
+}
+.hz-result-scrim.is-open { display: block; }
+
+.hz-result {
+  position: fixed;
+  z-index: 97;
+  inset: 0;                 /* direction-agnostic centering */
+  margin: auto;
+  height: fit-content;
+  max-height: calc(100dvh - 2rem);
+  width: min(22rem, calc(100vw - 2rem));
+  display: none;
+  flex-direction: column;
+  gap: 1rem;
+  padding: 1.6rem 1.4rem 1.2rem;
+  text-align: center;
+  background: var(--hz-bg-raised);
+  border: 1px solid var(--hz-border-soft);
+  border-radius: var(--hz-radius-lg);
+  box-shadow: var(--hz-shadow-overlay);
+}
+.hz-result.is-open { display: flex; animation: hz-result-in 220ms ease; }
+@media (prefers-reduced-motion: reduce) { .hz-result.is-open { animation: none; } }
+@keyframes hz-result-in {
+  from { opacity: 0; transform: translateY(0.5rem) scale(0.97); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* win gets a warm top edge; loss stays neutral */
+.hz-result--win  { border-block-start: 2px solid var(--hz-action-buy); }
+.hz-result--loss { border-block-start: 2px solid var(--hz-border); }
+
+.hz-result__cap {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  color: var(--hz-text-muted);
+}
+.hz-result__headline {
+  font-family: var(--hz-font-mono);
+  font-size: 2rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+  line-height: 1.1;
+}
+.hz-result--win  .hz-result__headline { color: var(--hz-action-buy); }
+.hz-result--loss .hz-result__headline { font-family: inherit; font-size: 1.35rem; color: var(--hz-text); }
+.hz-result__market { font-size: 0.95rem; color: var(--hz-text-soft); line-height: 1.4; }
+
+/* Winning outcome — which side resolved. Hidden until hydrated from the claim so
+   it never flashes an empty row on a market with no resolvable outcome. */
+.hz-result__outcome {
+  display: none;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--hz-text);
+}
+.hz-result__outcome.is-shown { display: block; }
+
+/* the track-record delta — the M2 point. mono, tabular, calm. */
+.hz-result__delta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+  margin-block-start: 0.2rem;
+  padding: 0.55rem 0.75rem;
+  border-radius: var(--hz-radius-md);
+  background: var(--hz-surface-1);
+  border: 1px solid var(--hz-border-faint);
+  font-family: var(--hz-font-mono);
+  font-size: 0.8125rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--hz-text-soft);
+}
+.hz-result__delta b { color: var(--hz-text); font-weight: 700; }
+.hz-result__delta .up   { color: var(--hz-action-buy); }
+.hz-result__delta .down { color: var(--hz-action-sell); }
+.hz-result__delta-sep { color: var(--hz-text-faint); }
+
+.hz-result__actions { display: flex; gap: 0.6rem; margin-block-start: 0.3rem; }
+.hz-result__btn {
+  flex: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--hz-radius-pill);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  border: 1px solid var(--hz-border-soft);
+  background: transparent;
+  color: var(--hz-text);
+  transition: background var(--hz-motion), border-color var(--hz-motion);
+}
+@media (hover: hover) {
+  .hz-result__btn:hover { background: var(--hz-surface-hover); }
+}
+.hz-result__btn--primary {
+  border-color: transparent;
+  background: var(--hz-brand);
+  color: var(--hz-text-inverse);
+}
+@media (hover: hover) {
+  .hz-result__btn--primary:hover { background: var(--hz-brand-strong); }
+}
+
+/* Claimed: the payout landed → flip the gold action to a settled green check. */
+.hz-result__btn.is-claimed {
+  background: var(--hz-action-buy);
+  color: var(--hz-text-inverse);
+  border-color: transparent;
+  cursor: default;
+}
+@media (hover: hover) {
+  .hz-result__btn.is-claimed:hover {
+    background: var(--hz-action-buy);
+    color: var(--hz-text-inverse);
+    border-color: transparent;
+    cursor: default;
+  }
+}
+
+/* 44px thumb floor on the reveal's actions (was ~32px). */
+.hz-result__btn { min-height: 44px; }
+
+/* Win payoff: symbol + counting number share the headline font; the number is
+   tabular so the count-up doesn't jitter the layout width. */
+.hz-result__amount-sym { color: inherit; }
+.hz-result__amount-num { font-variant-numeric: tabular-nums; }
+
+/* Celebration canvas — same fixed full-viewport pattern as the streak/trade FX,
+   sitting just above the panel so confetti reads in front of it. */
+.hz-result-fx {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100dvh;
+  pointer-events: none;
+  z-index: 98;
+}
+
+/* Quiet share footer under the win actions: a text affordance, not a third
+   button — the reveal stays about the read, sharing is one tap away. */
+.hz-result__share {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  margin-block-start: 0.55rem;
+  padding: 0.35rem 0.5rem;
+  border: none;
+  background: transparent;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--hz-text-soft);
+  cursor: pointer;
+  border-radius: var(--hz-radius-pill);
+  transition: color var(--hz-motion);
+}
+.hz-result__share .material-symbols-outlined { font-size: 1rem; }
+.hz-result__share:hover { color: var(--hz-text); }
+
+/* On phones the panel centers against the full dvh, which includes the bottom
+   tab band — pull the centering box up above it (and the home indicator) so the
+   reveal sits in the visible field, not half-under the nav. */
+@media (max-width: 640px) {
+  .hz-result {
+    bottom: calc(var(--hz-shell-bottom-tabs-h, 5rem) + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+} /* @layer hz.patterns */

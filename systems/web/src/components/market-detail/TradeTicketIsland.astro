@@ -1,0 +1,64 @@
+---
+// Trade ticket island (Phase 3.3) — Preact wrapper.
+// The Preact component (TradeTicket.jsx) owns ALL markup, state, and behavior.
+// Props are identical to the old version; [marketKey].astro does NOT change.
+import TradeTicket from './TradeTicket.jsx';
+
+const {
+  mode = 'binary',
+  marketKey,
+  canonicalOutcomeId,
+  noOutcomeId = '',
+  title,
+  yesLabel,
+  noLabel,
+  yesPrice,
+  noPrice,
+  yesColor = null,
+  noColor = null,
+  yesColorOn = null,
+  noColorOn = null,
+  yesCrest = null,
+  noCrest = null,
+  marketCrest = null,
+  marketStatus,
+  outcomes = [],
+  current = {},
+} = Astro.props;
+
+const isMulti = mode === 'multi';
+const ticketOutcomes = isMulti
+  ? outcomes.map((outcome) => ({
+      id: outcome.id,
+      label: outcome.label || outcome.id,
+      price: Number(current?.[outcome.id] ?? 0),
+      color: outcome.colorPrimary ?? null,
+      crestPath: outcome.crestPath ?? null,
+    }))
+  : [];
+const selectedOutcome = ticketOutcomes[0] || null;
+const selectedPrice = selectedOutcome?.price ?? 0;
+---
+
+<TradeTicket
+  client:load
+  mode={mode}
+  marketKey={marketKey}
+  canonicalOutcomeId={canonicalOutcomeId || selectedOutcome?.id}
+  noOutcomeId={noOutcomeId}
+  title={title}
+  yesLabel={yesLabel}
+  noLabel={noLabel}
+  yesPrice={isMulti ? selectedPrice : yesPrice}
+  noPrice={isMulti ? 1 - selectedPrice : noPrice}
+  yesColor={yesColor}
+  noColor={noColor}
+  yesColorOn={yesColorOn}
+  noColorOn={noColorOn}
+  yesCrest={yesCrest}
+  noCrest={noCrest}
+  marketCrest={marketCrest}
+  marketStatus={marketStatus}
+  outcomes={ticketOutcomes}
+  selectedOutcome={selectedOutcome?.id}
+/>

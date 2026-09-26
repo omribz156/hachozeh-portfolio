@@ -1,0 +1,209 @@
+---
+// Trust section — rules + timeline + prohibitions, in collapsible folds.
+// Ported from trust-sections.js + trust-model.js.
+// Prefer Seer/backend split contract copy; keep legacy prose parsing as fallback
+// for older market snapshots that do not expose the split fields yet.
+// Static content; one small accordion island toggles the folds.
+import { safeHttpsUrl } from '../../lib/safe-url.js';
+
+const { snapshot } = Astro.props;
+const snap = snapshot || {};
+const contract = snap.contract || {};
+const trust = snap.trust || {};
+
+type TimelineEntry = { title?: string; time?: string };
+type EventUpdate = {
+  eventType?: string;
+  summary?: string;
+  sourceUrl?: string | null;
+  sourceLabel?: string | null;
+  observedAt?: string;
+  createdBy?: string;
+};
+
+const stripSourceUrls = (s: unknown) => String(s || '').replace(/https?:\/\/\S+/g, '');
+const normalize = (s: unknown) => stripSourceUrls(s).replace(/\s+/g, ' ').replace(/[.。]\s*$/, '').trim();
+const paragraphs = (s: unknown) => stripSourceUrls(s)
+  .split(/\n+/)
+  .map(normalize)
+  .filter(Boolean);
+const prose = String(contract.resolutionRule || trust.resolutionRules || '').replace(/מקור ההכרעה:\s*https?:\/\/\S+/g, '');
+const sentences = prose.split(/\.\s+/).map(normalize).filter(Boolean);
+const resolutionRule = normalize(contract.resolutionRule || trust.resolutionRules);
+const fallbackMeasurement = sentences[0] || 'השוק מוכרע לפי מקור ההכרעה הרשמי שהוגדר לשוק.';
+const delaySentence = sentences.find((s) => s.includes('מתעכב') || s.includes('חד-משמעי'));
+const sections = [
+  {
+    eyebrow: 'מה נמדד',
+    paragraphs: paragraphs(contract.resolutionRule || trust.resolutionRules).length
+      ? paragraphs(contract.resolutionRule || trust.resolutionRules)
+      : [resolutionRule || normalize(contract.measurement) || fallbackMeasurement],
+  },
+  {
+    eyebrow: 'אם יש עיכוב',
+    paragraphs: paragraphs(contract.delayPolicy).length
+      ? paragraphs(contract.delayPolicy)
+      : [delaySentence || 'אם הנתון לא חד-משמעי או שהפרסום מתעכב, השוק נשאר פתוח להכרעה עד לאימות רשמי.'],
+  },
+];
+
+const contractSource = contract.resolutionSource && typeof contract.resolutionSource === 'object' ? contract.resolutionSource : {};
+const sourceLabel = normalize(contractSource.label || trust.resolutionSource) || 'מקור הכרעה רשמי';
+const sourceUrl = safeHttpsUrl(trust.sourceUrl || trust.resolutionSourceUrl || contractSource.url || null);
+
+const timeline = (Array.isArray(snap.timeline) ? snap.timeline : []) as TimelineEntry[];
+const ev = (part: string) => timeline.find((e) => e?.title?.includes(part));
+const openLabel = ev('פתיחת')?.time || snap.updatedLabel || 'לא נקבע';
+const closeLabel = ev('סגירת')?.time || snap.closeLabel || 'לא נקבע';
+const payoutPolicyLabel =
+  (typeof contract.payoutPolicy === 'string' && contract.payoutPolicy.trim()) ||
+  (typeof snap.lifecycle?.payoutPolicy === 'string' && snap.lifecycle.payoutPolicy.trim()) ||
+  'אחרי הכרעה רשמית';
+// Once settlement completes, the payment step shows the actual settlement time
+// (pre-formatted resolvedAtLabel) instead of the static payout-policy sentence.
+// (lifecycle/oracle handoff). Falls back to policy text pre-settlement.
+const settled =
+  (snap.lifecycle?.settlementStatus || snap.result?.settlementStatus) === 'completed';
+const payoutLabel =
+  (settled && snap.result?.resolvedAtLabel) || payoutPolicyLabel;
+const stage = snap.marketStatus === 'resolved' ? 'paid' : snap.marketStatus === 'closed' ? 'closed' : 'open';
+const incidentUpdates = ((Array.isArray(snap.eventUpdates) ? snap.eventUpdates : []) as EventUpdate[])
+  .filter((update) => update?.eventType === 'operator_observed_outcome')
+  .slice(0, 2)
+  .map((update) => {
+    const safeSourceUrl = safeHttpsUrl(update.sourceUrl);
+    const observedAtLabel = (() => {
+      try {
+        return new Intl.DateTimeFormat('he-IL', {
+          day: 'numeric',
+          month: 'short',
+          hour: '2-digit',
+          minute: '2-digit',
+        }).format(new Date(update.observedAt));
+      } catch {
+        return update.observedAt;
+      }
+    })();
+
+    return {
+      ...update,
+      observedAtLabel,
+      safeSourceUrl,
+    };
+  });
+
+// folds: rules open by default, others closed
+const folds = [
+  { key: 'rules', title: 'כללי הכרעה', open: true },
+  { key: 'timeline', title: 'ציר זמן', open: false },
+  { key: 'prohibitions', title: 'מגבלות מסחר', open: false },
+];
+---
+
+<div class="hz-trust-shell">
+  {incidentUpdates.length > 0 && (
+    <section class="hz-trust-incident" aria-label="עדכון מפעיל">
+      <div class="hz-trust-incident__eyebrow">עדכון מפעיל</div>
+      {incidentUpdates.map((update) => (
+        <article class="hz-trust-incident__item">
+          <p>{update.summary}</p>
+          <div class="hz-trust-incident__meta">
+            <span>{update.createdBy === 'operator' ? 'נבדק ידנית' : update.createdBy}</span>
+            <span>{update.observedAtLabel}</span>
+            {update.safeSourceUrl && (
+              <a href={update.safeSourceUrl} target="_blank" rel="noreferrer noopener">
+                {update.sourceLabel || 'מקור'}
+              </a>
+            )}
+          </div>
+        </article>
+      ))}
+    </section>
+  )}
+  {folds.map((fold) => (
+    <section class={`hz-trust-fold${fold.open ? ' is-open' : ''}`} data-market-detail-trust-fold={fold.key}>
+      <button class="hz-trust-fold__toggle" type="button" data-market-detail-trust-toggle="" aria-expanded={fold.open ? 'true' : 'false'}>
+        <span class="hz-trust-fold__toggle-copy">
+          <span class="hz-trust-fold__title">{fold.title}</span>
+        </span>
+        <span class="hz-trust-fold__chevron" aria-hidden="true">⌃</span>
+      </button>
+      <div class="hz-trust-fold__panel" hidden={!fold.open}>
+        {fold.key === 'rules' && (
+          <>
+            <div class="hz-rule-grid">
+              <div class="hz-rule-copy">
+                <div class="hz-contract-list">
+                  {sections.map((s) => (
+                    <article class="hz-contract-card">
+                      <span>{s.eyebrow}</span>
+                      <div class="hz-contract-card__body">
+                        {s.paragraphs.map((paragraph) => <p>{paragraph}</p>)}
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </div>
+              <aside class="hz-rule-facts" aria-label="פרטי הכרעה">
+                <div class="hz-rule-fact">
+                  <span>מקור הכרעה</span>
+                  {sourceUrl ? (
+                    <a class="hz-rule-source" href={sourceUrl} rel="noreferrer noopener" target="_blank">
+                      <span>{sourceLabel}</span><span aria-hidden="true">↗</span>
+                    </a>
+                  ) : (
+                    <span class="hz-rule-source hz-rule-source--pending"><span>{sourceLabel}</span></span>
+                  )}
+                </div>
+              </aside>
+            </div>
+            <div class="hz-rule-actions">
+              <button class="hz-rule-action" type="button" data-market-dispute>דיווח על בעיה</button>
+              <a class="hz-rule-action hz-rule-action--learn" href="/help/markets/how-markets-resolve" target="_blank" rel="noopener">איך שווקים נפתרים</a>
+              <a class="hz-rule-action hz-rule-action--learn" href="/help/markets/how-prices-work" target="_blank" rel="noopener">איך נקבעים המחירים</a>
+              <a class="hz-rule-action" href="/help" target="_blank" rel="noopener">מרכז עזרה</a>
+            </div>
+          </>
+        )}
+        {fold.key === 'timeline' && (
+          <>
+            <div class="hz-timeline" data-stage={stage}>
+              <div class={`hz-timeline__step${stage === 'open' ? ' is-current' : ' is-done'}`}>
+                <b>פתיחה</b><span>{openLabel}</span>
+              </div>
+              <div class={`hz-timeline__step${stage === 'closed' ? ' is-current' : ''}`}>
+                <b>סגירה</b><span>{closeLabel}</span>
+              </div>
+              <div class={`hz-timeline__step${stage === 'paid' ? ' is-current' : ''}`}>
+                <b>תשלום</b><span>{payoutLabel}</span>
+              </div>
+            </div>
+          </>
+        )}
+        {fold.key === 'prohibitions' && (
+          <p class="hz-prohibition-copy">
+            מי שמחזיק מידע מהותי שאינו פומבי לגבי מקור ההכרעה או תוצאת השוק לא אמור לסחור בשוק הזה.
+            הסעיף הזה נשאר קצר וברור, ויוכל לקבל נוסח מדויק יותר לפי כללי השוק בהמשך.
+          </p>
+        )}
+      </div>
+    </section>
+  ))}
+</div>
+
+<script>
+  // @ts-nocheck — untyped inline script; TODO(typecheck-tighten): annotate then remove
+  // Accordion island — toggle trust folds open/closed. Document-delegated (bound once)
+  // so it survives ClientRouter soft-nav: a per-element binding would only wire the
+  // first-loaded market page and go dead on the re-entered one's new toggles.
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('[data-market-detail-trust-toggle]');
+    if (!btn) return;
+    const fold = btn.closest('[data-market-detail-trust-fold]');
+    if (!fold) return;
+    const open = fold.classList.toggle('is-open');
+    btn.setAttribute('aria-expanded', String(open));
+    const panel = fold.querySelector('.hz-trust-fold__panel');
+    if (panel) panel.hidden = !open;
+  });
+</script>

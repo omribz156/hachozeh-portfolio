@@ -1,0 +1,518 @@
+---
+// Hero carousel (desktop-only via CSS). Binary + multi slides. The chart is the
+// market-detail L1 renderer mounted compact (HzProbabilityChartCompact) — same
+// engine, step+rounded, autoscale, time-based X axis, trace+lead-dot reveal —
+// instead of a bespoke SSR SVG. SSR ships the per-slide series (with real `t`)
+// embedded; the chart draws client-side on first in-view and the reveal is its
+// entrance. Doctrine: guide/components/market-detail/probability-chart.md → L3.
+import { categoryLook, closeLabel, getProb, getSignal, sortByProb, volumeShort } from '../lib/feed-helpers.js';
+import { ASSET_VERSION } from '../lib/asset-version.js';
+import { BACKEND_INTERNAL_URL } from '../lib/backend.js';
+import '../styles/patterns/probability-chart.css';
+
+const { items = [] } = Astro.props;
+const HERO_SLIDE_LIMIT = 10;
+const HERO_CHART_SCRIPT_URLS = [
+  `/scripts/probability-chart-renderer.js?v=${ASSET_VERSION}`,
+  `/scripts/probability-chart-compact.js?v=${ASSET_VERSION}`,
+];
+
+const href = (m) => m?.href || ('/markets/' + encodeURIComponent(m?.marketKey || ''));
+const thumbOf = (m) => categoryLook(m?.category?.key);
+// Line colors as token names — the compact mount resolves them to computed
+// colors client-side. Order matches the .hz-hero__outcome-dot--N legend dots.
+const MULTI_TOKENS = ['--hz-brand', '--hz-info', '--hz-action-buy', '--hz-action-sell'];
+
+// Resolve an outcome → its sports team (for kit-color derivation), shared by the
+// matchup buttons and the chart palette. Match by exact outcomeKey first, then by
+// normalized label vs the team's short/display name — so colors derive even when a
+// market's outcome keys don't line up with the sportsTeams keys (the grid derives
+// straight from home/away, so it never missed; the hero used to key strictly).
+const normTeam = (s) => String(s || '').replace(/["'`׳״\s]/g, '').toLowerCase();
+function teamForOutcome(key, label, st) {
+  const teams = [st?.home, st?.away].filter(Boolean);
+  if (!teams.length) return null;
+  const byKey = teams.find((t) => t.outcomeKey === key);
+  if (byKey) return byKey;
+  const ol = normTeam(label);
+  return ol ? (teams.find((t) => normTeam(t.shortName) === ol || normTeam(t.displayName) === ol) || null) : null;
+}
+
+// Per-slide chart CONFIG: which outcomes to chart + tags + palette, but NO
+// points. Points come from /history (single source, same as market-detail) —
+// resolved server-side for slide 0 (loads with the page) and client-side in
+// idle turns for the rest. `outcomeId` is the feed outcome key; for an event
+// it's a child market key (see resolveSeries).
+function buildChartConfig(m, isMulti) {
+  const marketKey = m?.marketKey || '';
+  const range = 'all';
+  if (isMulti) {
+    const outcomes = sortByProb(m).slice(0, 4).map((o, i) => ({
+      outcomeId: o.outcomeKey, label: o.label || '', shortLabel: o.label || '',
+      leadDot: i === 0, // top outcome is the single focal target for the reveal
+      endDotVariant: i === 0 ? 'live' : undefined, // leading line carries the live pulse
+    }));
+    // Matchup with resolved teams → color each chart line with its kit color,
+    // draw → neutral. But reject a near-black kit color (e.g. #111827) that would
+    // vanish against the dark chart: if ANY side's color is unreadable, use the
+    // bright MULTI_TOKENS palette for all lines so both stay visible (mirrors the
+    // market-detail contrast guard). resolveColor() in the compact mount passes
+    // raw hex straight through, so a hex/token-mixed palette is fine.
+    const st = m?.sportsTeams;
+    if (st?.home && st?.away) {
+      const isDraw = (o) => /^(draw|תיקו)/i.test(String(o.label || '').trim());
+      const kitTooDark = (hex) => {
+        const s = String(hex || '').replace('#', '').trim();
+        if (s.length < 6) return true;
+        const r = parseInt(s.slice(0, 2), 16), g = parseInt(s.slice(2, 4), 16), b = parseInt(s.slice(4, 6), 16);
+        if ([r, g, b].some(Number.isNaN)) return true;
+        return Math.max(r, g, b) < 110;
+      };
+      const kits = outcomes.map((o) =>
+        isDraw(o) ? null : ((teamForOutcome(o.outcomeId, o.label, st) || {}).colorPrimary || null)
+      );
+      const kitUsable =
+        kits.some(Boolean) &&
+        outcomes.every((o, i) => isDraw(o) || (kits[i] && !kitTooDark(kits[i])));
+      const palette = outcomes.map((o, i) => {
+        if (isDraw(o)) return '--hz-text-muted';
+        return kitUsable ? kits[i] : MULTI_TOKENS[i % MULTI_TOKENS.length];
+      });
+      return { marketKey, range, outcomes, palette };
+    }
+    return { marketKey, range, outcomes, palette: MULTI_TOKENS };
+  }
+  const sorted = sortByProb(m);
+  const yes = sorted.find((o) => /^(yes|כן)$/i.test(String(o.label || '').trim())) || sorted[0] || { label: 'כן' };
+  const outcomes = [{
+    outcomeId: yes.outcomeKey, label: yes.label || 'כן', shortLabel: yes.label || 'כן',
+    endDotVariant: 'live', leadDot: true,
+  }];
+  // Binary: single canonical (yes) line, and the hover shows ONLY the yes value.
+  // No complementLabel → no "לא" row (matches market-detail, which drops the
+  // "no" side too).
+  return { marketKey, range, outcomes, palette: ['--hz-brand'] };
+}
+
+// Resolve a config's outcomes to L1 series via /history (single source). A single
+// market needs one fetch (all outcomes share the card market); an EVENT's outcomes
+// are separate child markets, so each missing one fetches its own /history and we
+// take its canonical "yes" line — mirroring how Polymarket charts an event (one
+// prices-history per child). `fetchHist(key) → { outcomeKey: points } | null`.
+async function resolveSeries(config, fetchHist) {
+  const card = await fetchHist(config.marketKey);
+  const out = [];
+  for (const o of config.outcomes) {
+    let points = card && card[o.outcomeId];
+    if (!points) {
+      const child = o.outcomeId === config.marketKey ? card : await fetchHist(o.outcomeId);
+      points = pickYes(child);
+    }
+    out.push({ ...o, points: points || [] });
+  }
+  return out;
+}
+function pickYes(byKey) {
+  if (!byKey) return [];
+  for (const k of Object.keys(byKey)) if (/-outcome-yes$|^yes$|^כן$/i.test(k)) return byKey[k];
+  for (const k of Object.keys(byKey)) return byKey[k];
+  return [];
+}
+// SSR history fetch → { outcomeKey: points }, or null on failure (client retries).
+async function ssrHist(marketKey, range) {
+  try {
+    const res = await fetch(
+      `${BACKEND_INTERNAL_URL}/api/markets/${encodeURIComponent(marketKey)}/history?range=${encodeURIComponent(range)}`,
+      { signal: AbortSignal.timeout(1500) }
+    );
+    if (!res.ok) return null;
+    const d = await res.json();
+    const byKey = {};
+    for (const s of (d.seriesByOutcome || [])) byKey[s.outcomeKey] = s.points || [];
+    return byKey;
+  } catch { return null; }
+}
+
+// build slide view-models
+const slides = items.slice(0, HERO_SLIDE_LIMIT).map((m) => {
+  // Three info-column treatments: matchup → Team·Draw·Team buttons (sports
+  // header); multi/event → ranked rows + Δ; binary → big % + Yes/No buttons.
+  // All three except binary draw N chart lines.
+  const isMatchup = m?.shape === 'matchup';
+  const isMulti = !isMatchup && (m?.shape === 'multi' || (m?.outcomes || []).length >= 3);
+  const signal = getSignal(m);
+  const base = { m, isMatchup, isMulti, signal, href: href(m), thumb: thumbOf(m), photo: m?.image?.photoSrc, img: m?.image?.src, eyebrow: m?.category?.label || '', title: m?.title || '', vol: volumeShort(m), close: closeLabel(m) };
+  const config = buildChartConfig(m, isMatchup || isMulti);
+  if (isMatchup) {
+    // Outcomes in MARKET order (home · [draw] · away), not prob-ranked — reads
+    // like a fixture, mirroring the reference sports header. Each team button
+    // FILLS with its real kit color (sportsTeams.colorPrimary, same source the
+    // grid MarketCard uses) + readable on-color text; draw stays neutral.
+    const st = m?.sportsTeams || {};
+    const matchup = (m?.outcomes || []).slice(0, 3).map((o) => {
+      const isDraw = /^(draw|תיקו)/i.test(String(o.label || '').trim());
+      // Shared resolver: key match → label fallback (see teamForOutcome).
+      const team = !isDraw ? teamForOutcome(o.outcomeKey, o.label, st) : null;
+      return {
+        label: o.label || '',
+        prob: o.displayProbability || `${Math.round(getProb(o))}%`,
+        isDraw,
+        color: team?.colorPrimary || null,
+        on: team?.colorOn || '#ffffff',
+      };
+    });
+    return { ...base, matchup, config };
+  }
+  if (isMulti) {
+    const outs = sortByProb(m).slice(0, 4).map((o, i) => ({
+      label: o.label || '', prob: o.displayProbability || `${Math.round(getProb(o))}%`, dotN: i + 1,
+    }));
+    return { ...base, outs, config };
+  }
+  const sorted = sortByProb(m);
+  const yes = sorted.find((o) => /^(yes|כן)$/i.test(String(o.label || '').trim())) || sorted[0] || { label: 'כן' };
+  const no = sorted.find((o) => o !== yes) || sorted[1] || { label: 'לא' };
+  return { ...base, yesLabel: yes.label || 'כן', noLabel: no.label || 'לא', yesP: getProb(yes), noP: getProb(no), config };
+});
+
+// Slide 0 loads WITH the page: resolve its series server-side and embed (instant
+// paint, no client fetch). Slides 1-9 resolve client-side after first paint.
+// Degrades gracefully — if the SSR fetch fails, the client resolves slide 0 on load too.
+if (slides[0]) {
+  const seed = await resolveSeries(slides[0].config, (k) => ssrHist(k, slides[0].config.range));
+  if (seed.some((s) => (s.points || []).length >= 2)) slides[0].seed = seed;
+}
+
+// Carousel nav: each slide shows its neighbours' shortened market names as
+// prev/next chips (Poly pattern). Reuses the existing data-hero-slide-target
+// click handler — clicking a chip jumps the carousel to that slide.
+const slideCount = slides.length;
+const shortenTitle = (t) => { const s = String(t || '').trim(); return s.length > 22 ? s.slice(0, 21) + '…' : s; };
+const navTitles = slides.map((s) => shortenTitle(s.title));
+---
+
+<div class="hz-hero-carousel" data-hero-carousel>
+  <div class="hz-hero-carousel__track" data-hero-carousel-track>
+    {slides.map((s, index) => (
+      <article class="hz-hero" data-hero-slide={index}>
+        <header class="hz-hero__head">
+          {s.photo ? (
+            <div class="hz-hero__thumb hz-hero__thumb--photo"><img src={s.photo} alt={s.title} width="150" height="150" decoding="async" loading={index === 0 ? 'eager' : 'lazy'} fetchpriority={index === 0 ? 'high' : 'auto'} /></div>
+          ) : s.img ? (
+            <div class={`hz-hero__thumb hz-hero__thumb--${s.thumb.tone}`}><img src={s.img} alt={s.title} width="150" height="150" decoding="async" loading={index === 0 ? 'eager' : 'lazy'} fetchpriority={index === 0 ? 'high' : 'auto'} /></div>
+          ) : (
+            <div class={`hz-hero__thumb hz-hero__thumb--${s.thumb.tone}`}>{s.thumb.emoji}</div>
+          )}
+          <div class="hz-hero__head-text">
+            <div class="hz-hero__top">
+              <span class="hz-hero__eyebrow">{s.eyebrow}</span>
+              {s.signal && <span class="hz-hero__signal">{s.signal.label}</span>}
+            </div>
+            <h1 class="hz-hero__title"><a href={s.href}>{s.title}</a></h1>
+          </div>
+        </header>
+
+        <div class="hz-hero__main">
+          {s.isMatchup ? (
+            <div class="hz-hero__outcomes">
+              <div class="hz-hero__matchup">
+                {s.matchup.map((o) => (
+                  <a class={`hz-hero__matchup-btn${o.isDraw ? ' hz-hero__matchup-btn--draw' : ''}`} href={s.href} style={o.color ? `--mc: ${o.color}; --mc-on: ${o.on};` : undefined}>
+                    <span class="hz-hero__matchup-name">{o.label}</span>
+                    <span class="hz-hero__matchup-prob">{o.prob}</span>
+                  </a>
+                ))}
+              </div>
+            </div>
+          ) : s.isMulti ? (
+            <div class="hz-hero__outcomes">
+              {s.outs.map((o) => (
+                <div class="hz-hero__outcome-row">
+                  <span class={`hz-hero__outcome-dot hz-hero__outcome-dot--${o.dotN}`}></span>
+                  <span class="hz-hero__outcome-name">{o.label}</span>
+                  <span class="hz-hero__outcome-prob">{o.prob}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div class="hz-hero__outcomes">
+              <div class="hz-hero__prob">
+                <span class="hz-hero__prob-value">{Math.round(s.yesP)}%</span>
+              </div>
+              <div class="hz-hero__trade">
+                <a class="hz-hero__trade-btn hz-hero__trade-btn--yes" href={s.href}>
+                  <span class="hz-hero__trade-btn-prob">{Math.round(s.yesP)}%</span>
+                  <span class="hz-hero__trade-btn-name">{s.yesLabel}</span>
+                </a>
+                <a class="hz-hero__trade-btn hz-hero__trade-btn--no" href={s.href}>
+                  <span class="hz-hero__trade-btn-prob">{Math.round(s.noP)}%</span>
+                  <span class="hz-hero__trade-btn-name">{s.noLabel}</span>
+                </a>
+              </div>
+            </div>
+          )}
+
+          {/* L1 chart host — empty in SSR. The mount resolves points from /history
+              (single source): slide 0's series is SSR-seeded for instant paint, the
+              rest fetch after first paint. viewBox is a pre-JS sizing placeholder;
+              the mount re-sets it to the measured pixel box (1:1, no text distortion). */}
+          <div class="hz-hero__chart" data-hero-chart data-chart={JSON.stringify({ ...s.config, seed: s.seed || null })}>
+            <svg class="chart-card__svg hz-hero__chart-svg" viewBox="0 0 600 200" aria-hidden="true"></svg>
+          </div>
+        </div>
+
+        <footer class="hz-hero__footer">
+          {s.vol && <span>נפח · <span class="mono">{s.vol}</span></span>}
+          {s.close && <span>{s.close}</span>}
+        </footer>
+      </article>
+    ))}
+  </div>
+  <div class="hz-hero-carousel__nav" data-nav-titles={JSON.stringify(navTitles)}>
+    <div class="hz-hero-carousel__dots" data-hero-carousel-dots>
+      {slides.map((_, index) => (
+        <button class={`hz-hero-carousel__dot${index === 0 ? ' is-active' : ''}`} data-hero-slide-target={index} type="button" aria-label={`שקופית ${index + 1}`}></button>
+      ))}
+    </div>
+    {slideCount > 1 && (
+      <div class="hz-hero-carousel__chips">
+        <button class="hz-hero__nav-chip" type="button" data-hero-nav="prev" data-hero-slide-target="0">
+          <span class="hz-hero__nav-chip-arrow" aria-hidden="true">‹</span>
+          <span class="hz-hero__nav-chip-name" data-nav-name></span>
+        </button>
+        <button class="hz-hero__nav-chip" type="button" data-hero-nav="next" data-hero-slide-target="0">
+          <span class="hz-hero__nav-chip-name" data-nav-name></span>
+          <span class="hz-hero__nav-chip-arrow" aria-hidden="true">›</span>
+        </button>
+      </div>
+    )}
+  </div>
+</div>
+
+<script>
+  // @ts-nocheck — untyped inline script; TODO(typecheck-tighten): annotate then remove
+  // Hero carousel island (vanilla). Auto-rotate + dots + scroll-sync, RTL-aware.
+  (function () {
+    // Re-init on EVERY page view, not just first load. The carousel DOM is re-rendered on
+    // each ClientRouter soft-nav and this hoisted script does NOT re-execute — so without an
+    // astro:page-load hook the re-entered carousel had blank nav labels (updateNav never
+    // re-ran) and a dead auto-rotate (timer bound to the old, detached track). The rotate
+    // timer + the live start() sit at this outer scope so a re-init clears the previous
+    // page's timer instead of orphaning it; the document-level listeners are bound once.
+    const ROTATE_MS = 7000;
+    let timer = null;
+    let startCurrent = null;
+    const stopTimer = () => { if (timer != null) { clearInterval(timer); timer = null; } };
+
+    function initCarousel() {
+      const carousel = document.querySelector('[data-hero-carousel]');
+      if (!carousel) return;
+      const track = carousel.querySelector('[data-hero-carousel-track]');
+      if (!track) return;
+      stopTimer(); // drop the previous carousel's rotate timer before wiring the new one
+      carousel.style.setProperty('--hz-hero-rotate', ROTATE_MS + 'ms'); // sync the dot-progress fill to the auto-rotate
+      const count = () => track.children.length;
+      // Carousel-level prev/next chips, inline with the dots — relabelled + retargeted
+      // to the active slide's neighbours so clicking jumps there (reuses the
+      // data-hero-slide-target click handler below).
+      const navEl = carousel.querySelector('.hz-hero-carousel__nav');
+      let navTitles = [];
+      try { navTitles = JSON.parse((navEl && navEl.getAttribute('data-nav-titles')) || '[]'); } catch (e) {}
+      const prevChip = navEl && navEl.querySelector('[data-hero-nav="prev"]');
+      const nextChip = navEl && navEl.querySelector('[data-hero-nav="next"]');
+      function updateNav(i) {
+        const n = count();
+        if (!prevChip || !nextChip || n < 2) return;
+        const pi = (i - 1 + n) % n, ni = (i + 1) % n;
+        prevChip.setAttribute('data-hero-slide-target', String(pi));
+        const pn = prevChip.querySelector('[data-nav-name]'); if (pn) pn.textContent = navTitles[pi] || '';
+        nextChip.setAttribute('data-hero-slide-target', String(ni));
+        const nn = nextChip.querySelector('[data-nav-name]'); if (nn) nn.textContent = navTitles[ni] || '';
+      }
+      const setActive = (i) => {
+        carousel.querySelectorAll('.hz-hero-carousel__dot').forEach((d, j) => d.classList.toggle('is-active', j === i));
+        updateNav(i);
+      };
+      const currentIndex = () => Math.round(Math.abs(track.scrollLeft) / (track.clientWidth || 1));
+      function scrollToIndex(i) {
+        if (!track.children[i]) return;
+        const w = track.clientWidth || 1;
+        const rtl = getComputedStyle(track).direction === 'rtl';
+        track.scrollTo({ left: (rtl ? -1 : 1) * i * w, behavior: 'smooth' });
+        setActive(i);
+      }
+      const tick = () => { if (count() > 1) scrollToIndex((currentIndex() + 1) % count()); };
+      const start = () => { stopTimer(); if (count() > 1 && !document.hidden) timer = setInterval(tick, ROTATE_MS); };
+      startCurrent = start;
+      carousel.addEventListener('click', (e) => {
+        const dot = e.target.closest('[data-hero-slide-target]');
+        if (!dot) return;
+        scrollToIndex(Number(dot.getAttribute('data-hero-slide-target') || 0));
+        start();
+      });
+      let deb;
+      track.addEventListener('scroll', () => { clearTimeout(deb); deb = setTimeout(() => setActive(currentIndex()), 80); });
+      carousel.addEventListener('mouseenter', stopTimer);
+      carousel.addEventListener('mouseleave', start);
+      updateNav(0);
+      start();
+    }
+
+    // Bound once (document survives soft-nav): re-init each view; pause/resume on tab visibility.
+    document.addEventListener('visibilitychange', () => { if (document.hidden) stopTimer(); else if (startCurrent) startCurrent(); });
+    document.addEventListener('astro:page-load', initCarousel);
+  })();
+</script>
+
+	<!-- L1 renderer + compact mount: desktop-only. Mobile hides the hero chart, so
+	     don't download the chart renderer there. -->
+	<script is:inline define:vars={{ HERO_CHART_SCRIPT_URLS }}>
+	  (function () {
+	    var chartScripts = HERO_CHART_SCRIPT_URLS;
+	    function loadScript(src) {
+	      return new Promise(function (resolve, reject) {
+	        var existing = document.querySelector('script[src="' + src.replace(/"/g, '\\"') + '"]');
+	        if (existing) {
+	          if (existing.dataset.hzLoaded === '1') resolve();
+	          else existing.addEventListener('load', resolve, { once: true });
+	          return;
+	        }
+	        var script = document.createElement('script');
+	        script.src = src;
+	        script.async = false;
+	        script.dataset.hzHeroChartScript = '1';
+	        script.addEventListener('load', function () { script.dataset.hzLoaded = '1'; resolve(); }, { once: true });
+	        script.addEventListener('error', reject, { once: true });
+	        document.head.appendChild(script);
+	      });
+	    }
+	    function loadHeroChartScripts() {
+	      if (!window.__hzHeroChartScriptsPromise) {
+	        window.__hzHeroChartScriptsPromise = chartScripts.reduce(function (chain, src) {
+	          return chain.then(function () { return loadScript(src); });
+	        }, Promise.resolve());
+	      }
+	      return window.__hzHeroChartScriptsPromise;
+	    }
+	    function initHeroCharts(attempt) {
+	      attempt = typeof attempt === 'number' ? attempt : 0;
+	      // Desktop-only hero (matches the ≤1024 hero hide). Check this BEFORE the poll so
+	      // mobile (hero hidden) doesn't spin the retry loop for a chart it never shows.
+	      if (!window.matchMedia || !window.matchMedia('(min-width: 1025px)').matches) return;
+	      // Under ClientRouter the renderer srcs are re-injected ASYNC on soft nav, so
+	      // astro:page-load can fire before they execute. Poll briefly instead of bailing
+	      // silently (blank hero chart until next nav). ~1.5s ceiling, then give up.
+	      if (!window.HzProbabilityChartCompact) {
+	        loadHeroChartScripts().then(function () { initHeroCharts(attempt + 1); }).catch(function () {
+	          if (attempt < 50) setTimeout(function () { initHeroCharts(attempt + 1); }, 30);
+	        });
+	        return;
+	      }
+
+      // Single source: chart points come from /history (same as market-detail). A
+      // single market needs one fetch; an EVENT's outcomes are separate child
+      // markets, so each missing one fetches its own /history and we take its
+      // canonical "yes" line (mirrors how Polymarket charts an event).
+      function fetchHist(marketKey, range) {
+        return fetch('/api/markets/' + encodeURIComponent(marketKey) + '/history?range=' + encodeURIComponent(range), { cache: 'no-store' })
+          .then(function (r) { return r.ok ? r.json() : null; })
+          .then(function (d) {
+            if (!d) return null;
+            var byKey = {};
+            (d.seriesByOutcome || []).forEach(function (s) { byKey[s.outcomeKey] = s.points || []; });
+            return byKey;
+          })
+          .catch(function () { return null; });
+      }
+      function pickYes(byKey) {
+        if (!byKey) return [];
+        var ks = Object.keys(byKey);
+        for (var i = 0; i < ks.length; i++) if (/-outcome-yes$|^yes$|^כן$/i.test(ks[i])) return byKey[ks[i]];
+        return ks.length ? byKey[ks[0]] : [];
+      }
+      async function resolve(cfg) {
+        // First paint of slide 0 uses the SSR-embedded seed (no fetch). On a
+        // live refresh (doorbell), fall through to a fresh /history fetch so the
+        // chart actually updates instead of redrawing the stale seed.
+        if (cfg.seed && !cfg._usedSeed) { cfg._usedSeed = true; return cfg.seed; }
+        var card = await fetchHist(cfg.marketKey, cfg.range);
+        var out = [];
+        for (var i = 0; i < cfg.outcomes.length; i++) {
+          var o = cfg.outcomes[i];
+          var pts = card && card[o.outcomeId];
+          if (!pts) {
+            var child = o.outcomeId === cfg.marketKey ? card : await fetchHist(o.outcomeId, cfg.range);
+            pts = pickYes(child);
+          }
+          var merged = {}; for (var key in o) merged[key] = o[key];
+          merged.points = pts || [];
+          out.push(merged);
+        }
+        return out;
+      }
+      function mountOne(host, allowReveal) {
+        // Skip hosts already mounted (idempotency on same-page double-fire)
+        if (host.dataset.heroChartInit === '1') return;
+        var svg = host.querySelector('.chart-card__svg');
+        var cfg;
+        try { cfg = JSON.parse(host.getAttribute('data-chart') || '{}'); } catch (e) { return; }
+        if (!svg || !cfg.outcomes || !cfg.outcomes.length) return;
+        host.dataset.heroChartInit = '1';
+        // Keep the handle on the host so the live-refresh doorbell can reach it
+        // by querying the DOM (no stale handle array to leak across soft navs).
+        host._hzChartHandle = window.HzProbabilityChartCompact.mount(svg, {
+          fetchSeries: function () { return resolve(cfg); },
+          palette: cfg.palette,
+          complementLabel: cfg.complementLabel,
+          allowReveal: allowReveal,
+        });
+      }
+
+      var hosts = Array.prototype.slice.call(document.querySelectorAll('[data-hero-chart]'));
+      if (!hosts.length) return;
+      mountOne(hosts[0], true); // slide 0: now (loads with the page; reveal entrance)
+      // Slides 1-9: after first paint, one per idle turn. Ready before most
+      // rotations, but not a first-paint tax.
+      function scheduleIdle(fn) {
+        if ('requestIdleCallback' in window) requestIdleCallback(fn, { timeout: 1500 });
+        else setTimeout(fn, 160);
+      }
+      function mountRest(index) {
+        if (index >= hosts.length) return;
+        scheduleIdle(function () {
+          mountOne(hosts[index], false);
+          mountRest(index + 1);
+        });
+      }
+      mountRest(1);
+    }
+
+    // Hard nav: scripts loaded in document order — run immediately.
+    // Soft nav: astro:page-load fires after rerun scripts completed.
+    initHeroCharts();
+    document.addEventListener('astro:page-load', initHeroCharts);
+
+    // Live hero: the discovery feed SSE already doorbells `hz:discovery-feed-snapshot`
+    // (FeedPage.astro / breaking-markets.astro). On it, refresh the mounted hero
+    // charts off /history — same doorbell→refresh pattern as the market-detail
+    // chart. Debounced (the feed can burst) and skipped while hidden/mobile.
+    // Wired once (window-guarded): the handler queries the live DOM each time,
+    // so it stays correct across soft navs without re-binding or stale handles.
+    if (!window.__hzHeroLiveWired) {
+      window.__hzHeroLiveWired = true;
+      var heroLiveTimer = null;
+      window.addEventListener('hz:discovery-feed-snapshot', function () {
+        clearTimeout(heroLiveTimer);
+        heroLiveTimer = setTimeout(function () {
+          if (document.hidden) return;
+          if (!window.matchMedia || !window.matchMedia('(min-width: 1025px)').matches) return;
+          var hosts = document.querySelectorAll('[data-hero-chart]');
+          for (var i = 0; i < hosts.length; i++) {
+            var h = hosts[i]._hzChartHandle;
+            if (h && typeof h.refresh === 'function') h.refresh();
+          }
+        }, 1500);
+      });
+    }
+  })();
+</script>

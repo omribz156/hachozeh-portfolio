@@ -1,0 +1,35 @@
+{
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "CodeQL",
+          "version": "0.0.0",
+          "rules": [
+            {
+              "id": "RB-1",
+              "properties": {
+                "security-severity": "6.0"
+              }
+            },
+            {
+              "id": "RB-2",
+              "properties": {
+                "security-severity": "9.2"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "RB-2",
+          "message": {
+            "text": "RuleId fallback severity fixture"
+          }
+        }
+      ]
+    }
+  ]
+}

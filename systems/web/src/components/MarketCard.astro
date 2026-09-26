@@ -1,0 +1,215 @@
+---
+// Faithful port of trending-stage.js card renderers (binary | live | multi |
+// matchup). Pure server-render card + one stretched link layer; buy buttons are
+// real buttons above the link so mobile can open quick-buy without invalid HTML.
+// Astro auto-escapes {expressions}, so no manual esc() needed.
+import { categoryLook, closeLabel, getProb, getSignal, sortByProb, volumeShort } from '../lib/feed-helpers.js';
+import { vshekelSymbolHtml } from '../lib/vshekel';
+
+// eager: mobile-audit 2.2 — the first row of the feed is the LCP region on
+// mobile, but every thumbnail defaulted to loading="lazy", so the browser
+// deprioritized the exact image that decides the page's LCP score. Callers
+// on the first paint (FeedPage) pass eager for the first few cards; anything
+// fetched after first paint (fragments/discovery-feed.astro pagination) omits
+// it and stays lazy, which is correct — it can't be the LCP element.
+const { market, eager = false } = Astro.props;
+const thumbLoading = eager ? 'eager' : 'lazy';
+const thumbFetchPriority = eager ? 'high' : undefined;
+
+const isDraw = (o) => o?.role === 'draw' || /^(draw|תיקו)$/i.test(String(o?.label || '').trim());
+function pickVariant(m) {
+  if (m?.shape) return m.shape;
+  if ((m?.outcomes || []).length >= 3) return 'multi';
+  return 'binary';
+}
+
+const look = categoryLook(market?.category?.key);
+const href = market?.href || ('/markets/' + encodeURIComponent(market?.marketKey || ''));
+const variant = pickVariant(market);
+const signal = getSignal(market);
+const title = market?.title || '';
+const thumbImg = market?.image?.src;
+const vol = volumeShort(market);
+const close = closeLabel(market);
+const priceTokenHtml = (value) =>
+  `<bdi class="hz-money" dir="ltr" aria-label="V₪ ${Math.round(Number(value) || 0)}">${vshekelSymbolHtml({ decorative: true })}<span>${Math.round(Number(value) || 0)}</span></bdi>`;
+
+// data hooks for the client filter/sort island (Phase 2.5)
+const dataCategory = market?.category?.key || '';
+const dataVolume = market?.volume?.value || '0';
+const dataNew = (Array.isArray(market?.signals) && market.signals.some((s) => s?.type === 'new')) ? '1' : '0';
+const dataHasClose = close ? '1' : '0';
+const dataCloseAt = market?.closeAt ? String(Date.parse(market.closeAt) || 0) : '0';
+const dataFeedKey = market?.feedKey || market?.marketKey || '';
+
+// ── per-variant derived values ──
+const sorted = sortByProb(market);
+let ring = null; // { pct, label, tone }
+let bin = null, live = null, multi = null, match = null, teamMatch = null;
+
+if (variant === 'binary') {
+  const yes = sorted.find((o) => /^(yes|כן)$/i.test(String(o.label || '').trim())) || sorted[0] || {};
+  const no = sorted.find((o) => o !== yes) || sorted[1] || { label: 'לא' };
+  const yesP = getProb(yes), noP = getProb(no);
+  ring = { pct: yesP, label: 'סיכוי', tone: null };
+  bin = { yesKey: yes.outcomeKey, noKey: no.outcomeKey, yesLabel: yes.label || 'כן', noLabel: no.label || 'לא', yesP, noP };
+} else if (variant === 'live') {
+  const up = sorted.find((o) => o.role === 'up' || /up|מעלה/i.test(o.label || '')) || sorted[0] || {};
+  const down = sorted.find((o) => o !== up) || sorted[1] || {};
+  const upP = getProb(up), downP = 100 - upP;
+  ring = { pct: upP, label: 'מעלה', tone: upP >= 50 ? null : 'down' };
+  live = { upKey: up.outcomeKey, downKey: down.outcomeKey, upLabel: up.label || 'מעלה', downLabel: down.label || 'מטה', upP, downP, sparkDown: upP < 50 };
+} else if (variant === 'multi') {
+  const dots = ['var(--hz-brand)', 'var(--hz-info)'];
+  multi = sorted.slice(0, 2).map((o, i) => ({
+    key: o.outcomeKey,
+    quickBuyMarketKey: String(o.outcomeKey || '').startsWith(`${market?.marketKey || ''}-outcome-`) ? market?.marketKey : o.outcomeKey,
+    quickBuyOutcomeId: String(o.outcomeKey || '').startsWith(`${market?.marketKey || ''}-outcome-`) ? o.outcomeKey : '',
+    label: o.label || 'תוצאה',
+    prob: o.displayProbability || `${Math.round(getProb(o))}%`,
+    dot: dots[i],
+  }));
+} else if (variant === 'matchup') {
+  const drawOutcome = (market.outcomes || []).find(isDraw);
+  const st = market.sportsTeams;
+  if (st && st.home && st.away) {
+    // Resolved team matchup → jersey card (rows + team-tinted buttons).
+    const probOf = (key) => getProb((market.outcomes || []).find((o) => o.outcomeKey === key) || {});
+    teamMatch = {
+      home: { key: st.home.outcomeKey, name: st.home.displayName, short: st.home.shortName, crest: st.home.crestPath, color: st.home.colorPrimary, prob: probOf(st.home.outcomeKey) },
+      away: { key: st.away.outcomeKey, name: st.away.displayName, short: st.away.shortName, crest: st.away.crestPath, color: st.away.colorPrimary, prob: probOf(st.away.outcomeKey) },
+      draw: drawOutcome ? { key: drawOutcome.outcomeKey, prob: getProb(drawOutcome) } : null,
+    };
+  } else {
+    // Unresolved (one/both sides unseeded) → today's gold/blue default card.
+    const sides = (market.outcomes || []).filter((o) => o !== drawOutcome);
+    if (sides.length < 2) {
+      const dots = ['var(--hz-brand)', 'var(--hz-info)'];
+      multi = sortByProb(market).slice(0, 2).map((o, i) => {
+        const isLocalOutcome = String(o.outcomeKey || '').startsWith(`${market?.marketKey || ''}-outcome-`);
+        return {
+          key: o.outcomeKey,
+          quickBuyMarketKey: isLocalOutcome ? market?.marketKey : o.outcomeKey,
+          quickBuyOutcomeId: isLocalOutcome ? o.outcomeKey : '',
+          label: o.label || 'תוצאה',
+          prob: o.displayProbability || `${Math.round(getProb(o))}%`,
+          dot: dots[i],
+        };
+      });
+    } else {
+      const [a, b] = sides;
+      const aP = getProb(a), bP = getProb(b), drawP = drawOutcome ? getProb(drawOutcome) : 0;
+      const leaderIsA = aP >= bP;
+      ring = { pct: leaderIsA ? aP : bP, label: (leaderIsA ? a.label : b.label) || '', tone: leaderIsA ? null : 'info' };
+      match = {
+        aKey: a.outcomeKey,
+        bKey: b.outcomeKey,
+        aLabel: a.label || '',
+        bLabel: b.label || '',
+        aP,
+        bP,
+        draw: drawOutcome ? { key: drawOutcome.outcomeKey, p: drawP } : null,
+      };
+    }
+  }
+}
+const ringClass = ring && ring.tone ? ` hz-chance-ring--${ring.tone}` : '';
+---
+
+<article class={`hz-card${teamMatch ? ' hz-card--teammatch' : ''}`} data-market-key={market?.marketKey || ''} data-feed-key={dataFeedKey} data-market-href={href} data-category={dataCategory} data-volume={dataVolume} data-new={dataNew} data-has-close={dataHasClose} data-close-at={dataCloseAt}>
+  <a class="hz-card__link" href={href} aria-label={title}></a>
+  {!teamMatch && (
+  <div class="hz-card__head">
+    {thumbImg
+      ? <div class={`hz-card__thumb hz-card__thumb--${look.tone}`}><img src={thumbImg} alt={market?.image?.alt || title} width="42" height="42" loading={thumbLoading} fetchpriority={thumbFetchPriority} decoding="async" /></div>
+      : <div class={`hz-card__thumb hz-card__thumb--${look.tone}`}>{look.emoji}</div>
+    }
+    <div class="hz-card__title" title={title}>{title}</div>
+    {ring && (
+      <div class={`hz-chance-ring${ringClass}`} style={`--pct: ${ring.pct}%;`}>
+        <div class="hz-chance-ring__inner">
+          <div class="hz-chance-ring__value" data-card-ring-value>{Math.round(ring.pct)}%</div>
+          <div class="hz-chance-ring__label">{ring.label}</div>
+        </div>
+      </div>
+    )}
+  </div>
+  )}
+
+  <div class="hz-card__body">
+    {teamMatch && (
+      <>
+        <div class="hz-tm__rows">
+          <div class="hz-tm__row">
+            <span class="hz-tm__crest"><img src={teamMatch.home.crest} alt={teamMatch.home.name} width="32" height="32" loading={thumbLoading} fetchpriority={thumbFetchPriority} decoding="async" /></span>
+            <span class="hz-tm__name">{teamMatch.home.name}</span>
+          <span class="hz-tm__prob" data-card-outcome-prob={teamMatch.home.key}>{Math.round(teamMatch.home.prob)}%</span>
+          </div>
+          <div class="hz-tm__row">
+            <span class="hz-tm__crest"><img src={teamMatch.away.crest} alt={teamMatch.away.name} width="32" height="32" loading={thumbLoading} fetchpriority={thumbFetchPriority} decoding="async" /></span>
+            <span class="hz-tm__name">{teamMatch.away.name}</span>
+          <span class="hz-tm__prob" data-card-outcome-prob={teamMatch.away.key}>{Math.round(teamMatch.away.prob)}%</span>
+          </div>
+        </div>
+        <div class="hz-tm__btns">
+          <button class="hz-tm__btn" style={`--team: ${teamMatch.home.color};`} type="button" data-quickbuy data-quickbuy-market-key={market?.marketKey || ''} data-quickbuy-outcome-id={teamMatch.home.key || ''} data-quickbuy-side="yes" data-quickbuy-title={title}>{teamMatch.home.short}</button>
+          {teamMatch.draw && <button class="hz-tm__btn hz-tm__btn--draw" type="button" data-quickbuy data-quickbuy-market-key={market?.marketKey || ''} data-quickbuy-outcome-id={teamMatch.draw.key || ''} data-quickbuy-side="yes" data-quickbuy-title={title}>תיקו</button>}
+          <button class="hz-tm__btn" style={`--team: ${teamMatch.away.color};`} type="button" data-quickbuy data-quickbuy-market-key={market?.marketKey || ''} data-quickbuy-outcome-id={teamMatch.away.key || ''} data-quickbuy-side="yes" data-quickbuy-title={title}>{teamMatch.away.short}</button>
+        </div>
+      </>
+    )}
+    {bin && (
+      <div class="hz-yn">
+        <button class="hz-yn__btn hz-yn__btn--yes" type="button" data-quickbuy data-quickbuy-market-key={market?.marketKey || ''} data-quickbuy-outcome-id={bin.yesKey || ''} data-quickbuy-side="yes" data-quickbuy-title={title}>{bin.yesLabel} · <span dir="ltr" data-card-outcome-price={bin.yesKey} set:html={priceTokenHtml(bin.yesP)}></span></button>
+        <button class="hz-yn__btn hz-yn__btn--no" type="button" data-quickbuy data-quickbuy-market-key={market?.marketKey || ''} data-quickbuy-outcome-id={bin.noKey || ''} data-quickbuy-side="no" data-quickbuy-title={title}>{bin.noLabel} · <span dir="ltr" data-card-outcome-price={bin.noKey} set:html={priceTokenHtml(bin.noP)}></span></button>
+      </div>
+    )}
+
+    {live && (
+      <>
+        <div class="hz-live-tape">
+          <span class={`hz-live-spark${live.sparkDown ? ' hz-live-spark--down' : ''}`}></span>
+        </div>
+        <div class="hz-yn">
+          <button class="hz-yn__btn hz-yn__btn--up" type="button" data-quickbuy data-quickbuy-market-key={market?.marketKey || ''} data-quickbuy-outcome-id={live.upKey || ''} data-quickbuy-side="yes" data-quickbuy-title={title}>{live.upLabel} · <span dir="ltr" data-card-outcome-price={live.upKey} set:html={priceTokenHtml(live.upP)}></span></button>
+          <button class="hz-yn__btn hz-yn__btn--down" type="button" data-quickbuy data-quickbuy-market-key={market?.marketKey || ''} data-quickbuy-outcome-id={live.downKey || ''} data-quickbuy-side="no" data-quickbuy-title={title}>{live.downLabel} · <span dir="ltr" data-card-outcome-price={live.downKey} set:html={priceTokenHtml(live.downP)}></span></button>
+        </div>
+      </>
+    )}
+
+    {multi && multi.map((row) => (
+      <div class="hz-out-row">
+        <span class="hz-out-row__name">{row.label}</span>
+        <span class="hz-out-row__prob" data-card-outcome-prob={row.key}>{row.prob}</span>
+        <span class="hz-yn-inline">
+          <button class="hz-yn__btn hz-yn__btn--yes" type="button" data-quickbuy data-quickbuy-market-key={row.quickBuyMarketKey || market?.marketKey || ''} data-quickbuy-outcome-id={row.quickBuyOutcomeId || ''} data-quickbuy-side="yes" data-quickbuy-title={`${title} · ${row.label}`}>כן</button>
+          <button class="hz-yn__btn hz-yn__btn--no" type="button" data-quickbuy data-quickbuy-market-key={row.quickBuyMarketKey || market?.marketKey || ''} data-quickbuy-outcome-id={row.quickBuyOutcomeId || ''} data-quickbuy-side="no" data-quickbuy-title={`${title} · ${row.label}`}>לא</button>
+        </span>
+      </div>
+    ))}
+
+    {match && (
+      <div class={`hz-yn${match.draw ? ' hz-yn--draw' : ''}`}>
+        <button class="hz-yn__btn hz-yn__btn--amber" type="button" data-quickbuy data-quickbuy-market-key={market?.marketKey || ''} data-quickbuy-outcome-id={match.aKey || ''} data-quickbuy-side="yes" data-quickbuy-title={title}>{match.aLabel} · <span dir="ltr" set:html={priceTokenHtml(match.aP)}></span></button>
+        {match.draw && <button class="hz-yn__btn hz-yn__btn--draw" type="button" data-quickbuy data-quickbuy-market-key={market?.marketKey || ''} data-quickbuy-outcome-id={match.draw.key || ''} data-quickbuy-side="yes" data-quickbuy-title={title}>תיקו · <span dir="ltr" set:html={priceTokenHtml(match.draw.p)}></span></button>}
+        <button class="hz-yn__btn hz-yn__btn--info" type="button" data-quickbuy data-quickbuy-market-key={market?.marketKey || ''} data-quickbuy-outcome-id={match.bKey || ''} data-quickbuy-side="yes" data-quickbuy-title={title}>{match.bLabel} · <span dir="ltr" set:html={priceTokenHtml(match.bP)}></span></button>
+      </div>
+    )}
+  </div>
+
+  <div class="hz-card__foot">
+    <div class="hz-card__meta">
+      {signal && (
+        <>
+          <span class={`hz-signal hz-signal--${signal.tone}`}><span class="hz-signal__dot"></span>{signal.label}</span>
+          {(vol || close) && <span class="sep">·</span>}
+        </>
+      )}
+      <b data-card-volume>{vol}</b>
+      {close && (<>{vol && <span class="sep">·</span>}<span>{close}</span></>)}
+    </div>
+    <button class="hz-card__bookmark" aria-label="שמור" title="שמור" type="button">
+      <span class="hz-ico"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 2v12l4-3 4 3V2z"/></svg></span>
+    </button>
+  </div>
+</article>

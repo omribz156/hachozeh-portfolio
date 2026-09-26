@@ -1,0 +1,133 @@
+---
+// Chart island (Phase 3.2). Reuses the battle-tested, self-contained chart
+// modules (HzProbabilityChartRenderer L1 + HzMarketDetailChart L2) verbatim as
+// vanilla scripts — the doctrine's ideal case. The wrapper owns range tabs,
+// polling, persistence; we just feed it a fetchHistory seam + palette + meta.
+import { ASSET_VERSION } from '../../lib/asset-version.js';
+import { resolveSeedRange, fetchChartSeed } from '../../lib/chart-seed.js';
+import { serializeJsonForHtmlScript } from '../../lib/json-script.js';
+const { marketKey, seed = null, canonicalOutcomeId, namedOpponents, outcomeColors = {}, marketStatus, isResolved, winnerOutcomeId, volumeLabel, closeLabel, openAt } = Astro.props;
+
+// SSR-seed the chart's first paint so the island renders instantly instead of
+// fetching after mount (4.1 baseline: the post-mount history fetch was 337ms
+// starting at ~400ms). Preferred path: the parent page hoists this fetch into
+// its own parallel wave and passes it as `seed` — see markets/[marketKey].astro.
+// Fallback (other call sites, or if the parent didn't seed): fetch it here.
+// Either way the range matches the client's initial range (resolveSeedRange);
+// failures degrade to the post-mount client fetch and never block the page.
+const chartSeed = seed
+  ?? await fetchChartSeed(marketKey, resolveSeedRange(Astro.url.searchParams.get('range')));
+---
+
+<div
+  class="market-detail-stage-chart"
+  data-md-chart
+  data-market-key={marketKey}
+  data-canonical={canonicalOutcomeId || ''}
+  data-named-opponents={namedOpponents ? '1' : ''}
+  data-outcome-colors={JSON.stringify(outcomeColors || {})}
+  data-resolved={isResolved ? '1' : ''}
+  data-winner={winnerOutcomeId || ''}
+  data-status-label={isResolved ? 'הוכרע' : ''}
+  data-volume={volumeLabel || ''}
+  data-close={closeLabel || ''}
+  data-open-at={openAt || ''}
+></div>
+
+{chartSeed && (
+  <script type="application/json" data-md-chart-seed set:html={serializeJsonForHtmlScript(chartSeed)} />
+)}
+
+<!-- L1 renderer, then L2 wrapper (classic scripts → window globals, in order) -->
+<!-- L1 renderer + L2 wrapper load once; they assign to window globals so they
+     don't need data-astro-rerun (window persists across soft nav). The init IIFE
+     below uses astro:page-load so it fires AFTER both srcs have (re-)executed. -->
+<script is:inline src={`/scripts/probability-chart-renderer.js?v=${ASSET_VERSION}`}></script>
+<script is:inline src={`/scripts/market-detail-chart.js?v=${ASSET_VERSION}`}></script>
+<script is:inline>
+  (function () {
+    function initChart(attempt) {
+      attempt = typeof attempt === 'number' ? attempt : 0;
+      var host = document.querySelector('[data-md-chart]');
+      if (!host) return;
+      // Idempotency guard: don't double-mount the same host on the same page
+      if (host.dataset.chartInit === '1') return;
+      // Under ClientRouter the renderer srcs above are re-injected ASYNC on soft nav,
+      // so astro:page-load can fire before they finish executing. Poll briefly for the
+      // global instead of bailing silently (which would leave the chart BLANK until the
+      // next navigation — no error, just gone). ~1.5s ceiling, then give up.
+      if (!window.HzMarketDetailChart) {
+        if (attempt < 50) setTimeout(function () { initChart(attempt + 1); }, 30);
+        return;
+      }
+      host.dataset.chartInit = '1';
+
+      var marketKey = host.dataset.marketKey;
+      var canonical = host.dataset.canonical || null;
+      var palette = [1, 2, 3, 4].map(function (i) {
+        return getComputedStyle(document.documentElement).getPropertyValue('--chart-line-' + i).trim();
+      });
+
+      // The backend already returns `seriesByOutcome` in the exact shape the
+      // chart wants: [{ outcomeId, label, points: [{t, value}] }] with value in
+      // 0–1 and t in seconds. Pass it through (same as the legacy adapter) — no
+      // re-deriving from `points`, no scaling.
+      async function fetchHistory(mk, range) {
+        try {
+          var r = await fetch('/api/markets/' + encodeURIComponent(mk) + '/history?range=' + encodeURIComponent(range), { credentials: 'include', cache: 'no-store' });
+          if (!r.ok) return { seriesByOutcome: [] };
+          var d = await r.json();
+          return { seriesByOutcome: Array.isArray(d.seriesByOutcome) ? d.seriesByOutcome : [] };
+        } catch (_e) {
+          return { seriesByOutcome: [] };
+        }
+      }
+
+      // SSR seed (optional) — first paint without a fetch; see frontmatter.
+      var initialData = null;
+      var seedEl = document.querySelector('[data-md-chart-seed]');
+      if (seedEl) {
+        try { initialData = JSON.parse(seedEl.textContent); } catch (_e) { /* degrade to fetch */ }
+      }
+
+      var chartHandle = window.HzMarketDetailChart.mount(host, {
+        marketKey: marketKey,
+        palette: palette,
+        fetchHistory: fetchHistory,
+        initialData: initialData,
+        marketMeta: {
+          volume: host.dataset.volume || null,
+          closeDate: host.dataset.close || null,
+          statusLabel: host.dataset.statusLabel || null,
+          openedAtMs: host.dataset.openAt ? Date.parse(host.dataset.openAt) : null,
+          canonicalOutcomeId: canonical,
+          // Resolved-chart treatment: drives ✓/✗ winner-loser end-dots and the
+          // resolved status pill, and suppresses the NEW pill. (chief-of-staff
+          // port-regression handoff 2026-06-16)
+          isResolved: host.dataset.resolved === '1',
+          winnerOutcomeId: host.dataset.winner || null,
+          namedOpponents: host.dataset.namedOpponents === '1',
+          outcomeColors: (function () {
+            try { return JSON.parse(host.dataset.outcomeColors || '{}'); } catch (_e) { return {}; }
+          })(),
+        },
+      });
+
+      var refreshTimer = null;
+      window.addEventListener('hz:market-live-fetch', function (event) {
+        if (event.detail && event.detail.marketKey && event.detail.marketKey !== marketKey) return;
+        if (event.detail && event.detail.type !== 'market.snapshot') return;
+        window.clearTimeout(refreshTimer);
+        refreshTimer = window.setTimeout(function () {
+          chartHandle.refresh();
+        }, 120);
+      });
+    }
+
+    // Hard nav: scripts are loaded in document order, run immediately.
+    // Soft nav (ClientRouter): astro:page-load fires after all rerun scripts
+    // have executed — window.HzMarketDetailChart is guaranteed present then.
+    initChart();
+    document.addEventListener('astro:page-load', initChart);
+  })();
+</script>

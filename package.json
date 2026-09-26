@@ -1,0 +1,54 @@
+{
+  "name": "navi",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Whole-repo tooling entrypoint for Hachozeh/Navi.",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "workspaces": [
+    "systems/back",
+    "systems/cli",
+    "systems/design",
+    "systems/web",
+    "systems/oracle",
+    "systems/seer",
+    "workspace/browser-qa"
+  ],
+  "scripts": {
+    "pr:review-map": "node workspace/scripts/pr-review-map.mjs",
+    "pr:architecture-guard": "node workspace/scripts/pr-architecture-guard.mjs",
+    "hygiene:dead": "knip --config workspace/tools/hygiene/knip.json",
+    "hygiene:dupes": "jscpd --config workspace/tools/hygiene/jscpd.json systems workspace",
+    "hygiene:cycles": "madge systems/back/src systems/seer/src systems/oracle/src systems/web/src systems/web/public/scripts --circular --extensions ts,js,mjs",
+    "hygiene:deps": "depcruise --config workspace/tools/hygiene/dependency-cruiser.cjs systems/back/src systems/seer/src systems/oracle/src systems/web/src systems/web/public/scripts",
+    "hygiene:lint": "oxlint --config workspace/tools/hygiene/oxlint.json systems workspace",
+    "precommit": "oxlint --config workspace/tools/hygiene/oxlint.json systems workspace",
+    "security:audit:prod": "npm audit --omit=dev --audit-level=high",
+    "security:prod-smoke": "npm --prefix systems/back run security:prod-smoke --",
+    "deploy:preflight": "node workspace/scripts/deploy-preflight.mjs",
+    "deploy:preflight:live": "node workspace/scripts/deploy-preflight.mjs --live",
+    "lifecycle:prod-gate": "bash workspace/scripts/lifecycle-prod-gate.sh",
+    "lifecycle:ops:test": "bash workspace/scripts/test-lifecycle-ops-fixtures.sh",
+    "db:restore-drill": "workspace/scripts/restore-drill-postgres.sh",
+    "security:codeql:gate": "node workspace/scripts/check-codeql-sarif-gate.mjs",
+    "security:codeql:gate:test": "node --test workspace/scripts/check-codeql-sarif-gate.test.mjs",
+    "hygiene:deps:unused": "depcheck --config workspace/tools/hygiene/depcheck.json",
+    "hygiene:updates": "ncu",
+    "hygiene:report": "npm run hygiene:dead; npm run hygiene:dupes; npm run hygiene:cycles; npm run hygiene:deps; npm run hygiene:lint; npm run hygiene:deps:unused"
+  },
+  "overrides": {
+    "depcheck": {
+      "js-yaml": "^4.2.0"
+    }
+  },
+  "devDependencies": {
+    "depcheck": "^1.4.7",
+    "dependency-cruiser": "^17.4.3",
+    "jscpd": "^5.0.4",
+    "knip": "^6.16.1",
+    "madge": "^8.0.0",
+    "npm-check-updates": "^22.2.3",
+    "oxlint": "^1.69.0"
+  }
+}

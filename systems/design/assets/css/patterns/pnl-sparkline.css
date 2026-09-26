@@ -1,0 +1,83 @@
+/* ───── HzPnlSparklineRenderer (L1 renderer) ─────
+   Styles owned by the renderer. Consumer cards just give the SVG a
+   sensible width/height; the renderer mounts its own paths/lines/
+   circles into the SVG with these classes. Per chart doctrine the
+   palette comes from the `--chart-*` token family. */
+
+.hz-pnl-spark {
+  width: 100%;
+  height: 100%;
+  display: block;
+  /* Keep the scrub gesture from being hijacked by page scroll. */
+  touch-action: none;
+  cursor: crosshair;
+  /* Single color source for the whole chart — line, area fill, and cursor
+     dot all inherit via currentColor. Golden = brand identity: the portfolio
+     P&L curve is "ours", the way Poly leans on its brand purple. The hero
+     number still tints green/red by sign; only the curve carries identity. */
+  color: var(--hz-brand);
+}
+
+/* Smooth-curve line — solid color stroke, cubic-bezier interpolation
+   (per portfolio surface contract §2 PnL Card deviation, 2026-05-30).
+   Step interpolation is the doctrine default for time-series charts
+   (probability lines, breaking signals) — portfolio P&L deviates
+   because the underlying mark value is continuous between candle
+   samples; smoothing doesn't fake activity here. */
+.hz-pnl-spark__line {
+  stroke: currentColor;
+  stroke-width: 1.6;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+/* Entry pen-draw (set once on mount via [data-reveal] on the SVG): the line
+   traces itself here in CSS (stroke-dashoffset; pathLength=1 makes the tween
+   length-agnostic). The area fill is NOT wiped in CSS — the line draws by arc
+   length while a CSS clip wipe is linear in X, so on a smooth curve the fill
+   outran the stroke. The renderer instead clips the fill via rAF to the line's
+   drawn point (getPointAtLength) over the same 1100ms, so the fill edge tracks
+   the pen-tip exactly. Don't reintroduce a CSS clip-path here — it would
+   override the renderer's url(#…) clip. Renderer gates reveal off for
+   reduced-motion (no [data-reveal]); reduced-motion users get the static chart. */
+.hz-pnl-spark[data-reveal] .hz-pnl-spark__line {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: hz-pnl-spark-draw 1100ms linear forwards;
+}
+@keyframes hz-pnl-spark-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+/* Dashed hairline at y=0 when the series crosses zero. Visual
+   reference for gains vs losses; never the dominant line. */
+.hz-pnl-spark__zero-line {
+  stroke: var(--chart-grid);
+  stroke-width: 0.6;
+  stroke-dasharray: 2 2;
+}
+
+/* Crosshair line on hover — quiet, dashed. Hidden by default; the
+   renderer flips visibility via the `visibility` attribute.
+   Calibrated 2026-05-30: original (0.8 stroke, 2-2 dash) was too
+   faint to read against the card atmosphere at sparkline scale —
+   the eye lost the cursor mid-scrub. Slightly thicker stroke + a
+   longer dash pattern lands "deliberate guide" without going loud. */
+.hz-pnl-spark__crosshair {
+  stroke: var(--chart-crosshair);
+  stroke-width: 1.2;
+  stroke-dasharray: 3 3;
+  stroke-opacity: 0.9;
+  pointer-events: none;
+}
+
+/* Cursor dot snapped to the nearest data point on hover. Fills with
+   the chart line color so it reads as "on the line". Radius set on
+   the SVG element (renderer); ring widened here so the dot punches
+   out of the curve cleanly on the lower atmosphere. */
+.hz-pnl-spark__cursor-dot {
+  fill: currentColor;
+  stroke: var(--hz-surface-1);
+  stroke-width: 1.5;
+  pointer-events: none;
+}

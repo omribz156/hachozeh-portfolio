@@ -1,0 +1,22 @@
+@layer hz.tailwind, hz.tokens, hz.reset, hz.primitives, hz.compat;
+/* Layer order:
+ *   hz.tailwind  (compiled Tailwind output, lowest priority)
+ *   hz.tokens    (--hz-* CSS variables)
+ *   hz.reset     (browser physics, body/* defaults)
+ *   hz.primitives (small shared primitives)
+ *   hz.compat    (transitional aliases)
+ *
+ * patterns/ and pages/ CSS stay UN-LAYERED so their class selectors sit
+ * above the entire layered stack — they win by normal specificity over
+ * any layered rule. Promoting them into named layers is a separate task
+ * (see Option C in workspace/docs/engineering-decisions.md 2026-05-30
+ * Tailwind migration entry).
+ */
+
+@import url("https://fonts.googleapis.com/css2?family=Arimo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@500;600;700&display=swap") layer(hz.tokens);
+@import url("https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap") layer(hz.tokens);
+
+@import url("./base/tokens.css") layer(hz.tokens);
+@import url("./base/reset.css") layer(hz.reset);
+@import url("./base/primitives.css") layer(hz.primitives);
+@import url("./base/compat.css") layer(hz.compat);

@@ -1,0 +1,182 @@
+/*
+ * global.css — platform CSS spine for the Astro app.
+ * Ported from systems/front/assets/css/base.css.
+ *
+ * Layer order (lowest → highest priority among layered rules):
+ *   hz.tailwind < hz.tokens < hz.reset < hz.primitives < hz.compat
+ * Un-layered patterns/ + pages/ CSS (added later) sit above all layered rules.
+ *
+ * Note: @import statements must precede non-import rules, so the base layers
+ * are imported first, then Tailwind's @tailwind block expands into hz.tailwind.
+ * Google Fonts are loaded via <link> in the Layout head, not @import here.
+ */
+
+/* @layer order statement + @import MUST come first. CSS spec: @import is only
+   valid before any non-import/non-layer rule. Putting an @font-face or a plain
+   rule above these silently INVALIDATES every @import below → tokens/reset/
+   primitives/compat never load → the whole site renders unstyled (var(--hz-*)
+   all undefined). The font-face + icon-cap below therefore come AFTER the imports. */
+@layer hz.tailwind, hz.tokens, hz.reset, hz.primitives, hz.compat;
+
+@import './base/tokens.css' layer(hz.tokens);
+@import './base/reset.css' layer(hz.reset);
+@import './base/primitives.css' layer(hz.primitives);
+@import './base/compat.css' layer(hz.compat);
+
+/* ───── Metric-matched font fallbacks ─────
+   Unlayered (after the imports) so it sits above layered rules. At first paint
+   (before Google Fonts arrive) the stack falls through to 'Arimo-fallback' — Arial
+   with metric overrides tuned to match Arimo's rendered width — so the swap is
+   invisible. @font-face registers regardless of position; it just must be AFTER the
+   @imports (see the ordering note above).
+   Overrides from Arimo's font tables (ascent=1854, descent=434, lineGap=67,
+   unitsPerEm=2048) + size-adjust=110% empirically tuned on Hebrew header strings
+   to land within 0–2px of Arimo widths. Best single value across Hebrew+Latin. */
+@font-face {
+  font-family: 'Arimo-fallback';
+  src: local('Arial'), local('Helvetica Neue'), local('sans-serif');
+  ascent-override: 90.53%;
+  descent-override: 21.19%;
+  line-gap-override: 3.27%;
+  size-adjust: 110%;
+}
+
+/* ───── Digit-tuned fallback (money only) ─────
+   The 110% size-adjust above was tuned on Hebrew header strings and is ~9% too
+   wide for DIGITS specifically: measured in-browser (Playwright, tabular-nums,
+   weight 700), Arial's digit advance width already sits within ~0.1% of real
+   Arimo's — no widening needed. Ratio held constant (0.9091, i.e. 100/110)
+   across sizes 14–24px and across money strings ("1,234.56", "18,902.98",
+   plain digit runs). Confirmed visually: the wallet header amount was ~3.6px
+   (~6%) too wide on the fallback vs the loaded webfont, causing a width flash
+   on cold font load; this face removes that flash for money/digit content
+   without touching the Hebrew-tuned fallback everything else still uses.
+   Same ascent/descent/line-gap overrides (metrics come from the same Arimo
+   font tables — only the digit-specific width scale differs). */
+@font-face {
+  font-family: 'Arimo-fallback-digits';
+  src: local('Arial'), local('Helvetica Neue'), local('sans-serif');
+  ascent-override: 90.53%;
+  descent-override: 21.19%;
+  line-gap-override: 3.27%;
+  size-adjust: 100%;
+}
+
+/* Lock every Material Symbols icon to its glyph advance (1em). Until the icon font
+   loads (font-display:block period), each <span> renders its ligature NAME as wide
+   fallback text (e.g. "school", "notifications"), then collapses to the 1-glyph
+   width when the font lands — a width change that reflows the header sideways (the
+   guest "jump", and the bell before it). Capping width + clipping the overflow text
+   makes the box the same before and after the swap. `width`/`overflow` aren't set by
+   Google's Material Symbols CSS, so this is conflict-free; it supersedes the old
+   bell-only cap in site-shell.css. */
+.material-symbols-outlined {
+  display: inline-block;
+  width: 1em;
+  overflow: hidden;
+}
+
+/* ───── Screen-reader-only utility ─────
+   Visually hidden but exposed to assistive tech. Used for always-render sr-only
+   headings (keep the h1→h2→h3 hierarchy intact without a visible change) and other
+   AT-only text. Unlayered so it wins over layered utilities. */
+.sr-only {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ───── Keyboard focus ring ─────
+   :focus-visible only (so mouse/touch clicks stay clean). box-shadow as the ring
+   survives component `outline: none` rules, so this covers every interactive element
+   without touching each file. Components that set their own :focus box-shadow keep it. */
+:focus-visible {
+  outline: none;
+  box-shadow: var(--hz-focus-ring);
+}
+
+/* ───── Touch press feedback ─────
+   The platform had hover-only feedback (251 :hover rules vs 6 :active) — all
+   invisible to a thumb, so taps felt dead. This gives every interactive surface
+   an INSTANT press state on touch devices only (no lag, no 300ms — see
+   touch-action in reset.css). Same model as :focus-visible above: one global
+   unlayered rule, low-specificity element selectors, so any component :active
+   rule (patterns/ load later, also unlayered) overrides it cleanly — the 6
+   bespoke press states (trade launcher, binary pill, …) keep their own feel.
+   Scoped to (hover: none) so it never touches the desktop pointer experience. */
+@media (hover: none) and (pointer: coarse) {
+  a:active,
+  button:active,
+  summary:active,
+  label[for]:active,
+  [role="button"]:active {
+    opacity: 0.62;
+  }
+  /* A subtle press-in on the box-like controls (buttons, cards, chips) — the
+     same register as the trade launcher's scale(0.985). Inline text links get
+     the opacity dip only, no scale (scaling a run of text reads as a glitch). */
+  button:active,
+  [role="button"]:active,
+  .hz-card:active,
+  .hz-chip:active {
+    transform: scale(0.97);
+  }
+}
+
+/* ───── 44px touch-target floor ─────
+   Apple HIG / WCAG 2.5.5 minimum. Drop onto controls whose painted size is
+   smaller than a comfortable thumb (icon buttons, overlay close affordances,
+   dense pills). Expands the hit box without forcing the visual to grow — use on
+   inline-flex/grid elements so the min-size actually takes. */
+.hz-tap-min {
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* The shared overlay/panel affordances ship at 24–32px — fine for a mouse, under
+   the thumb floor on a phone. Floor them on touch only, so the desktop chrome
+   stays tidy. (Centralized here rather than editing each overlay's CSS + its
+   JS-rendered markup.) Native buttons vertically center their own text, so a bare
+   min-height keeps the glyph/label centered without a display change. */
+@media (hover: none) and (pointer: coarse) {
+  .navi-overlay-close,
+  .hz-share-modal__close,
+  .hz-notif__close,
+  .hz-notif__dismiss,
+  .hz-notif__settings,
+  .hz-dispute__btn,
+  .cab-modal-x {
+    min-width: 44px;
+    min-height: 44px;
+  }
+}
+
+/* ───── Skip-to-content link ───── */
+.skip-link {
+  position: absolute;
+  inset-inline-start: 0.5rem;
+  top: -3rem;
+  z-index: 1000;
+  padding: 0.5rem 0.9rem;
+  border-radius: var(--hz-radius-md);
+  background: var(--hz-brand);
+  color: #1a1206;
+  font-weight: 800;
+  text-decoration: none;
+  transition: top 160ms ease;
+}
+.skip-link:focus {
+  top: 0.5rem;
+}
+
+@layer hz.tailwind {
+  @tailwind base;
+  @tailwind components;
+  @tailwind utilities;
+}

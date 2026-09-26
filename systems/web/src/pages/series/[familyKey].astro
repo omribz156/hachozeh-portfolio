@@ -1,0 +1,327 @@
+---
+// Recurring-series hub (/series/{familyKey}) — an EVERGREEN page per recurring market
+// family (e.g. BoI rate decisions). It always resolves to the live instance + shows the
+// series history, so it can rank for the recurring query and be cited by AI assistants,
+// unlike the ephemeral dated instances that resolve within days.
+//
+// Eligibility: the family must be curated in lib/family-hubs.js (editorial metadata =
+// quality gate) AND the backend must return >= 2 published instances. Otherwise 404.
+import Layout from '../../layouts/Layout.astro';
+import { getFamilyHub, familyHubPath } from '../../lib/family-hubs.js';
+import { fetchMarketFamily } from '../../lib/market-family.js';
+import { getCategoryHub, categoryHubPath } from '../../lib/category-hubs.js';
+import {
+  buildBreadcrumbJsonLd,
+  buildCanonicalUrl,
+  buildMarketItemListJsonLd,
+  buildWebPageJsonLd,
+} from '../../lib/seo.js';
+
+const { familyKey = '' } = Astro.params;
+const hub = getFamilyHub(familyKey);
+
+let items = [];
+let loadError = false;
+if (hub) {
+  try {
+    const family = await fetchMarketFamily(familyKey);
+    items = Array.isArray(family?.items) ? family.items : [];
+  } catch (error) {
+    console.error('[series] fetchMarketFamily failed', familyKey, error);
+    loadError = true;
+  }
+}
+
+// A "series" needs the family curated AND at least two published instances. Anything
+// else is a 404 — never a thin auto-generated page.
+const eligible = Boolean(hub) && !loadError && items.length >= 2;
+if (!eligible) {
+  Astro.response.status = 404;
+}
+
+const category = hub ? getCategoryHub(hub.categoryKey) : null;
+const current = items.find((item) => item.temporalStatus === 'current') || null;
+const upcoming = items.filter((item) => item.temporalStatus === 'future');
+const past = items.filter((item) => item.temporalStatus === 'past');
+
+const canonicalPath = hub ? familyHubPath(hub.familyKey) : Astro.url.pathname;
+const shareImage = category ? `/share/pages/topics/${hub.categoryKey}.png` : '/og-image.jpg';
+
+const structuredData = eligible
+  ? [
+      buildWebPageJsonLd({
+        title: `${hub.title} · החוזה`,
+        description: hub.description,
+        canonicalUrl: buildCanonicalUrl(canonicalPath),
+        imageUrl: buildCanonicalUrl(shareImage),
+        type: 'CollectionPage',
+      }),
+      buildBreadcrumbJsonLd({
+        items: [
+          { name: 'החוזה', href: '/' },
+          ...(category ? [{ name: category.label, href: categoryHubPath(hub.categoryKey) }] : []),
+          { name: hub.title, href: canonicalPath },
+        ],
+      }),
+      buildMarketItemListJsonLd({
+        name: `${hub.title} — כל המועדים`,
+        items: items.map((item) => ({
+          marketKey: item.id,
+          title: `${hub.title} · ${item.label}`,
+          href: item.href,
+        })),
+      }),
+    ]
+  : undefined;
+---
+
+{eligible ? (
+  <Layout
+    title={`${hub.title} — כל המועדים`}
+    description={hub.description}
+    activePage=""
+    canonicalPath={canonicalPath}
+    image={shareImage}
+    twitterCard="summary_large_image"
+    structuredData={structuredData}
+  >
+    <main class="hz-series">
+      <nav class="hz-series__crumb" aria-label="ניווט">
+        <a href="/">החוזה</a>
+        <span aria-hidden="true">/</span>
+        {category && (
+          <>
+            <a href={categoryHubPath(hub.categoryKey)}>{category.label}</a>
+            <span aria-hidden="true">/</span>
+          </>
+        )}
+        <span aria-current="page">{hub.title}</span>
+      </nav>
+
+      <header class="hz-series__head">
+        <div class="hz-series__cadence">{hub.cadenceLabel}</div>
+        <h1 class="hz-series__title">{hub.title}</h1>
+        <p class="hz-series__intro">{hub.intro}</p>
+      </header>
+
+      {current && (
+        <a class="hz-series__current" href={current.href}>
+          <span class="hz-series__current-tag">השוק הפעיל עכשיו</span>
+          <span class="hz-series__current-label">{current.label}</span>
+          <span class="hz-series__current-cta">לצפייה בשוק ←</span>
+        </a>
+      )}
+
+      {upcoming.length > 0 && (
+        <section class="hz-series__section" aria-label="מועדים קרובים">
+          <h2 class="hz-series__h2">מועדים קרובים</h2>
+          <ul class="hz-series__list">
+            {upcoming.map((item) => (
+              <li>
+                <a class="hz-series__row" href={item.href}>
+                  <span class="hz-series__row-label">{item.label}</span>
+                  <span class="hz-series__badge hz-series__badge--soon">בקרוב</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {past.length > 0 && (
+        <section class="hz-series__section" aria-label="היסטוריה">
+          <h2 class="hz-series__h2">היסטוריה</h2>
+          <ul class="hz-series__list">
+            {past.map((item) => (
+              <li>
+                <a class="hz-series__row" href={item.href}>
+                  <span class="hz-series__row-label">{item.label}</span>
+                  <span class="hz-series__badge hz-series__badge--past">הוכרע</span>
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      <section class="hz-series__resolve">
+        <a class="hz-series__resolve-link" href="/help/markets/how-markets-resolve">
+          איך שווקים מוכרעים? →
+        </a>
+      </section>
+    </main>
+  </Layout>
+) : (
+  <Layout title="סדרה לא נמצאה" robots="noindex, follow" activePage="">
+    <main class="hz-series hz-series--empty">
+      <h1 class="hz-series__title">הסדרה לא נמצאה</h1>
+      <p class="hz-series__intro">
+        לא מצאנו סדרת שווקים בכתובת הזו. ייתכן שהיא עדיין לא נפתחה או שהכתובת השתנתה.
+      </p>
+      <a class="hz-series__resolve-link" href="/">חזרה לעמוד הראשי ←</a>
+    </main>
+  </Layout>
+)}
+
+<style>
+  .hz-series {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 2rem var(--hz-content-pad, 1.5rem) 4rem;
+  }
+  .hz-series__crumb {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.8125rem;
+    color: var(--hz-text-faint);
+    margin-bottom: 1.75rem;
+  }
+  .hz-series__crumb a {
+    color: var(--hz-text-soft);
+    text-decoration: none;
+  }
+  .hz-series__crumb a:hover {
+    color: var(--hz-text);
+  }
+  .hz-series__crumb [aria-current='page'] {
+    color: var(--hz-text);
+  }
+  .hz-series__head {
+    margin-bottom: 2rem;
+  }
+  .hz-series__cadence {
+    display: inline-block;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    color: var(--hz-brand, #7dd3a8);
+    background: var(--hz-bg-raised, rgba(255, 255, 255, 0.04));
+    border: 1px solid var(--hz-border-faint, rgba(255, 255, 255, 0.08));
+    border-radius: 999px;
+    padding: 0.25rem 0.7rem;
+    margin-bottom: 0.9rem;
+  }
+  .hz-series__title {
+    font-size: clamp(1.6rem, 4vw, 2.2rem);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+    color: var(--hz-text, #f4f1ea);
+    margin: 0 0 0.9rem;
+  }
+  .hz-series__intro {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: var(--hz-text-soft, #cfcabb);
+    margin: 0;
+  }
+  .hz-series__current {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    padding: 1.1rem 1.25rem;
+    margin: 0 0 2rem;
+    background: var(--hz-bg-raised, rgba(255, 255, 255, 0.04));
+    border: 1px solid var(--hz-border-soft, rgba(255, 255, 255, 0.12));
+    border-radius: var(--hz-radius-md, 14px);
+    box-shadow: var(--hz-shadow-soft, 0 1px 2px rgba(0, 0, 0, 0.2));
+    text-decoration: none;
+    transition: border-color var(--hz-motion, 150ms ease), transform var(--hz-motion, 150ms ease);
+  }
+  .hz-series__current:hover {
+    border-color: var(--hz-brand, #7dd3a8);
+    transform: translateY(-1px);
+  }
+  .hz-series__current-tag {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    color: var(--hz-action-buy, #7dd3a8);
+  }
+  .hz-series__current-label {
+    flex: 1;
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--hz-text, #f4f1ea);
+  }
+  .hz-series__current-cta {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--hz-text-soft, #cfcabb);
+  }
+  .hz-series__section {
+    margin-bottom: 1.75rem;
+  }
+  .hz-series__h2 {
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--hz-text-faint, #8a857a);
+    margin: 0 0 0.75rem;
+  }
+  .hz-series__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .hz-series__row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.85rem 1rem;
+    background: var(--hz-bg-raised, rgba(255, 255, 255, 0.03));
+    border: 1px solid var(--hz-border-faint, rgba(255, 255, 255, 0.07));
+    border-radius: var(--hz-radius-sm, 10px);
+    text-decoration: none;
+    transition: border-color var(--hz-motion, 150ms ease);
+  }
+  .hz-series__row:hover {
+    border-color: var(--hz-border-soft, rgba(255, 255, 255, 0.16));
+  }
+  .hz-series__row-label {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--hz-text, #f4f1ea);
+  }
+  .hz-series__badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.02em;
+    padding: 0.2rem 0.55rem;
+    border-radius: 999px;
+  }
+  .hz-series__badge--soon {
+    color: var(--hz-brand, #7dd3a8);
+    background: color-mix(in srgb, var(--hz-brand, #7dd3a8) 14%, transparent);
+  }
+  .hz-series__badge--past {
+    color: var(--hz-text-faint, #8a857a);
+    background: var(--hz-bg-raised, rgba(255, 255, 255, 0.05));
+  }
+  .hz-series__resolve {
+    margin-top: 2.25rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--hz-border-faint, rgba(255, 255, 255, 0.07));
+  }
+  .hz-series__resolve-link {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--hz-text-soft, #cfcabb);
+    text-decoration: none;
+  }
+  .hz-series__resolve-link:hover {
+    color: var(--hz-text, #f4f1ea);
+  }
+  .hz-series--empty {
+    text-align: center;
+    padding-top: 4rem;
+  }
+</style>

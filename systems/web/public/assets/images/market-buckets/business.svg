@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="business market image">
+  <defs>
+    <linearGradient id="g" x1="58" y1="52" x2="456" y2="466" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#233e4a"/>
+      <stop offset=".56" stop-color="#172330"/>
+      <stop offset="1" stop-color="#0b111b"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#g)"/>
+  <!-- Ground baseline — the "city floor" -->
+  <path d="M112 402h288" stroke="#e7edf4" stroke-width="24" stroke-linecap="round"/>
+  <!-- Three towers: left medium · center tall (the standout) · right short -->
+  <rect x="142" y="226" width="78" height="174" fill="none" stroke="#e7edf4" stroke-width="22" stroke-linejoin="round"/>
+  <rect x="232" y="142" width="92" height="258" fill="none" stroke="#e7edf4" stroke-width="22" stroke-linejoin="round"/>
+  <rect x="336" y="270" width="74" height="130" fill="none" stroke="#e7edf4" stroke-width="22" stroke-linejoin="round"/>
+  <!-- Windows — horizontal floor strips inside each tower. Subtle so the silhouette stays clean. -->
+  <path d="M162 272h38M162 320h38M162 368h38" stroke="#e7edf4" stroke-width="12" stroke-linecap="round" opacity=".55"/>
+  <path d="M252 188h52M252 230h52M252 326h52M252 368h52" stroke="#e7edf4" stroke-width="12" stroke-linecap="round" opacity=".55"/>
+  <path d="M354 312h38M354 358h38" stroke="#e7edf4" stroke-width="12" stroke-linecap="round" opacity=".55"/>
+  <!-- Amber accent: the tallest tower's roofline — the "growth" signal -->
+  <path d="M232 142h92" stroke="#f7c66a" stroke-width="22" stroke-linecap="round"/>
+  <!-- Mint accent: a single mid-floor highlight on the standout tower — "this floor matters" -->
+  <path d="M250 282h56" stroke="#6ee7b7" stroke-width="14" stroke-linecap="round"/>
+</svg>

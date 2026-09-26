@@ -1,0 +1,589 @@
+/* Trade ticket (Phase 3.3) — the rail buy/sell order widget.
+   Ported VERBATIM from the legacy market-detail ticket design
+   (systems/front: patterns/binary-pill-duo.css, patterns/trade-ticket.css,
+   patterns/button-primary.css, pages/market-detail.css). Behavior is the
+   Preact island TradeTicket.jsx bound to these data-hooks. Tokens (--hz-*)
+   resolve from base/tokens.css; slate/success utilities from tailwind config. */
+
+/* ---- panel reset + a11y utility ---- */
+.market-detail-panel {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+.market-detail-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---- ticket root ---- */
+.hz-trade-ticket {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.hz-trade-ticket--binary {
+  gap: 0.86rem;
+}
+
+/* ---- multi-outcome context header ---- */
+.hz-trade-ticket__header {
+  display: flex;
+  align-items: flex-start;
+  /* Price block removed → the lone outcome/context block sits at the RTL end
+     (visual left), mirroring the binary ticket's side label placement. */
+  justify-content: flex-end;
+  gap: 0.62rem;
+  padding-bottom: 0.78rem;
+  border-bottom: 1px solid var(--hz-border-faint);
+}
+
+.hz-trade-ticket__heading-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+}
+
+.hz-trade-ticket__icon {
+  display: inline-flex;
+  width: 1.14rem;
+  height: 1.14rem;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.1rem;
+  border-radius: var(--hz-radius-pill);
+  background: rgb(255 255 255 / 0.045);
+  color: var(--hz-text-faint);
+  transition: background-color var(--hz-motion), color var(--hz-motion);
+}
+
+.hz-trade-ticket__trend-icon {
+  position: relative;
+  display: block;
+  width: 0.92rem;
+  height: 0.92rem;
+}
+
+.hz-trade-ticket__trend-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.hz-trade-ticket__trend-line {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.35;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.hz-trade-ticket__trend-line--down,
+.hz-trade-ticket__trend-icon[data-icon-state='down'] .hz-trade-ticket__trend-line--up {
+  display: none;
+}
+
+.hz-trade-ticket__trend-icon[data-icon-state='down'] .hz-trade-ticket__trend-line--down {
+  display: block;
+}
+
+.hz-trade-ticket__state-line {
+  display: block;
+  margin-bottom: 0.12rem;
+  color: var(--hz-text-faint);
+  font-size: 0.68rem;
+  font-weight: 600;
+}
+
+.hz-trade-ticket__title {
+  display: block;
+  color: var(--hz-text);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.22;
+}
+
+.hz-trade-ticket__price-block {
+  min-width: 4.2rem;
+  text-align: left;
+}
+
+.hz-trade-ticket__price-label {
+  display: block;
+  margin-bottom: 0.18rem;
+  color: var(--hz-text-faint);
+  font-size: 0.66rem;
+  font-weight: 600;
+}
+
+.hz-trade-ticket__price-value {
+  font-family: var(--hz-font-mono);
+  font-size: 0.94rem;
+}
+
+.hz-trade-ticket__price-accent {
+  color: var(--hz-text-soft);
+  transition: color var(--hz-motion);
+}
+
+.hz-trade-ticket[data-order-side='sell'] .hz-trade-ticket__price-accent {
+  color: var(--hz-action-sell-strong);
+}
+
+/* ---- ticket context header (binary + multi) ----
+   Stacked: market name on top, then a row of outcome (RTL start) + yes/no (RTL end). */
+.hz-trade-ticket__context-header {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0.32rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--hz-border-faint);
+  min-width: 0;
+}
+.hz-trade-ticket__context-title {
+  min-width: 0;
+  color: var(--hz-text-soft);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.hz-trade-ticket__context-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.55rem;
+  min-width: 0;
+}
+.hz-trade-ticket__context-side {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--hz-font-ui);
+  font-size: 0.96rem;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+.hz-trade-ticket__context-yesno {
+  flex: 0 0 auto;
+  color: var(--hz-text-muted);
+  font-family: var(--hz-font-ui);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+/* yes/no wears the same green/red as its buy/no CTAs. */
+.hz-trade-ticket__context-yesno--yes {
+  color: var(--hz-action-buy);
+}
+.hz-trade-ticket__context-yesno--no {
+  color: var(--hz-action-sell-strong);
+}
+.hz-trade-ticket__context-side--yes {
+  color: var(--hz-action-buy);
+}
+.hz-trade-ticket__context-side--no {
+  color: var(--hz-action-sell-strong);
+}
+/* Team-colored markets: the side label (top-left of the binary ticket) wears the
+   active side's kit color (--cta-team tracks contractSide on the ticket root). */
+.hz-trade-ticket[data-team-colored] .hz-trade-ticket__context-side {
+  color: var(--cta-team);
+}
+
+/* ---- side toggle (buy/sell) ---- */
+.hz-side-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  border: 1px solid var(--hz-border-faint);
+  border-radius: var(--hz-radius-md);
+  background: linear-gradient(180deg, rgb(15 23 42 / 0.9), rgb(15 23 42 / 0.72));
+  padding: 0.35rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.03);
+}
+.hz-side-toggle--stage {
+  width: auto;
+  display: inline-flex;
+  gap: 0.82rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+.hz-side-toggle__button {
+  flex: 1 1 0%;
+  border-radius: var(--hz-radius-sm);
+  padding: 0.65rem 0;
+  color: var(--hz-text-muted);
+  transition: all var(--hz-motion);
+}
+.hz-side-toggle--stage .hz-side-toggle__button {
+  min-width: 5.5rem;
+  flex: 0 0 auto;
+  border-radius: 0;
+  padding: 0 0 0.32rem;
+  border-bottom: 2px solid transparent;
+  color: var(--hz-text-faint);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.hz-trade-ticket__header-copy,
+.hz-trade-ticket__heading-row,
+.hz-trade-ticket__title {
+  min-width: 0;
+}
+
+.hz-trade-ticket__title {
+  overflow-wrap: anywhere;
+}
+.hz-side-toggle__button:hover {
+  background: transparent;
+  color: var(--hz-text);
+}
+.hz-side-toggle__button--active {
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+  color: var(--hz-text);
+}
+.hz-trade-ticket[data-order-side='buy'] .hz-side-toggle__button--active {
+  color: var(--hz-action-buy-strong);
+  border-bottom-color: rgb(var(--hz-action-buy-rgb) / 0.95);
+}
+.hz-trade-ticket[data-order-side='sell'] .hz-side-toggle__button--active {
+  color: var(--hz-action-sell-strong);
+  border-bottom-color: rgb(var(--hz-action-sell-rgb) / 0.95);
+}
+
+/* ---- binary pill duo (yes/no) ---- */
+.hz-binary-pill-duo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+.hz-binary-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  border: 1px solid var(--hz-border-faint);
+  border-radius: var(--hz-radius-md);
+  background: rgb(255 255 255 / 0.025);
+  padding: 0.86rem 1.1rem;
+  color: var(--hz-text-soft);
+  font-family: var(--hz-font-ui);
+  cursor: pointer;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    transform 120ms ease;
+}
+.hz-binary-pill:hover:not(.hz-binary-pill--disabled) {
+  background: rgb(255 255 255 / 0.045);
+  border-color: var(--hz-border-soft);
+}
+.hz-binary-pill:active:not(.hz-binary-pill--disabled) {
+  transform: translateY(1px);
+}
+.hz-binary-pill__label {
+  font-size: 0.98rem;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.hz-binary-pill__price {
+  font-family: var(--hz-font-mono);
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.hz-binary-pill--yes.hz-binary-pill--active {
+  background: rgb(var(--hz-action-buy-rgb) / 0.18);
+  border-color: rgb(var(--hz-action-buy-rgb) / 0.6);
+  color: var(--hz-action-buy);
+}
+.hz-binary-pill--no.hz-binary-pill--active {
+  background: rgb(var(--hz-action-sell-rgb) / 0.18);
+  border-color: rgb(var(--hz-action-sell-rgb) / 0.6);
+  color: var(--hz-action-sell-strong);
+}
+.hz-binary-pill--yes.hz-binary-pill--active .hz-binary-pill__label,
+.hz-binary-pill--yes.hz-binary-pill--active .hz-binary-pill__price {
+  color: var(--hz-action-buy);
+}
+.hz-binary-pill--no.hz-binary-pill--active .hz-binary-pill__label,
+.hz-binary-pill--no.hz-binary-pill--active .hz-binary-pill__price {
+  color: var(--hz-action-sell-strong);
+}
+.hz-binary-pill--disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+/* Team-colored sides (sports/coloring markets): the active pill wears a soft kit-
+   color wash (--pill-team) with neutral white text — "chromatic ground, monochrome
+   type", consistent with the matchup cards. Overrides the yes/no green/red active
+   state (same specificity, declared later). */
+.hz-binary-pill--team.hz-binary-pill--active {
+  background: color-mix(in srgb, var(--pill-team) 22%, transparent);
+  border-color: color-mix(in srgb, var(--pill-team) 60%, transparent);
+  color: var(--hz-text);
+}
+.hz-binary-pill--team.hz-binary-pill--active .hz-binary-pill__label,
+.hz-binary-pill--team.hz-binary-pill--active .hz-binary-pill__price {
+  color: var(--hz-text);
+}
+/* The active team pill keeps (deepens) its kit wash on hover — without this the
+   generic neutral :hover (higher specificity) greys it out until the cursor leaves,
+   so a just-clicked side looked unselected while hovered. */
+.hz-binary-pill--team.hz-binary-pill--active:hover:not(.hz-binary-pill--disabled) {
+  background: color-mix(in srgb, var(--pill-team) 30%, transparent);
+  border-color: color-mix(in srgb, var(--pill-team) 70%, transparent);
+}
+
+/* ---- amount shell + input + unit suffix ---- */
+.hz-amount-shell {
+  position: relative;
+  border: 1px solid var(--hz-border-soft);
+  border-radius: var(--hz-radius-lg);
+  background: rgba(2, 8, 19, 0.24);
+}
+.hz-amount-input {
+  min-height: 0;
+  height: auto;
+  padding: 1rem 3rem 1rem 1rem;
+  direction: ltr;
+  text-align: left;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+/* High specificity (element + class) so we beat Tailwind's forms plugin
+   which targets [type="text"] and forces a white bg on inputs. */
+input.hz-amount-input--stage,
+input.hz-amount-input--stage:disabled,
+input.hz-amount-input--stage:focus {
+  box-sizing: border-box;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 0.68rem 0.88rem 0.68rem 3.45rem;
+  color: var(--hz-text);
+  caret-color: var(--hz-text);
+  direction: ltr;
+  font-family: var(--hz-font-mono);
+  font-size: 1.46rem;
+  font-weight: 700;
+  text-align: right;
+  unicode-bidi: isolate;
+  box-shadow: none;
+}
+input.hz-amount-input--stage::-webkit-inner-spin-button,
+input.hz-amount-input--stage::-webkit-outer-spin-button {
+  margin: 0;
+  appearance: none;
+}
+.hz-trade-ticket__unit-suffix {
+  position: absolute;
+  left: 1rem;
+  right: auto;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--hz-text-faint);
+  font-family: var(--hz-font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  /* Direction follows the JS-set `dir` attribute (ltr for the V₪ mark in buy,
+     rtl for "מניות" in sell). `isolate` keeps the suffix from reordering against
+     the input; an earlier `isolate-override; direction: ltr` forced Hebrew to
+     render reversed ("תוינמ"). */
+  unicode-bidi: isolate;
+}
+
+/* ---- quick chips ---- */
+.hz-quick-chip {
+  border: 1px solid var(--hz-border-soft);
+  border-radius: var(--hz-radius-pill);
+  background: rgb(255 255 255 / 0.04);
+  color: var(--hz-text-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding-block: 0.38rem;
+  transition: all var(--hz-motion);
+}
+.hz-quick-chip:hover {
+  border-color: var(--hz-border);
+  background: rgb(255 255 255 / 0.08);
+}
+.hz-quick-chip:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+@media (max-width: 960px) {
+  .market-detail-stage-order-widget .hz-side-toggle--stage {
+    width: 100%;
+  }
+
+  .market-detail-stage-order-widget .hz-side-toggle--stage .hz-side-toggle__button {
+    min-width: 0;
+    flex: 1 1 0;
+  }
+
+  .market-detail-stage-order-widget [data-order-quick-chips] {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+.hz-quick-chip--active {
+  border-color: var(--hz-border);
+  background: rgb(255 255 255 / 0.08);
+}
+.hz-trade-ticket[data-order-side='sell'] .hz-quick-chip--active {
+  border-color: rgb(var(--hz-action-sell-rgb) / 0.4);
+  background: rgb(var(--hz-action-sell-rgb) / 0.12);
+}
+
+/* ---- summary ---- */
+.hz-trade-ticket__summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.72rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+}
+.hz-trade-ticket__summary.is-hidden {
+  display: none;
+}
+.hz-trade-ticket__summary-divider {
+  height: 1px;
+  background: var(--hz-border-soft);
+}
+
+/* ---- total row ---- */
+.hz-trade-ticket__total-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.hz-trade-ticket__total-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--hz-text-muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+.hz-trade-ticket__total-value {
+  display: inline-flex;
+  justify-content: flex-end;
+  font-family: var(--hz-font-mono);
+  font-size: 1.58rem;
+  line-height: 1;
+  min-width: 6.4rem;
+  color: var(--hz-action-buy-strong);
+  direction: ltr;
+  text-align: left;
+  white-space: nowrap;
+  font-feature-settings: 'tnum' 1, 'lnum' 1;
+  font-variant-numeric: tabular-nums;
+  unicode-bidi: isolate;
+}
+.hz-trade-ticket__total-value--negative {
+  color: var(--hz-action-sell);
+}
+.hz-trade-ticket[data-order-side='buy'] .hz-trade-ticket__total-value {
+  color: var(--hz-action-buy-strong);
+}
+.hz-trade-ticket[data-order-side='sell'] .hz-trade-ticket__total-value {
+  color: var(--hz-action-sell-strong);
+}
+
+/* ---- submit button ---- */
+.hz-button-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: var(--hz-radius-md);
+  background: var(--hz-info);
+  color: var(--hz-text);
+  font-weight: 700;
+  transition: all var(--hz-motion);
+}
+.hz-button-primary:hover {
+  background: var(--hz-info);
+  filter: brightness(1.05);
+}
+.hz-button-primary--large {
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.875rem 1rem;
+  border-radius: var(--hz-radius-lg);
+  font-size: 1rem;
+  font-weight: 900;
+  box-shadow: 0 12px 28px rgb(var(--hz-info-rgb) / 0.25);
+}
+.hz-button-primary:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+.hz-trade-ticket__submit {
+  justify-content: center;
+  border-radius: var(--hz-radius-lg);
+  min-height: 2.64rem;
+  font-size: 0.94rem;
+  font-weight: 700;
+}
+/* side-aware submit tint — binary keys off data-active-side */
+.hz-trade-ticket--binary[data-active-side='yes'] .hz-button-primary--large {
+  background: linear-gradient(180deg, rgb(var(--hz-action-buy-rgb) / 0.95), rgb(var(--hz-action-buy-rgb) / 0.8));
+  box-shadow: 0 16px 36px rgb(var(--hz-action-buy-rgb) / 0.24);
+}
+.hz-trade-ticket--binary[data-active-side='no'] .hz-button-primary--large {
+  background: linear-gradient(180deg, rgb(var(--hz-action-sell-rgb) / 0.95), rgb(var(--hz-action-sell-rgb) / 0.78));
+  box-shadow: 0 16px 36px rgb(var(--hz-action-sell-rgb) / 0.22);
+}
+/* Team-colored execute CTA: solid kit color (--cta-team, tracks the selected side
+   on the ticket root) + a luminance-derived on-color so text stays readable on any
+   kit (e.g. Maccabi yellow → dark). Declared after the side green/red so it wins. */
+.hz-trade-ticket[data-team-colored] .hz-button-primary--large {
+  background: var(--cta-team);
+  color: var(--cta-team-on);
+  box-shadow: 0 16px 36px color-mix(in srgb, var(--cta-team) 28%, transparent);
+}
+.hz-trade-ticket[data-team-colored] .hz-button-primary--large:hover {
+  filter: brightness(1.06);
+}
+.hz-trade-ticket[data-team-colored] .hz-trade-ticket__submit-price {
+  color: color-mix(in srgb, var(--cta-team-on) 60%, transparent);
+}
+
+/* ---- feedback tones ---- */
+[data-order-feedback][data-tone='error'] {
+  color: var(--hz-action-sell-strong);
+}
+[data-order-feedback][data-tone='success'] {
+  color: var(--hz-action-buy);
+}

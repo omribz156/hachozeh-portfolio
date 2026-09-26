@@ -1,0 +1,31 @@
+---
+export const partial = true;
+
+import MarketCard from '../../components/MarketCard.astro';
+import { fetchFeed } from '../../lib/discovery.js';
+
+const url = new URL(Astro.request.url);
+const feed = url.searchParams.get('feed') || 'trending';
+const category = url.searchParams.get('category') || null;
+const cursor = url.searchParams.get('cursor') || null;
+const limit = Math.min(Math.max(Number(url.searchParams.get('limit') || 16), 1), 48);
+
+let items = [];
+let pagination = { nextCursor: null, hasMore: false };
+try {
+  const data = await fetchFeed(feed, category, { limit, cursor });
+  items = Array.isArray(data?.items) ? data.items : [];
+  pagination = data?.pagination || pagination;
+} catch {
+  Astro.response.status = 502;
+}
+
+Astro.response.headers.set('content-type', 'text/html; charset=utf-8');
+---
+
+{items.map((m) => <MarketCard market={m} />)}
+<template
+  data-feed-pagination
+  data-next-cursor={pagination.nextCursor || ''}
+  data-has-more={pagination.hasMore ? '1' : '0'}
+></template>

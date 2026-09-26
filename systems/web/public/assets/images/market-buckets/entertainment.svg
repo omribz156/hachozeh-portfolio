@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="entertainment market image">
+  <defs>
+    <linearGradient id="g" x1="58" y1="44" x2="458" y2="468" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#3b2647"/>
+      <stop offset=".58" stop-color="#182033"/>
+      <stop offset="1" stop-color="#0b111b"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#g)"/>
+  <path d="M132 170c50-28 99-28 148 0v74c0 74-43 120-74 120s-74-46-74-120v-74Z" fill="none" stroke="#f7c66a" stroke-width="24" stroke-linejoin="round"/>
+  <path d="M232 170c50-28 99-28 148 0v74c0 74-43 120-74 120-16 0-35-12-49-34" fill="none" stroke="#6ee7b7" stroke-width="24" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="182" cy="238" r="10" fill="#e7edf4"/>
+  <circle cx="230" cy="238" r="10" fill="#e7edf4"/>
+  <path d="M176 290c22 20 42 20 64 0M282 286c20-14 40-14 60 0" fill="none" stroke="#e7edf4" stroke-width="16" stroke-linecap="round"/>
+</svg>

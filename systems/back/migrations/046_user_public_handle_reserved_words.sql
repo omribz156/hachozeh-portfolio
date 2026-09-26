@@ -1,0 +1,46 @@
+alter table users
+  drop constraint if exists chk_users_handle_reserved_words;
+
+alter table users
+  add constraint chk_users_handle_reserved_words
+    check (handle not in (
+      'about',
+      'admin',
+      'admin-market-management',
+      'api',
+      'auth',
+      'breaking',
+      'breaking-markets',
+      'cookies',
+      'deposit',
+      'explore',
+      'fallback',
+      'feeds',
+      'graphs-and-accuracy',
+      'help',
+      'leaderboard',
+      'login',
+      'logout',
+      'market-detail',
+      'markets',
+      'me',
+      'new',
+      'new-markets',
+      'notifications',
+      'portfolio',
+      'privacy',
+      'profile',
+      'qanda',
+      'register',
+      'robots',
+      'search',
+      'settings',
+      'share',
+      'signup',
+      'sitemap',
+      'terms',
+      'topics',
+      'trending',
+      'u',
+      'wallet'
+    ));

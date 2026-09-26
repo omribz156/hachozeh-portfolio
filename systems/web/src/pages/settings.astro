@@ -1,0 +1,156 @@
+---
+// /settings (הגדרות) — Ledger direction, ported from
+// systems/design/to integrate/settings/dist/ (INTEGRATION.md is the contract).
+//
+// Slice 2+: profile fields, session rows, notification preferences, data
+// export, and account deletion are backend-backed.
+import Layout from '../layouts/Layout.astro';
+import { BACKEND_INTERNAL_URL } from '../lib/backend.js';
+import Settings from '../components/settings/Settings.jsx';
+import '../styles/pages/settings.css';
+
+// Hard auth gate — nothing here is useful to a guest. The middleware has
+// already validated the session and embedded currentUser.
+const auth = Astro.locals.auth;
+if (!auth?.authenticated) {
+  return Astro.redirect('/?overlay=login', 302);
+}
+
+const payload = auth.payload as any;
+const currentUser = payload?.currentUser ?? null;
+
+// Identity (mirrors SiteHeader's derivation so the avatar/initial match).
+// Prefer the full email when the backend exposes it (own email on own
+// settings — see finish-settings-integration.md #2). Until then, the shared
+// identity field is privacy-masked, so fall back to the masked hint.
+const emailDisplay =
+  currentUser?.identity?.primary?.email ||
+  currentUser?.identity?.primary?.identifierHint ||
+  payload?.identity?.identifierHint ||
+  null;
+const emailVerified = Boolean(currentUser?.identity?.primary?.verifiedAt);
+const userName =
+  currentUser?.user?.displayName ||
+  currentUser?.user?.name ||
+  currentUser?.user?.handle ||
+  emailDisplay ||
+  'משתמש';
+const userInitial = (String(userName).trim()[0] || 'ח').toLocaleUpperCase('he-IL');
+
+// Three independent /api/me reads — fetched CONCURRENTLY (they share only the request
+// cookie, not one another), collapsing what were 3 sequential SSR awaits into one wave.
+// Each still degrades gracefully to its default below if the fetch fails or is non-ok.
+const cookie = Astro.request.headers.get('cookie') || '';
+async function getJSON(path: string) {
+  try {
+    const res = await fetch(new URL(path, BACKEND_INTERNAL_URL), {
+      headers: { cookie, accept: 'application/json' },
+      signal: AbortSignal.timeout(1500),
+    });
+    return res.ok ? await res.json().catch(() => null) : null;
+  } catch {
+    return null;
+  }
+}
+const [sessionsData, notifData, deletionData] = await Promise.all([
+  getJSON('/api/me/sessions'),
+  getJSON('/api/me/notification-preferences'),
+  getJSON('/api/me/account-deletion'),
+]);
+
+// Sessions summary/list — graceful degrade (never blocks the page).
+let activeCount: number | null = null;
+let sessions: Array<{
+  id: string;
+  label: string;
+  current: boolean;
+  createdAt: string;
+  lastSeenAt: string | null;
+  expiresAt: string;
+}> = [];
+{
+  const n = sessionsData?.summary?.activeCount;
+  if (typeof n === 'number') activeCount = n; // else: count line omitted
+  if (Array.isArray(sessionsData?.sessions)) sessions = sessionsData.sessions;
+}
+const otherDevices = typeof activeCount === 'number' ? Math.max(0, activeCount - 1) : 0;
+
+let notificationPreferences: Record<string, boolean> = {
+  moves_app: true,
+  moves_ext: false,
+  resolve_app: true,
+  resolve_ext: true,
+  comments_app: true,
+  comments_ext: false,
+};
+if (notifData?.preferences && typeof notifData.preferences === 'object') {
+  notificationPreferences = { ...notificationPreferences, ...notifData.preferences };
+}
+
+const profileHandle = currentUser?.user?.handle || '';
+const profileDisplayName = currentUser?.user?.displayName || '';
+const profileBio = currentUser?.user?.bio || '';
+const profileAvatarUrl = currentUser?.user?.avatarUrl || '';
+
+type AccountDeletionStatus = 'none' | 'scheduled' | 'cancelled' | 'completed';
+type AccountDeletionState = {
+  deletion: {
+    status: AccountDeletionStatus;
+    requestId: string | null;
+    reason: string | null;
+    scheduledAt: string | null;
+    deleteAfter: string | null;
+    cancelledAt: string | null;
+    completedAt: string | null;
+  };
+  user: {
+    userId: string | null;
+    tradeAccessStatus: 'enabled' | 'blocked' | null;
+  };
+};
+
+let accountDeletion: AccountDeletionState = {
+  deletion: {
+    status: 'none',
+    requestId: null,
+    reason: null,
+    scheduledAt: null,
+    deleteAfter: null,
+    cancelledAt: null,
+    completedAt: null,
+  },
+  user: {
+    userId: payload?.actor?.id ?? null,
+    tradeAccessStatus: null,
+  },
+};
+if (deletionData?.deletion && deletionData?.user) {
+  accountDeletion = deletionData;
+}
+
+---
+
+<Layout
+  title="הגדרות · החוזה"
+  description="ניהול הפרופיל, האבטחה וההתראות בחשבון שלך."
+  activePage="settings"
+  canonicalPath="/settings"
+  robots="noindex, nofollow"
+  showFooter={false}
+>
+  <h1 class="sr-only">הגדרות</h1>
+  <Settings
+    client:load
+    userInitial={userInitial}
+    profileDisplayName={profileDisplayName}
+    profileHandle={profileHandle}
+    profileBio={profileBio}
+    profileAvatarUrl={profileAvatarUrl}
+    emailDisplay={emailDisplay}
+    emailVerified={emailVerified}
+    sessions={sessions}
+    otherDevices={otherDevices}
+    notificationPreferences={notificationPreferences}
+    accountDeletion={accountDeletion}
+  />
+</Layout>

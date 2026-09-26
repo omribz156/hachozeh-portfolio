@@ -1,0 +1,54 @@
+---
+import { ASSET_VERSION } from '../../lib/asset-version.js';
+import PortfolioDepth from './PortfolioDepth.jsx';
+import PortfolioCards from './PortfolioCards.jsx';
+---
+
+<!-- Cards container = the vanilla orchestrator's paint target. It owns only the
+     auth-gate, loading, and error states (the toggle + personal-space moved to a
+     dedicated page). PortfolioCards (Preact island, sibling below) owns the
+     top-fold cards; PortfolioDepth (sibling below) owns the depth section.
+     Neither island is placed inside this container — the orchestrator's
+     innerHTML would destroy hydrated islands placed inside it. -->
+<!-- Static SSR placeholder — mirrors portfolio.js's LOADING_SKELETON_HTML so there's
+     no flash from a plain text line into the sized skeleton once the script boots. -->
+<div data-portfolio-cards>
+  <div class="pf-skel" aria-hidden="true">
+    <div class="pf-skel-top-fold">
+      <div class="pf-skel-card">
+        <span class="hz-skel hz-skel--line"></span>
+        <span class="hz-skel hz-skel--line-lg"></span>
+        <span class="hz-skel hz-skel--line"></span>
+      </div>
+      <div class="pf-skel-card">
+        <span class="hz-skel hz-skel--line"></span>
+        <span class="hz-skel hz-skel--line-lg"></span>
+        <span class="hz-skel hz-skel--line"></span>
+      </div>
+    </div>
+    <div class="pf-skel-rows">
+      <div class="pf-skel-row"><span class="hz-skel hz-skel--thumb"></span><span class="hz-skel hz-skel--line"></span><span class="hz-skel hz-skel--line-sm"></span></div>
+      <div class="pf-skel-row"><span class="hz-skel hz-skel--thumb"></span><span class="hz-skel hz-skel--line"></span><span class="hz-skel hz-skel--line-sm"></span></div>
+      <div class="pf-skel-row"><span class="hz-skel hz-skel--thumb"></span><span class="hz-skel hz-skel--line"></span><span class="hz-skel hz-skel--line-sm"></span></div>
+    </div>
+  </div>
+  <span class="sr-only" role="status">טוען תיק…</span>
+</div>
+
+<!-- These 4 scripts set window.NaviPortfolio* globals that persist across soft
+     nav — load once, no rerun needed. portfolio.js is the per-page orchestrator;
+     it must re-run each visit (new DOM, new data load). On soft nav Astro's
+     data-astro-rerun re-executes it after globals are already on window. -->
+<script is:inline src={`/scripts/portfolio/portfolio-data-source.js?v=${ASSET_VERSION}`}></script>
+<script is:inline src={`/scripts/components/pnl-sparkline-renderer.js?v=${ASSET_VERSION}`}></script>
+<script is:inline src={`/scripts/portfolio/formatters.js?v=${ASSET_VERSION}`}></script>
+<script is:inline src={`/scripts/portfolio/view-model.js?v=${ASSET_VERSION}`}></script>
+<script is:inline data-astro-rerun src={`/scripts/portfolio/portfolio.js?v=${ASSET_VERSION}`}></script>
+
+<!-- The vanilla card/tab modules (total-card / change-card / closing-soon /
+     claims / positions-tab / history-tab / orders-tab) were replaced by the
+     PortfolioCards + PortfolioDepth Preact islands and deleted. The remaining
+     scripts above are the shared vanilla data layer the islands read from. -->
+
+<PortfolioCards client:load />
+<PortfolioDepth client:load />

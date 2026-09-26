@@ -1,0 +1,110 @@
+/* ───────────────────────────────────────────────────────────────
+   quick-buy-sheet.css — shell for the pop-anywhere trade ticket.
+   The ticket INTERNALS (swap toggles, chips, centered amount, the
+   per-outcome pic switch) come for free: the sheet carries the
+   `.market-detail-stage-order-widget` class, which trade-ticket.css
+   styles by class alone. This file only provides the SHEET SHELL
+   (scrim + bottom-pinned slide-up + drag handle), values mirrored
+   from the market-detail sheet (pages/market-detail.css) so the pop
+   is visually identical. Mobile only — desktop cards navigate.
+   Layer: hz.patterns
+   ─────────────────────────────────────────────────────────────── */
+@layer hz.patterns {
+
+/* Scrim — dim + tap-to-close. */
+.hz-quickbuy__scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 96;
+  border: 0;
+  padding: 0;
+  background: rgba(8, 9, 13, 0.5);
+  opacity: 0;
+  visibility: hidden;
+  cursor: pointer;
+  transition: opacity 300ms ease, visibility 300ms ease;
+}
+.hz-quickbuy.is-open .hz-quickbuy__scrim {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Sheet — pinned to the bottom edge, slides up. Mirrors
+   .market-detail-stage-order-widget so the popped ticket reads identically. */
+.hz-quickbuy__sheet {
+  position: fixed;
+  inset: auto 0 0 0;
+  top: auto;
+  left: 0;
+  z-index: 97;
+  width: 100%;
+  max-width: 32rem;          /* full-bleed on phones, centered on tablets */
+  margin-inline: auto;
+  max-height: min(90dvh, 42rem);
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
+  border: 1px solid var(--hz-border-soft);
+  border-bottom: 0;
+  border-radius: 1.4rem 1.4rem 0 0;
+  background:
+    radial-gradient(circle at 20% 0%, rgba(122, 174, 230, 0.12), transparent 12rem),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.052), rgba(255, 255, 255, 0.018)),
+    var(--hz-bg-raised);
+  box-shadow: 0 -18px 50px rgba(0, 0, 0, 0.5);
+  /* --hz-kb-overlap is set by TradeTicket.jsx's visualViewport handler while the
+     keyboard is up (0px otherwise / no-JS) — pushes the submit row above the
+     keyboard without translating the whole sheet. Mirrors the market-detail sheet. */
+  padding: 1.6rem 1rem calc(1rem + env(safe-area-inset-bottom) + var(--hz-kb-overlap, 0px));
+  box-sizing: border-box;
+  transform: translateY(100%);
+  transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+  will-change: transform;
+}
+.hz-quickbuy.is-open .hz-quickbuy__sheet {
+  transform: translateY(0);
+}
+/* While dragging the sheet kills the transition so it tracks the finger 1:1. */
+.hz-quickbuy__sheet.is-dragging {
+  transition: none;
+}
+
+/* Grab-handle affordance + swipe-down target. */
+.hz-quickbuy__sheet::before {
+  content: "";
+  position: absolute;
+  top: 0.6rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 2.5rem;
+  height: 0.3rem;
+  border-radius: var(--hz-radius-pill);
+  background: var(--hz-border-strong);
+  pointer-events: none;
+}
+
+/* Loading / error placeholder shown while the ticket data fetches. */
+.hz-quickbuy__status {
+  min-height: 9rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-align: center;
+  color: var(--hz-text-muted);
+  font-size: 0.9rem;
+}
+.hz-quickbuy__status-title {
+  color: var(--hz-text-soft);
+  font-weight: 700;
+}
+
+/* Mobile only: hard-hide above the sheet breakpoint so a desktop card click
+   (routed to navigate) can never reveal a half-styled sheet. */
+@media (min-width: 961px) {
+  .hz-quickbuy { display: none; }
+}
+
+} /* @layer hz.patterns */

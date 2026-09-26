@@ -1,0 +1,59 @@
+/* Shared V₪ mark. The DOM keeps "V₪" as fallback text for copy/a11y; CSS paints
+   the compact product symbol so RTL/LTR money rows stay stable. */
+.hz-money,
+.hz-vshekel-inline {
+  direction: ltr;
+  unicode-bidi: isolate;
+  white-space: nowrap;
+}
+
+.hz-money {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38em;
+  line-height: 1;
+  /* Digit-tuned fallback stack (see --hz-font-number in tokens.css): the
+     site-wide fallback's size-adjust is tuned for Hebrew strings and renders
+     digits ~9% too wide, causing a measurable width flash on cold font load
+     for money amounts (wallet header etc). This scopes the narrower,
+     digit-tuned fallback to money content only — the Hebrew-tuned fallback
+     everything else uses is untouched. */
+  font-family: var(--hz-font-number);
+}
+
+.hz-vshekel-symbol {
+  position: relative;
+  display: inline-block;
+  inline-size: 0.94em;
+  block-size: 0.54em;
+  color: inherit;
+  vertical-align: -0.02em;
+  flex: 0 0 auto;
+}
+
+.hzhiw-demo .hz-vshekel-symbol {
+  inline-size: 1em;
+  block-size: 0.58em;
+  vertical-align: -0.02em;
+}
+
+.hz-vshekel-symbol::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: currentColor;
+  -webkit-mask: url("/assets/currency/vshekel-symbol.png") center / contain no-repeat;
+  mask: url("/assets/currency/vshekel-symbol.png") center / contain no-repeat;
+}
+
+.hz-vshekel-fallback {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

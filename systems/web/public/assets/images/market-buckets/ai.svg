@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="AI market image">
+  <defs>
+    <linearGradient id="g" x1="56" y1="48" x2="456" y2="466" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#18384f"/>
+      <stop offset=".56" stop-color="#142238"/>
+      <stop offset="1" stop-color="#0b111b"/>
+    </linearGradient>
+    <radialGradient id="r" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(256 256) rotate(90) scale(220)">
+      <stop stop-color="#f7c66a" stop-opacity=".18"/>
+      <stop offset="1" stop-color="#f7c66a" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#g)"/>
+  <!-- Soft glow behind the main sparkle — gives it the "AI shimmer" atmosphere. -->
+  <rect width="512" height="512" rx="96" fill="url(#r)"/>
+  <!-- Main sparkle — the universal AI mark (Apple/Gemini/ChatGPT all use this). -->
+  <path d="M256 92 Q258 222 388 256 Q258 290 256 420 Q254 290 124 256 Q254 222 256 92 Z" fill="#f7c66a"/>
+  <!-- Small sparkle, top-right accent — mint, the "second thought" beat. -->
+  <path d="M384 132 Q385 168 422 178 Q385 188 384 224 Q383 188 346 178 Q383 168 384 132 Z" fill="#6ee7b7"/>
+  <!-- Small sparkle, bottom-left accent — neutral, the "third thought" beat. -->
+  <path d="M136 348 Q137 374 162 382 Q137 390 136 416 Q135 390 110 382 Q135 374 136 348 Z" fill="#e7edf4" opacity=".85"/>
+</svg>

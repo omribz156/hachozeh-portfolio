@@ -1,0 +1,1223 @@
+/*
+ * Market Detail Page CSS
+ *
+ * History:
+ *  Slice 1 (2026-05-12): merged from two files into one:
+ *    - pages/market-detail.css        (legacy base layer, pre-token)
+ *    - pages/market-detail-stage.css  (stage proof, deboxed direction)
+ *  Body still carries both `market-detail-page` and `market-detail-page`
+ *  classes; rename + token migration happen in Slice 2.
+ *
+ * Layering:
+ *  - BASE LAYER below sets wrappers and base component styling.
+ *  - STAGE OVERRIDES below redefine the visible surface to the deboxed direction.
+ *  - Source order = stage wins for any overlap; base fills gaps.
+ */
+
+/* ============================================================
+   BASE LAYER (formerly pages/market-detail.css)
+   ============================================================ */
+
+/* .market-detail-panel is a generic wrapper that JS still emits on the chart,
+   trade ticket, and trust panels. Stage direction is deboxed — panel chrome
+   (bg/border/radius) is intentionally null. The stage override that wiped
+   the legacy slate-blue panel look was removed in slice 4 wave 3 alongside
+   the chart extraction; this is the surviving inline replacement. */
+.market-detail-page .market-detail-panel {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+
+.market-detail-page .market-detail-topbar {
+  margin-bottom: 1.5rem;
+}
+
+
+.market-detail-page .market-detail-heading {
+  display: flex;
+  gap: 1.5rem;
+}
+
+.market-detail-page .market-detail-brand-mark {
+  width: 4rem;
+  height: 4rem;
+  overflow: hidden;
+  flex-shrink: 0;
+  margin-top: 0.25rem;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.75rem;
+  box-shadow: 0 24px 50px rgba(15, 23, 42, 0.35);
+}
+
+.market-detail-page .market-detail-title-block {
+  min-width: 0;
+}
+
+.market-detail-page .market-detail-page-title {
+  margin-bottom: 1rem;
+  color: var(--hz-text);
+  font-size: 1.875rem;
+  line-height: 1.15;
+  font-weight: 900;
+}
+
+.market-detail-page .market-detail-page-meta {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem 0.75rem;
+  color: var(--hz-text-muted);
+  font-size: 0.8125rem;
+  font-weight: 700;
+}
+
+
+
+.market-detail-page .market-detail-action-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  align-self: flex-start;
+  margin-top: 0.5rem;
+}
+
+
+
+.market-detail-page .market-detail-outcomes-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 1rem;
+  color: var(--hz-text-muted);
+  font-size: 12.5px;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.35;
+}
+
+.market-detail-page .market-detail-section {
+  padding-top: 1rem;
+}
+
+.market-detail-page .market-detail-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: var(--hz-text);
+  font-size: 1.125rem;
+  font-weight: 900;
+}
+
+.market-detail-page .market-detail-section-title--interactive {
+  cursor: pointer;
+  transition: color 180ms ease;
+}
+
+@media (hover: hover) {
+  .market-detail-page .market-detail-section-title--interactive:hover {
+    color: #2b6cee;
+  }
+}
+
+.market-detail-page .market-detail-section-toggle {
+  width: 100%;
+  justify-content: flex-start;
+  text-align: right;
+}
+
+.market-detail-page .market-detail-section-chevron {
+  transition: transform 180ms ease;
+}
+
+.market-detail-page .market-detail-section-chevron.is-collapsed {
+  transform: rotate(180deg);
+}
+
+.market-detail-page .market-detail-content-panel {
+  padding: 1.5rem;
+}
+
+.market-detail-page .market-detail-copy-block {
+  color: var(--hz-text-soft);
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+
+.market-detail-page .market-detail-payment-card {
+  margin-top: 1.5rem;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 0.875rem;
+  background: rgba(11, 18, 34, 0.45);
+  padding: 1rem;
+}
+
+
+
+.market-detail-page .market-detail-outcomes-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.9rem 1rem;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.02), rgba(255, 255, 255, 0));
+}
+
+.market-detail-page .market-detail-outcomes-toolbar-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.market-detail-page .market-detail-outcomes-toolbar-kicker {
+  color: var(--hz-text-faint);
+  font-size: 0.6875rem;
+  font-weight: 700;
+}
+
+.market-detail-page .market-detail-outcomes-toolbar-value {
+  color: var(--hz-text);
+  font-size: 0.95rem;
+  font-weight: 800;
+}
+
+/* outcomes-toolbar--sell side-toggle hover variant: rule was tied to a hidden
+   page-level toolbar (display:none post-stage); side-toggle styling now lives
+   in patterns/trade-ticket.css. */
+
+@media (max-width: 767px) {
+  .market-detail-page .market-detail-outcomes-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+      }
+
+.market-detail-page .market-detail-related-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.75rem;
+  background: #1e293b;
+  padding: 0.75rem;
+  transition: all 180ms ease;
+}
+
+@media (hover: hover) {
+  .market-detail-page .market-detail-related-card:hover {
+    border-color: rgba(43, 108, 238, 0.5);
+  }
+}
+
+.market-detail-page .market-detail-related-title {
+  color: var(--hz-text-soft);
+  transition: color 180ms ease;
+}
+
+@media (hover: hover) {
+  .market-detail-page .market-detail-related-card:hover .market-detail-related-title {
+    color: #2b6cee;
+  }
+}
+
+@media (max-width: 1023px) {
+  .market-detail-page .market-detail-heading {
+    gap: 1rem;
+  }
+
+  .market-detail-page .market-detail-page-title {
+    font-size: 1.5rem;
+  }
+
+    }
+
+/* ============================================================
+   STAGE OVERRIDES (formerly pages/market-detail-stage.css)
+   ============================================================ */
+
+.market-detail-page {
+  /* Flat surface (scoped to market detail only — global atmosphere in tokens.css
+     is untouched for trending/etc). The sticky header paints flat --hz-bg; any
+     page atmosphere here — the amber/cool radials OR the linear top-light→bottom-
+     dark base — is a tone the flat header can't match, so it surfaces as a band
+     when the header turns opaque on scroll. Painting the whole page the same flat
+     --hz-bg as the header (and body) leaves nothing to transition against — the
+     only scroll cue is the header's hairline border. */
+  background: var(--hz-bg);
+  color: var(--hz-text);
+  font-family: var(--hz-font-ui);
+  font-feature-settings: "kern";
+}
+
+.market-detail-page :where(h1, h2, h3, h4, p, button, input, textarea, span, a, li) {
+  text-rendering: geometricPrecision;
+}
+
+.market-detail-page :where(.font-black, .font-bold) {
+  font-weight: 700;
+}
+
+.market-detail-page .market-detail-stage-page-shell {
+  max-width: var(--hz-content-max);
+  /* Small top breath only (~0.6rem). It used to be 1.8rem + the stage's 1.05rem
+     margin = ~47px of headroom above the content. Because the rail/header are
+     sticky, that headroom was "travel": on first scroll the sidebar rose ~40px up
+     to meet the chrome before pinning (Polymarket's pins almost immediately). With
+     the headroom shrunk to ~0.6rem the rail's resting top lands on its sticky line,
+     so it barely moves before pinning — the sidebar reads as fixed until the page
+     end, like Poly. */
+  padding: 0.6rem 1.4rem 4rem;
+}
+
+.market-detail-page .market-detail-stage {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) clamp(19rem, 27vw, 21.5rem);
+  gap: clamp(1.6rem, 3.2vw, 3.25rem);
+  margin-top: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  overflow: visible;
+}
+
+.market-detail-page .market-detail-stage::before {
+  content: none;
+}
+
+.market-detail-page .market-detail-stage-main,
+.market-detail-page .market-detail-stage-rail,
+.market-detail-page .market-detail-stage-side,
+.market-detail-page .market-detail-dossier-main {
+  min-width: 0;
+}
+
+/* Right column (left in RTL) = ticket card + related-markets list beneath it, as ONE
+   sticky unit so the pair moves together and related stays anchored under the ticket
+   on scroll (Poly-style). The SIDE now owns the sticky offset + internal scroll that
+   the rail used to own; the ticket becomes a plain card inside it. Related is
+   JS-relocated into here on desktop (>960px); on mobile it lives under the rules in
+   the main column (see the component script + the max-width:960px reset below). */
+.market-detail-page .market-detail-stage-side {
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  /* A LIGHTWEIGHT sticky positioning wrapper — deliberately NOT a scroll container.
+     Wrapping the ticket's backdrop-filter blur in an `overflow:auto` sticky element
+     forced the compositor to re-rasterize the blur every scroll frame (real-GPU jank,
+     invisible to headless). The ticket keeps its own overflow scroll (below) for tall
+     tickets, so there is only ONE scroll container, as before this slice. */
+  position: sticky;
+  top: calc(var(--hz-shell-spacer) + 1.75rem);
+  margin-top: 1.25rem;
+  align-self: start;
+}
+/* Ticket keeps its own max-height + overflow (unchanged from base) so tall tickets
+   still scroll internally; we only drop its own sticky/offset (the SIDE owns those now)
+   and re-stretch to full column width (align-self:start was a grid-era vertical rule
+   that reads as a horizontal shrink inside this flex column). */
+.market-detail-page .market-detail-stage-side > .market-detail-stage-rail {
+  position: static;
+  align-self: stretch;
+  margin-top: 0;
+}
+
+.market-detail-page .market-detail-stage-main {
+  position: relative;
+  z-index: 1;
+  padding: 0 0 1.35rem;
+}
+
+.market-detail-page .market-detail-stage-head {
+  position: sticky;
+  /* Use the platform shell's spacer token instead of hardcoding 8.25rem.
+     8.25rem == the MOBILE spacer value (matches by coincidence at small
+     font-size), but on DESKTOP the spacer is 6.75rem — the hardcoded
+     value left a ~18px gap below the platform header where the body
+     atmosphere bled through. Reading the token aligns this surface with
+     the platform contract; any responsive shell change tracks here too. */
+  top: var(--hz-shell-spacer);
+  z-index: 40;
+  margin: 0 0 1rem;
+  padding: 0.45rem 0;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  isolation: isolate;
+  overflow: visible;
+}
+
+.market-detail-page .market-detail-stage-head::before {
+  content: "";
+  position: absolute;
+  inset: -0.42rem -1.4rem 0;
+  z-index: -1;
+  /* Flat solid --hz-bg — NOT the page atmosphere. The page's glow is
+     `background-attachment: scroll` (pinned to the document top, scrolls away),
+     but a sticky header painting its own glow would have to use `fixed`
+     (pinned to the viewport top) — so the header keeps a glow the content beside
+     it has already scrolled past, and that tonal mismatch pops in as a band/flash
+     when the header turns opaque. Matching the flat body colour makes the header
+     seamless once you're scrolled past the faint top glow. */
+  background: var(--hz-bg);
+  border-bottom: 1px solid var(--hz-border-soft);
+  opacity: 0;
+  pointer-events: none;
+  /* No opacity fade. The ::before already carries its own solid --hz-bg base, so
+     fading it from 0 did two bad things: (a) while half-opaque, scrolled content
+     bled THROUGH the header (the earlier "ghosting"), and (b) a separate instant
+     base under a fading gradient flashed plain --hz-bg before the atmosphere
+     arrived (the "color flash"). Appearing at full opacity in one step shows the
+     final atmosphere + bg + border immediately — no bleed, no flash. */
+}
+
+.market-detail-page.market-detail-page--has-moved .market-detail-stage-head::before {
+  opacity: 1;
+}
+
+.market-detail-page .market-detail-stage-head-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.market-detail-page .market-detail-topbar {
+  margin-bottom: 0;
+}
+
+
+@media (hover: hover) {
+  .market-detail-page .market-detail-section-title--interactive:hover {
+    color: var(--hz-text-soft);
+  }
+}
+
+.market-detail-page .market-detail-heading {
+  align-items: center;
+  gap: clamp(0.64rem, 1.1vw, 0.92rem);
+}
+
+.market-detail-page .market-detail-brand-mark {
+  flex: 0 0 auto;
+  width: clamp(3.2rem, calc(2.6rem + 1.6vw), 3.9rem);
+  height: clamp(3.2rem, calc(2.6rem + 1.6vw), 3.9rem);
+  border: 1px solid var(--hz-border-soft);
+  border-radius: 0.8rem;
+  box-shadow: none;
+}
+
+.market-detail-page .market-detail-title-block {
+  flex: 1 1 auto;
+  min-width: 0;
+  max-inline-size: min(100%, 52rem);
+}
+
+/* Media-object header: breadcrumb becomes a quiet eyebrow stacked tight
+   above the title, the brand mark spans both lines (centered by the heading). */
+.market-detail-page .market-detail-title-block .hz-breadcrumb {
+  overflow: hidden;
+  max-height: 1.5rem;
+  margin-bottom: 0.16rem;
+  opacity: 1;
+  transition: max-height 220ms ease, opacity 160ms ease, margin-bottom 220ms ease;
+}
+
+/* Scroll fold: when compacted, only the eyebrow collapses — the brand mark stays
+   its full size. That's deliberate: the mark is taller than the title, so it PINS
+   the header's height. If the header height never changes, the sticky header can't
+   reflow the chart/ticket below it (that reflow, re-triggered every frame while
+   scrolling slowly near the threshold, was the "shaking"). The eyebrow folding
+   inside the fixed-height header just lets the title re-center — no layout shift.
+   Driven by --head-compact (hysteresis: add >64px, remove <20px) rather than
+   --has-moved (>4px) so the eyebrow can't flicker on/off near the threshold. */
+.market-detail-page.market-detail-page--head-compact .market-detail-title-block .hz-breadcrumb {
+  max-height: 0;
+  margin-bottom: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.market-detail-page .market-detail-page-title {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  margin-bottom: 0;
+  max-width: none;
+  color: var(--hz-text);
+  font-size: clamp(1.32rem, calc(1.02rem + 0.7vw), 1.6rem);
+  font-weight: 700;
+  line-height: 1.22;
+  letter-spacing: -0.018em;
+  overflow: hidden;
+  text-overflow: clip;
+  white-space: normal;
+}
+
+.market-detail-page .market-detail-page-meta {
+  margin-bottom: 0;
+  gap: 0.26rem 0.58rem;
+  color: var(--hz-text-muted);
+  font-size: 0.66rem;
+  font-weight: 600;
+  line-height: 1.2;
+}
+
+
+
+
+.market-detail-page .market-detail-stage-date-strip {
+  position: relative;
+  z-index: 2;
+  margin: 0.18rem 0 0.86rem;
+  padding: 0.08rem 0 0.56rem;
+  border-bottom: 1px solid var(--hz-border-faint);
+  transition:
+    opacity 160ms ease,
+    max-height 180ms ease,
+    margin 180ms ease,
+    padding 180ms ease;
+}
+
+.market-detail-page .market-detail-chain-rail {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin: -0.18rem 0 0.95rem;
+  overflow: visible;
+}
+
+.market-detail-page .market-detail-chain-rail__label {
+  flex: 0 0 auto;
+  color: var(--hz-text-faint);
+  font-size: 0.72rem;
+  font-weight: 700;
+}
+
+.market-detail-page .market-detail-chain-rail__track {
+  display: flex;
+  align-items: center;
+  gap: 0.42rem;
+  min-width: 0;
+  overflow-x: auto;
+  overscroll-behavior-inline: contain;
+  scrollbar-width: none;
+}
+
+.market-detail-page .market-detail-chain-rail__track::-webkit-scrollbar {
+  display: none;
+}
+
+.market-detail-page .market-detail-chain-past {
+  position: relative;
+  flex: 0 0 auto;
+}
+
+.market-detail-page .market-detail-chain-past > summary {
+  list-style: none;
+  cursor: pointer;
+  user-select: none;
+}
+
+.market-detail-page .market-detail-chain-past > summary::-webkit-details-marker {
+  display: none;
+}
+
+.market-detail-page .market-detail-chain-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 2rem;
+  flex: 0 0 auto;
+  padding: 0.42rem 0.85rem;
+  border: 1px solid transparent;
+  border-radius: var(--hz-radius-pill);
+  background: var(--hz-surface-soft);
+  color: var(--hz-text-muted);
+  font-size: 0.82rem;
+  font-weight: 800;
+  line-height: 1;
+  text-decoration: none;
+  transition:
+    background var(--hz-motion),
+    border-color var(--hz-motion),
+    color var(--hz-motion);
+}
+
+.market-detail-page .market-detail-chain-pill--current {
+  background: var(--hz-text);
+  color: var(--hz-bg);
+}
+
+.market-detail-page .market-detail-chain-pill--past {
+  color: var(--hz-text-soft);
+}
+
+.market-detail-page .market-detail-chain-pill--past-toggle {
+  gap: 0.18rem;
+  color: var(--hz-text-soft);
+}
+
+.market-detail-page .market-detail-chain-past__chevron {
+  font-size: 1rem;
+  transition: transform var(--hz-motion);
+}
+
+.market-detail-page .market-detail-chain-past[open] .market-detail-chain-past__chevron {
+  transform: rotate(180deg);
+}
+
+.market-detail-page .market-detail-chain-past__menu {
+  position: absolute;
+  inset-block-start: calc(100% + 0.48rem);
+  inset-inline-start: 0;
+  z-index: 60;
+  display: grid;
+  gap: 0.14rem;
+  min-width: 12.5rem;
+  max-height: min(24rem, calc(100vh - 14rem));
+  /* dynamic viewport: don't size past the visible area when the iOS bar is shown */
+  max-height: min(24rem, calc(100dvh - 14rem));
+  padding: 0.42rem;
+  overflow: auto;
+  border: 1px solid var(--hz-border-soft);
+  border-radius: 0.92rem;
+  background: color-mix(in srgb, var(--hz-bg) 94%, var(--hz-surface-3));
+  box-shadow: 0 1.15rem 2.8rem rgba(0, 0, 0, 0.34);
+}
+
+.market-detail-page .market-detail-chain-past__item {
+  display: flex;
+  align-items: center;
+  gap: 0.58rem;
+  padding: 0.66rem 0.72rem;
+  border-radius: 0.68rem;
+  color: var(--hz-text-soft);
+  font-size: 0.82rem;
+  font-weight: 780;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.market-detail-page .market-detail-chain-past__item .material-symbols-outlined {
+  color: var(--hz-text-muted);
+  font-size: 1rem;
+}
+
+@media (hover: hover) {
+  .market-detail-page a.market-detail-chain-pill:hover,
+  .market-detail-page .market-detail-chain-past > summary:hover {
+    border-color: var(--hz-border-soft);
+    background: var(--hz-surface-3);
+    color: var(--hz-text);
+  }
+
+  .market-detail-page .market-detail-chain-past__item:hover {
+    background: var(--hz-surface-soft);
+    color: var(--hz-text);
+  }
+}
+
+@media (min-width: 701px) {
+  .market-detail-page .market-detail-chain-pill--hide-desktop {
+    display: none;
+  }
+}
+
+@media (max-width: 700px) {
+  .market-detail-page .market-detail-chain-pill--hide-mobile {
+    display: none;
+  }
+}
+
+
+.market-detail-page .market-detail-action-row {
+  gap: 0.34rem;
+  margin-top: 0;
+  padding-top: 0;
+  flex-wrap: nowrap;
+}
+
+.market-detail-page:not(.market-detail-page--scrolled) .hz-date-rail {
+  padding-top: 0.04rem;
+}
+
+
+.market-detail-page.market-detail-page--scrolled .market-detail-stage-head {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* The old --stage-scrolled compactions (title single-line ellipsis, heading
+   re-center, meta-row appearance, date-rail/date-strip collapse, icon-action
+   padding shrink) were removed in slice 2b. They created visible hard breaks
+   at scrollY=190 with the new stable title size — the sticky bar should look
+   the same whether you've scrolled 50px or 5000px. */
+
+
+.market-detail-page .market-detail-stage-chart {
+  position: relative;
+  z-index: 1;
+  padding: 0.15rem 0 0.92rem;
+  /* No outer chart border-bottom — the `hz-chart__footer` pattern paints
+     its own border-top to separate the chart body from its controls,
+     and `market-detail-trust-shell` (or the viewer-positions panel when
+     present) carries the next separator. Stacking three lines on a
+     binary no-positions page reads as clutter. */
+}
+
+/* Binary layout slots — hero above chart, viewer-positions below.
+   Both mount points are page-arrangement, not patterns; the
+   patterns (`hz-probability-hero`, `hz-viewer-positions`) own their
+   internal layout. These rules govern outer spacing and the
+   empty-state collapse (when no layout fills them, no space). */
+.market-detail-page .market-detail-stage-hero {
+  padding: 0.4rem 0 0.85rem;
+}
+
+.market-detail-page .market-detail-stage-hero:empty {
+  display: none;
+}
+
+.market-detail-page .market-detail-stage-viewer-positions {
+  padding: 1rem 0 1rem;
+  /* No border-bottom here — `.market-detail-trust-shell` already paints a
+     border-top that serves as the single separator between viewer-positions
+     and the trust section below. */
+}
+
+.market-detail-page .market-detail-stage-viewer-positions:empty {
+  display: none;
+  padding: 0;
+}
+
+/* chart-container-ltr override folded into patterns/chart.css (Wave 3, slice 4) */
+
+.market-detail-page .market-detail-stage-hinge {
+  padding-top: 0.72rem;
+}
+
+/* When binary layout is active, the outcomes mount stays empty —
+   collapse the hinge so the page does not show ghost padding. */
+.market-detail-page .market-detail-stage-hinge:empty {
+  display: none;
+  padding: 0;
+}
+
+.market-detail-page .market-detail-outcomes-toolbar {
+  display: none;
+}
+
+.market-detail-page .market-detail-outcomes-toolbar-copy {
+  gap: 0.1rem;
+}
+
+.market-detail-page .market-detail-outcomes-toolbar-kicker,
+.market-detail-page .market-detail-outcomes-head {
+  color: var(--hz-text-faint);
+  font-size: 0.76rem;
+  letter-spacing: 0;
+  line-height: 1.35;
+}
+
+.market-detail-page .market-detail-outcomes-toolbar-value {
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+
+.market-detail-page .market-detail-outcomes-head {
+  display: none;
+}
+
+.market-detail-page .market-detail-stage-rail {
+  position: sticky;
+  /* Rail steps ~1.75rem (~28px) below the stage-head so the headline anchors the
+     top and the ticket sits just beneath it. The SAME offset goes on margin-top so
+     the rail STARTS where it pins — bumping only `top` would make it rise that
+     distance on first scroll (the travel we just removed). margin-top and top must
+     move together to keep the no-rise behavior. */
+  top: calc(var(--hz-shell-spacer) + 1.75rem);
+  margin-top: 1.25rem;
+  z-index: 1;
+  align-self: start;
+  /* Polymarket-style sticky panel: it moves with the page AND can scroll its own
+     content (so the submit stays reachable when the ticket is taller than the
+     viewport) — but the inner scrollbar is HIDDEN (scrollbar-width + ::-webkit
+     below), so the scroll works without ever showing a bar. */
+  max-height: calc(100vh - var(--hz-shell-spacer) - 1.75rem - 0.70rem);
+  /* dynamic viewport: don't size past the visible area when the iOS bar is shown */
+  max-height: calc(100dvh - var(--hz-shell-spacer) - 1.75rem - 0.70rem);
+  overflow-y: auto;
+  overflow-x: hidden;
+  scrollbar-width: none; /* Firefox */
+  border: 1px solid var(--hz-border-soft);
+  border-radius: 1.12rem;
+  background:
+    radial-gradient(circle at 22% 0%, rgba(49, 130, 246, 0.1), transparent 11rem),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.038), rgba(255, 255, 255, 0.012)),
+    rgba(8, 14, 25, 0.76);
+  box-shadow: 0 22px 54px rgba(2, 8, 23, 0.26);
+  padding: 0.92rem;
+  backdrop-filter: blur(18px) saturate(1.12);
+  box-sizing: border-box;
+}
+
+/* Hide the rail's inner scrollbar (Chrome/Brave/Safari) — the panel still
+   scrolls its own content; the bar just never shows. Pairs with scrollbar-width
+   on the rail rule above. */
+.market-detail-page .market-detail-stage-rail::-webkit-scrollbar {
+  display: none;
+}
+
+.market-detail-page .market-detail-stage-rail-backdrop,
+.market-detail-page .market-detail-stage-mobile-ticket {
+  display: none;
+}
+
+.market-detail-page .market-detail-stage-order-widget {
+  top: 6.5rem;
+  gap: 0.86rem;
+}
+
+.market-detail-page .market-detail-related-card {
+  border-color: var(--hz-border-soft);
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+@media (hover: hover) {
+  .market-detail-page .market-detail-related-card:hover {
+    border-color: var(--hz-border);
+  }
+}
+
+.market-detail-page .market-detail-dossier {
+  padding-top: 0.85rem;
+}
+
+.market-detail-page .market-detail-dossier-main {
+  max-width: min(100%, 64rem);
+}
+
+/* Neither `.market-detail-trust-shell` nor `.market-detail-section--community`
+   carries a page-arrangement border-top. Their inner patterns (`.hz-trust-shell`
+   with `border-block`, `.hz-social-shell` with `border-bottom`) already paint
+   the right hairlines. Adding page-level border-tops here stacks two lines
+   per boundary. */
+
+.market-detail-page .market-detail-trust-shell {
+  display: grid;
+  gap: 0.65rem;
+  padding-top: 0.82rem;
+}
+
+.market-detail-page .market-detail-section--stage {
+  padding-top: 0;
+}
+
+.market-detail-page .market-detail-section--timeline {
+  margin-top: 0;
+}
+
+.market-detail-page .market-detail-section--timeline:has([data-market-detail-timeline][hidden]) {
+  margin-top: 0.25rem;
+  padding-bottom: 0;
+}
+
+.market-detail-page .market-detail-section-toggle {
+  width: 100%;
+  min-height: 1.95rem;
+  padding: 0.22rem 0;
+}
+
+.market-detail-page .market-detail-section--timeline:has([data-market-detail-timeline][hidden]) .market-detail-section-toggle {
+  min-height: 1.9rem;
+  opacity: 0.76;
+}
+
+.market-detail-page .market-detail-section--timeline [data-market-detail-timeline] > .market-detail-content-panel {
+  max-width: 32rem;
+}
+
+.market-detail-page .market-detail-section-title {
+  font-size: 0.9rem;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.market-detail-page .market-detail-copy-block,
+.market-detail-page .market-detail-copy-block p {
+  max-width: 48rem;
+}
+
+.market-detail-page .market-detail-copy-block ul {
+  display: grid;
+  gap: 0.48rem;
+  max-width: 48rem;
+}
+
+.market-detail-page .market-detail-payment-card {
+  border: 0;
+  border-top: 1px solid var(--hz-border-soft);
+  border-radius: 0;
+  background: transparent;
+  padding: 1.25rem 0 0;
+}
+
+
+.market-detail-page .market-detail-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+@media (max-width: 1180px) {
+  .market-detail-page .market-detail-stage-page-shell {
+    padding-inline: 1.1rem;
+  }
+
+  .market-detail-page .market-detail-stage {
+    grid-template-columns: minmax(0, 1fr) 20rem;
+    gap: 1.4rem;
+  }
+
+  .market-detail-page .market-detail-page-title {
+    font-size: clamp(1.3rem, calc(1rem + 0.85vw), 1.5rem);
+  }
+
+    .market-detail-page .market-detail-stage-rail {
+    padding: 1.1rem;
+  }
+
+  }
+
+@media (max-width: 960px) {
+  .market-detail-page.market-detail-page--ticket-open {
+    /* clip, NOT hidden: `overflow: hidden` makes this element a scroll container,
+       which re-bases the sticky stage-head (top: var(--hz-shell-spacer)) to THIS box
+       — so on open the header lost its stuck offset and snapped ~200px up to its flow
+       position (the visible "header jump"). `clip` clips identically but is not a
+       scroll container, so the header keeps sticking against the window. Body scroll
+       is still locked by `body.overlay-open`. (overflow-x: clip already used below.) */
+    overflow: clip;
+  }
+
+  .market-detail-page .market-detail-stage-page-shell {
+    padding-bottom: 1.5rem;
+    overflow-x: clip;
+  }
+
+  .market-detail-page .market-detail-stage {
+    grid-template-columns: minmax(0, 1fr);
+    overflow-x: clip;
+  }
+
+  .market-detail-page .market-detail-stage-main {
+    overflow-x: clip;
+  }
+
+  .market-detail-page .market-detail-stage-rail {
+    position: fixed;
+    inset: 0;
+    top: 0;
+    z-index: 90;
+    display: block;
+    height: 100vh;
+    height: 100dvh; /* dynamic viewport: don't size past the visible area when the iOS bar is shown */
+    max-height: none;
+    overflow: hidden;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    padding: 0;
+    opacity: 0;
+    pointer-events: none;
+    visibility: hidden;
+    backdrop-filter: none;
+    /* Matched to the sheet's slide so the scrim stays painted through the full
+       close animation (visibility:hidden flipping early would clip the slide-out). */
+    transition:
+      opacity 300ms ease,
+      visibility 300ms ease;
+  }
+
+  /* Mobile: the sidebar wrapper is no longer a sticky column (related renders under
+     the rules in the main column here); only the rail keeps its fixed-drawer role. */
+  .market-detail-page .market-detail-stage-side {
+    position: static;
+    max-height: none;
+    overflow: visible;
+    margin-top: 0;
+  }
+
+  .market-detail-page.market-detail-page--ticket-open .market-detail-stage-rail {
+    opacity: 1;
+    pointer-events: auto;
+    visibility: visible;
+  }
+
+  .market-detail-page .market-detail-stage-rail-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    display: block;
+    /* Deeper scrim than the old centered modal (0.2): a bottom sheet pulls focus
+       to the sheet, and the dimmer page reads as "the rest is paused". */
+    background: rgba(2, 8, 19, 0.5);
+  }
+
+  /* ── Trade ticket as a BOTTOM SHEET (was a centered modal) ──────────────────
+     Pinned to the bottom edge, full-bleed on phones, slides up from below. This
+     puts the whole ticket — and crucially the confirm button at its end — in the
+     natural thumb arc, instead of floating mid-screen. Rounded top + drag handle
+     read it as a sheet; safe-area padding clears the home indicator. */
+  .market-detail-page .market-detail-stage-order-widget {
+    position: fixed;
+    inset: auto 0 0 0;
+    top: auto;
+    left: 0;
+    z-index: 1;
+    width: 100%;
+    /* Full-bleed on phones; a centered sheet on tablets (≤960 covers both). */
+    max-width: 32rem;
+    margin-inline: auto;
+    max-height: min(90dvh, 42rem);
+    overflow-y: auto;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior: contain;
+    border: 1px solid var(--hz-border-soft);
+    border-bottom: 0;
+    border-radius: 1.4rem 1.4rem 0 0;
+    background:
+      radial-gradient(circle at 20% 0%, rgba(122, 174, 230, 0.12), transparent 12rem),
+      linear-gradient(180deg, rgba(255, 255, 255, 0.052), rgba(255, 255, 255, 0.018)),
+      var(--hz-bg-raised);
+    /* Shadow casts UPWARD now (the sheet sits at the bottom edge). */
+    box-shadow: 0 -18px 50px rgba(0, 0, 0, 0.5);
+    /* Top pad leaves room for the drag handle; bottom pad clears the home bar.
+       --hz-kb-overlap is set by TradeTicket.jsx's visualViewport handler while
+       the keyboard is up (0px otherwise / no-JS) — it pushes the submit row
+       above the keyboard without translating the whole sheet. */
+    padding: 1.6rem 1rem calc(1rem + env(safe-area-inset-bottom) + var(--hz-kb-overlap, 0px));
+    box-sizing: border-box;
+    transform: translateY(100%);
+    transition: transform 300ms cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+  }
+
+  /* Grab-handle affordance — signifies "sheet" and is the swipe-down target. */
+  .market-detail-page .market-detail-stage-order-widget::before {
+    content: "";
+    position: absolute;
+    top: 0.6rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 2.5rem;
+    height: 0.3rem;
+    border-radius: var(--hz-radius-pill);
+    background: var(--hz-border-strong);
+    pointer-events: none;
+  }
+
+  .market-detail-page.market-detail-page--ticket-open .market-detail-stage-order-widget {
+    transform: translateY(0);
+  }
+
+  /* While the user is dragging the sheet, kill the transition so it tracks the
+     finger 1:1 (JS sets --sheet-drag); the release re-enables it for the snap. */
+  .market-detail-page .market-detail-stage-order-widget.is-dragging {
+    transition: none;
+  }
+
+  .market-detail-page .market-detail-stage-mobile-ticket {
+    display: none;
+  }
+
+  .market-detail-page .market-detail-stage-mobile-ticket span {
+    font-size: 0.75rem;
+    font-weight: 700;
+    opacity: 0.76;
+  }
+
+  .market-detail-page .market-detail-stage-mobile-ticket b {
+    color: #02100b;
+    font-size: 0.92rem;
+    font-weight: 800;
+  }
+
+  .market-detail-page.market-detail-page--ticket-open .market-detail-stage-mobile-ticket {
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(0.8rem);
+  }
+}
+
+@media (max-width: 767px) {
+  /* Mobile action-row: drop comment + download icons. Comment is
+     redundant (the comments section is on the same page, scrollable);
+     download is a desktop-only export use case. Keep only bookmark
+     and share — the two actions that matter on a phone. */
+  .market-detail-page .hz-icon-action[data-topbar-action="download"],
+  .market-detail-page a.hz-icon-action[href="#comments-section"] {
+    display: none;
+  }
+
+  .market-detail-page .market-detail-stage-page-shell {
+    padding-inline: 0.75rem;
+    overflow-x: clip;
+  }
+
+  .market-detail-page .market-detail-stage {
+    margin-top: 0.72rem;
+    overflow-x: clip;
+  }
+
+  .market-detail-page .market-detail-stage-main {
+    overflow-x: clip;
+  }
+
+  .market-detail-page .market-detail-stage-rail {
+    padding-inline: 0.75rem;
+  }
+
+  .market-detail-page .market-detail-stage-main {
+    padding-top: 0.9rem;
+  }
+
+  .market-detail-page .market-detail-stage-head {
+    position: sticky;
+    top: var(--hz-shell-spacer);
+    /* Static margin + symmetric padding — the sticky bar should look
+       the same whether you've scrolled 50px or 5000px (slice 2b
+       doctrine, see line 422 comment block above). The previous
+       `calc(... * var(--hz-scroll-progress))` rules ran 190px of
+       padding-top growth + padding-bottom shrink + margin-bottom
+       shrink while the header was sticking, which read as a "bump"
+       — the header moved up into place AND its inner spacing shifted
+       at the same time. Values below are the resolved scroll-progress=1
+       state, the canonical post-scroll look.
+       Desktop equivalent (line 287) was already static; this matches. */
+    margin: 0 -0.22rem 0.72rem;
+    padding: 0.30rem 0.22rem;
+    background: transparent;
+    backdrop-filter: none;
+  }
+
+  .market-detail-page .market-detail-stage-head::before {
+    inset: -0.4rem -0.75rem -0.54rem;
+  }
+
+  /* Mobile head-grid: keep title block + action icons on one row so
+     the icons sit at the top-end corner of the title (RTL = top-left
+     visually) rather than stacking below and consuming a whole row
+     of their own. Title gets the flexible track; icons get auto. */
+  .market-detail-page .market-detail-stage-head-grid,
+  .market-detail-page.market-detail-page--scrolled .market-detail-stage-head-grid {
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.45rem;
+    align-items: start;
+  }
+
+  /* Inline icons should sit beside the title's *first* line. The
+     topbar-main column carries TWO stacked rows internally — a
+     breadcrumb (height ~16px) and the heading block. By default the
+     action-row aligns to the breadcrumb top; we need to clear the
+     breadcrumb's height + gap so the icons land at the title's first
+     line center. Measured offset on iPhone 14 Pro profile: ~1.2rem. */
+  .market-detail-page .market-detail-action-row {
+    display: flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding-top: 1.2rem;
+  }
+
+  .market-detail-page .market-detail-action-row .hz-icon-action {
+    width: 2rem;
+    height: 2rem;
+  }
+
+  .market-detail-page .market-detail-action-row .hz-icon-action .material-symbols-outlined {
+    font-size: 1.05rem;
+  }
+
+  .market-detail-page .market-detail-heading {
+    gap: 0.56rem;
+  }
+
+  .market-detail-page .market-detail-brand-mark {
+    width: 3.2rem;
+    height: 3.2rem;
+  }
+
+  .market-detail-page .market-detail-page-title {
+    font-size: clamp(1.28rem, calc(0.96rem + 1.1vw), 1.55rem);
+    line-height: 1.22;
+    white-space: normal;
+  }
+
+  /* (Earlier rule that set `justify-content: flex-start; padding-top:
+     0.12rem` on the action-row was folded into the head-grid block
+     above where the action-row's own track now controls its placement.) */
+
+  /* chart-container-ltr mobile override folded into patterns/chart.css */
+
+  .market-detail-page .market-detail-outcomes-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+      /* outcome-row mobile rules folded into patterns/outcome-ladder.css */
+
+    }
+
+@media (max-width: 520px) {
+  .market-detail-page .market-detail-stage-page-shell {
+    padding-inline: 0.55rem;
+  }
+
+  .market-detail-page .market-detail-stage-head {
+    margin-inline: -0.12rem;
+    padding-inline: 0.12rem;
+  }
+
+  .market-detail-page .market-detail-stage-head::before {
+    inset-inline: -0.55rem;
+  }
+
+  .market-detail-page .market-detail-heading {
+    gap: 0.48rem;
+  }
+
+  .market-detail-page .market-detail-brand-mark {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 0.68rem;
+  }
+
+  .market-detail-page .market-detail-page-title {
+    -webkit-line-clamp: 3;
+    font-size: clamp(1.22rem, calc(0.96rem + 0.8vw), 1.42rem);
+    letter-spacing: -0.018em;
+  }
+
+  /* date-pill mobile breakpoint folded into patterns/date-rail.css (Wave 2, slice 4) */
+}

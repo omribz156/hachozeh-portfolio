@@ -1,0 +1,107 @@
+---
+// Help Center hub (/help). PRERENDERED to static HTML via the shell-less HelpLayout
+// (no SiteHeader / auth shell), so there's no SSR-baked auth state to get stuck —
+// the trade-off that forced the earlier revert. Everything here is build-time content.
+export const prerender = true;
+import HelpLayout from '../../layouts/HelpLayout.astro';
+import HelpSearch from '../../components/help/HelpSearch.astro';
+import { getCollection } from 'astro:content';
+import {
+  HELP_TOPICS,
+  HELP_FEATURED,
+  HELP_CONTACT_EMAIL,
+  helpTopicPath,
+  helpArticlePath,
+  articleSlugFromId,
+  topicArticleCount,
+  buildSearchIndex,
+  visibleHelpEntries,
+} from '../../lib/help-content.js';
+import '../../styles/pages/help-center.css';
+
+const entries = visibleHelpEntries((await getCollection('help')) as any[]);
+const searchIndex = buildSearchIndex(entries);
+const byKey = new Map(entries.map((e) => [`${e.data.topic}/${articleSlugFromId(e.id)}`, e]));
+
+const featured = HELP_FEATURED
+  .map((f) => {
+    const e = byKey.get(`${f.topic}/${f.slug}`) as any;
+    return e ? { title: e.data.title, href: helpArticlePath(f.topic, f.slug) } : null;
+  })
+  .filter(Boolean);
+
+const topics = HELP_TOPICS.map((t) => ({
+  ...t,
+  count: topicArticleCount(entries, t.slug),
+  href: helpTopicPath(t.slug),
+}));
+---
+
+<HelpLayout
+  title="מרכז עזרה · החוזה"
+  description="מרכז העזרה של החוזה — מדריכים, הסברים, ותשובות לשאלות נפוצות על הפלטפורמה, על V₪, ועל איך עובדים שווקי החיזוי."
+  canonicalPath="/help"
+  robots="index, follow"
+>
+  <div class="hz-help">
+    <section class="hz-help__hero hz-help__container">
+      <div class="hz-help-crumb">
+        <a href="/">החוזה</a>
+        <span class="hz-help-crumb__sep">/</span>
+        <span class="hz-help-crumb__current">מרכז עזרה</span>
+      </div>
+      <div class="hz-help__eyebrow">מדריך לפלטפורמה</div>
+      <h1>איך לעבוד עם החוזה</h1>
+      <p class="hz-help__lede">
+        איך עובדים השווקים, מה אנחנו עושים עם המחירים, ולמה ה-V₪ נשאר בתוך המערכת. חפשו תשובה או דפדפו בנושאים.
+      </p>
+      <HelpSearch articles={searchIndex} placeholder="חפשו במרכז העזרה — למשל איך נסגר שוק" />
+    </section>
+
+    <section class="hz-help__block hz-help__container">
+      <div class="hz-help__block-label">
+        <span>התחילו כאן</span>
+        <span class="hz-help__dash"></span>
+      </div>
+      <h2 class="sr-only">מאמרים מומלצים</h2>
+      <div class="hz-help-featured">
+        {featured.map((f) => (
+          <a href={f.href} class="hz-help-featured__link">
+            <span>{f.title}</span>
+            <svg class="hz-help-featured__arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </a>
+        ))}
+      </div>
+    </section>
+
+    <section class="hz-help__block hz-help__container">
+      <div class="hz-help__block-label">
+        <span>נושאים</span>
+        <span class="hz-help__dash"></span>
+      </div>
+      <h2 class="sr-only">נושאי עזרה</h2>
+      <div class="hz-help-cards">
+        {topics.map((t) => (
+          <a href={t.href} class="hz-help-card">
+            <div class="hz-help-card__top">
+              <span class="hz-help-card__num">{t.index}</span>
+              <span class="hz-help-card__count">{t.count} מאמרים</span>
+            </div>
+            <h3>{t.title}</h3>
+            <p>{t.description}</p>
+            <div class="hz-help-card__foot">
+              <span>עברו לנושא</span>
+              <svg class="hz-help-card__arrow" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+            </div>
+          </a>
+        ))}
+      </div>
+
+      <div class="hz-help__contact">
+        <strong>שאלה שלא נענתה?</strong>
+        <span>כתבו לנו —</span>
+        <a href={`mailto:${HELP_CONTACT_EMAIL}`}>{HELP_CONTACT_EMAIL}</a>
+      </div>
+    </section>
+  </div>
+</HelpLayout>

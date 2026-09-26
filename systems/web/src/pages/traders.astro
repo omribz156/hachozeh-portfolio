@@ -1,0 +1,106 @@
+---
+// Public forecaster directory — a lightweight crawl BRIDGE. Its job is to give
+// crawlers server-rendered <a href="/@handle"> links to every public profile, so
+// profiles (which are in the sitemap but otherwise have no crawlable inbound links)
+// get discovered and prioritized. Deliberately minimal — the real leaderboard
+// (ranking, stats, filters) is a later product surface that can replace/extend this
+// at the same URL. SSR so the links are in the initial HTML (the whole point).
+import Layout from '../layouts/Layout.astro';
+import { fetchPublicProfileCatalog } from '../lib/public-profile-catalog.js';
+import { buildCanonicalUrl, buildWebPageJsonLd, buildBreadcrumbJsonLd } from '../lib/seo.js';
+
+const TITLE = 'סוחרים · החוזה';
+const DESCRIPTION = 'מדריך הפרופילים הציבוריים של החוזה — הרקורד, הדיוק והפוזיציות של חוזים בקהילה.';
+const CANONICAL = '/traders';
+
+// Drop smoke/QA/test accounts so the public directory (and its crawl signal) stays
+// real. Prod is already clean; this guards against test handles ever leaking in.
+const TEST_HANDLE = /^(auth[_-]?smoke|check[_-]|stress|gauntlet|smoke[_-]|e2e|qa[_-]|test[_-])/i;
+
+let profiles = [];
+try {
+  const catalog = await fetchPublicProfileCatalog({ limit: 300 });
+  profiles = (catalog?.profiles ?? [])
+    .filter((p) => p?.handle && !TEST_HANDLE.test(p.handle))
+    .map((p) => ({ handle: p.handle, name: p.displayName || `@${p.handle}` }));
+} catch (e) {
+  console.error('[traders] profile catalog fetch failed', e);
+}
+
+const structuredData = [
+  buildWebPageJsonLd({
+    title: TITLE,
+    description: DESCRIPTION,
+    canonicalUrl: buildCanonicalUrl(CANONICAL),
+    type: 'CollectionPage',
+  }),
+  buildBreadcrumbJsonLd({
+    items: [
+      { name: 'החוזה', href: '/' },
+      { name: 'סוחרים', href: CANONICAL },
+    ],
+  }),
+];
+---
+
+<Layout title={TITLE} description={DESCRIPTION} canonicalPath={CANONICAL} structuredData={structuredData}>
+  <main class="traders">
+    <div class="traders__inner">
+      <nav class="traders__crumb" aria-label="breadcrumb">
+        <a href="/">החוזה</a><span class="traders__crumb-sep">/</span><span>סוחרים</span>
+      </nav>
+      <h1 class="traders__title">סוחרים</h1>
+      <p class="traders__lede">הפרופילים הציבוריים של קהילת החוזה — לחצו על שם כדי לראות את הרקורד, הדיוק והפוזיציות.</p>
+      {profiles.length > 0 ? (
+        <ul class="traders__grid">
+          {profiles.map((p) => (
+            <li class="traders__item">
+              <a class="traders__link" href={`/@${p.handle}`}>
+                <span class="traders__name">{p.name}</span>
+                <span class="traders__handle">@{p.handle}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <p class="traders__empty">אין כרגע פרופילים ציבוריים להצגה.</p>
+      )}
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .traders { padding-block: clamp(1.5rem, 4vw, 3rem); }
+  .traders__inner {
+    max-width: var(--hz-content-max, 1280px);
+    margin: 0 auto;
+    padding-inline: var(--hz-content-pad, 1.5rem);
+  }
+  .traders__crumb {
+    display: flex; align-items: center; gap: 0.4rem;
+    font-size: 0.8rem; color: var(--hz-text-faint, #8a857b); margin-bottom: 0.75rem;
+  }
+  .traders__crumb a { color: inherit; text-decoration: none; }
+  .traders__crumb a:hover { color: var(--hz-text-soft, #b9b3a7); }
+  .traders__title { font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 800; color: var(--hz-text, #f4f1ea); margin: 0 0 0.4rem; }
+  .traders__lede { color: var(--hz-text-soft, #b9b3a7); margin: 0 0 1.75rem; max-width: 42rem; }
+  .traders__grid {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; gap: 0.6rem;
+    grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+  }
+  .traders__item { margin: 0; }
+  .traders__link {
+    display: flex; flex-direction: column; gap: 0.15rem;
+    padding: 0.7rem 0.85rem;
+    border: 1px solid var(--hz-border-soft, rgba(255,255,255,0.1));
+    border-radius: var(--hz-radius-md, 0.6rem);
+    background: var(--hz-surface, rgba(255,255,255,0.03));
+    text-decoration: none;
+    transition: border-color 120ms ease, background 120ms ease;
+  }
+  .traders__link:hover { border-color: var(--hz-border, rgba(255,255,255,0.2)); background: var(--hz-surface-soft, rgba(255,255,255,0.06)); }
+  .traders__name { font-weight: 600; color: var(--hz-text, #f4f1ea); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .traders__handle { font-size: 0.8rem; color: var(--hz-text-faint, #8a857b); direction: ltr; text-align: start; }
+  .traders__empty { color: var(--hz-text-soft, #b9b3a7); }
+</style>

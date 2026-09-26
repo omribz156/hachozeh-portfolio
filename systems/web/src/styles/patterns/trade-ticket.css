@@ -1,0 +1,1038 @@
+/* Trade ticket (Phase 3.3) — the rail buy/sell order widget.
+   Ported VERBATIM from the legacy market-detail ticket design
+   (systems/front: patterns/binary-pill-duo.css, patterns/trade-ticket.css,
+   patterns/button-primary.css, pages/market-detail.css). Behavior is the
+   Preact island TradeTicket.jsx bound to these data-hooks. Tokens (--hz-*)
+   resolve from base/tokens.css; slate/success utilities from tailwind config. */
+
+/* ---- panel reset + a11y utility ---- */
+.market-detail-panel {
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+}
+.market-detail-visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---- ticket root ---- */
+.hz-trade-ticket {
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+.hz-trade-ticket--binary {
+  gap: 0.86rem;
+}
+
+/* ---- multi-outcome context header ---- */
+.hz-trade-ticket__header {
+  display: flex;
+  align-items: flex-start;
+  /* Price block removed → the lone outcome/context block sits at the RTL end
+     (visual left), mirroring the binary ticket's side label placement. */
+  justify-content: flex-end;
+  gap: 0.62rem;
+  padding-bottom: 0.78rem;
+  border-bottom: 1px solid var(--hz-border-faint);
+}
+
+.hz-trade-ticket__heading-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.7rem;
+}
+
+.hz-trade-ticket__icon {
+  display: inline-flex;
+  width: 1.14rem;
+  height: 1.14rem;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.1rem;
+  border-radius: var(--hz-radius-pill);
+  background: rgb(255 255 255 / 0.045);
+  color: var(--hz-text-faint);
+  transition: background-color var(--hz-motion), color var(--hz-motion);
+}
+
+.hz-trade-ticket__trend-icon {
+  position: relative;
+  display: block;
+  width: 0.92rem;
+  height: 0.92rem;
+}
+
+.hz-trade-ticket__trend-icon svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.hz-trade-ticket__trend-line {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.35;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.hz-trade-ticket__trend-line--down,
+.hz-trade-ticket__trend-icon[data-icon-state='down'] .hz-trade-ticket__trend-line--up {
+  display: none;
+}
+
+.hz-trade-ticket__trend-icon[data-icon-state='down'] .hz-trade-ticket__trend-line--down {
+  display: block;
+}
+
+.hz-trade-ticket__state-line {
+  display: block;
+  margin-bottom: 0.12rem;
+  color: var(--hz-text-faint);
+  font-size: 0.68rem;
+  font-weight: 600;
+}
+
+.hz-trade-ticket__title {
+  display: block;
+  color: var(--hz-text);
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.22;
+}
+
+.hz-trade-ticket__price-block {
+  min-width: 4.2rem;
+  text-align: left;
+}
+
+.hz-trade-ticket__price-label {
+  display: block;
+  margin-bottom: 0.18rem;
+  color: var(--hz-text-faint);
+  font-size: 0.66rem;
+  font-weight: 600;
+}
+
+.hz-trade-ticket__price-value {
+  font-family: var(--hz-font-mono);
+  font-size: 0.94rem;
+}
+
+.hz-trade-ticket__price-accent {
+  color: var(--hz-text-soft);
+  transition: color var(--hz-motion);
+}
+
+.hz-trade-ticket[data-order-side='sell'] .hz-trade-ticket__price-accent {
+  color: var(--hz-action-sell-strong);
+}
+
+/* ---- ticket context header (binary + multi) ----
+   Stacked: market name on top, then a row of outcome (RTL start) + yes/no (RTL end). */
+.hz-trade-ticket__context-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.6rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--hz-border-faint);
+  min-width: 0;
+}
+/* Text stack beside the leading flag: market name on top, outcome row below. */
+.hz-trade-ticket__context-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.32rem;
+  min-width: 0;
+  flex: 1 1 auto;
+}
+.hz-trade-ticket__context-title {
+  min-width: 0;
+  color: var(--hz-text-soft);
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  line-height: 1.3;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.hz-trade-ticket__context-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.55rem;
+  min-width: 0;
+}
+/* Selected-outcome flag/crest — leads the whole header (spanning the market name +
+   the outcome row), swapping with the binary side (Brazil ⇄ Japan) or the chosen
+   multi outcome so the ticket mirrors the ladder/hero. Absent when the outcome has
+   no crest (yes/no, non-sports). */
+.hz-trade-ticket__context-crest {
+  position: relative;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  inline-size: 2.5rem;
+  block-size: 2.5rem;
+  border-radius: var(--hz-radius-sm);
+  overflow: hidden;
+  border: 1px solid var(--hz-border-soft);
+  background: var(--hz-surface-2);
+}
+.hz-trade-ticket__context-crest img {
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  display: block;
+}
+/* Stacked crests (all outcomes mounted): only the active one is visible. Toggling
+   opacity is compositor-only — instant, and never re-fetches the image. */
+.hz-trade-ticket__context-crest-img {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+}
+.hz-trade-ticket__context-crest-img[data-crest-active] {
+  opacity: 1;
+}
+/* Draw/tie glyph in the ticket crest — mirrors the ladder's "=" mark. */
+.hz-trade-ticket__context-crest-glyph {
+  inline-size: 60%;
+  block-size: 60%;
+  fill: var(--hz-text-soft);
+}
+.hz-trade-ticket__context-side {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: var(--hz-font-ui);
+  font-size: 0.96rem;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+.hz-trade-ticket__context-yesno {
+  flex: 0 0 auto;
+  color: var(--hz-text-muted);
+  font-family: var(--hz-font-ui);
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+/* yes/no wears the same green/red as its buy/no CTAs. */
+.hz-trade-ticket__context-yesno--yes {
+  color: var(--hz-action-buy);
+}
+.hz-trade-ticket__context-yesno--no {
+  color: var(--hz-action-sell-strong);
+}
+.hz-trade-ticket__context-side--yes {
+  color: var(--hz-action-buy);
+}
+.hz-trade-ticket__context-side--no {
+  color: var(--hz-action-sell-strong);
+}
+/* Team-colored markets: the side label (top-left of the binary ticket) wears the
+   active side's kit color (--cta-team tracks contractSide on the ticket root). */
+.hz-trade-ticket[data-team-colored] .hz-trade-ticket__context-side {
+  color: var(--cta-team);
+}
+
+/* ---- side toggle (buy/sell) ---- */
+.hz-side-toggle {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  border: 1px solid var(--hz-border-faint);
+  border-radius: var(--hz-radius-md);
+  background: linear-gradient(180deg, rgb(15 23 42 / 0.9), rgb(15 23 42 / 0.72));
+  padding: 0.35rem;
+  font-size: 0.875rem;
+  font-weight: 700;
+  box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.03);
+}
+.hz-side-toggle--stage {
+  width: auto;
+  display: inline-flex;
+  gap: 0.82rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  padding: 0;
+}
+.hz-side-toggle__button {
+  flex: 1 1 0%;
+  border-radius: var(--hz-radius-sm);
+  padding: 0.65rem 0;
+  color: var(--hz-text-muted);
+  transition: all var(--hz-motion);
+}
+.hz-side-toggle--stage .hz-side-toggle__button {
+  min-width: 5.5rem;
+  flex: 0 0 auto;
+  border-radius: 0;
+  padding: 0 0 0.32rem;
+  border-bottom: 2px solid transparent;
+  color: var(--hz-text-faint);
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.hz-trade-ticket__header-copy,
+.hz-trade-ticket__heading-row,
+.hz-trade-ticket__title {
+  min-width: 0;
+}
+
+.hz-trade-ticket__title {
+  overflow-wrap: anywhere;
+}
+@media (hover: hover) {
+  .hz-side-toggle__button:hover {
+    background: transparent;
+    color: var(--hz-text);
+  }
+}
+.hz-side-toggle__button--active {
+  background: transparent !important;
+  box-shadow: none !important;
+  transform: none !important;
+  color: var(--hz-text);
+}
+.hz-trade-ticket[data-order-side='buy'] .hz-side-toggle__button--active {
+  color: var(--hz-action-buy-strong);
+  border-bottom-color: rgb(var(--hz-action-buy-rgb) / 0.95);
+}
+.hz-trade-ticket[data-order-side='sell'] .hz-side-toggle__button--active {
+  color: var(--hz-action-sell-strong);
+  border-bottom-color: rgb(var(--hz-action-sell-rgb) / 0.95);
+}
+
+/* ---- binary pill duo (yes/no) ---- */
+.hz-binary-pill-duo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+.hz-binary-choice {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 0.38rem;
+}
+.hz-binary-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  min-height: 3.15rem;
+  border: 1px solid var(--hz-border-faint);
+  border-radius: var(--hz-radius-md);
+  background: rgb(255 255 255 / 0.025);
+  padding: 0.86rem 1.1rem;
+  color: var(--hz-text-soft);
+  font-family: var(--hz-font-ui);
+  cursor: pointer;
+  width: 100%;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    transform 120ms ease;
+}
+@media (hover: hover) {
+  .hz-binary-pill:hover:not(.hz-binary-pill--disabled) {
+    background: rgb(255 255 255 / 0.045);
+    border-color: var(--hz-border-soft);
+  }
+}
+.hz-binary-pill:active:not(.hz-binary-pill--disabled) {
+  transform: translateY(1px);
+}
+.hz-binary-pill__label {
+  font-size: 0.98rem;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.hz-binary-pill__price {
+  font-family: var(--hz-font-mono);
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+.hz-binary-pill__price .hz-money {
+  gap: 0.46em;
+}
+.hz-binary-pill__price .hz-vshekel-symbol {
+  inline-size: 1.16em;
+  block-size: 0.66em;
+  vertical-align: -0.03em;
+}
+.hz-binary-choice__shares {
+  display: block;
+  min-height: 1rem;
+  color: var(--hz-text-faint);
+  direction: rtl;
+  font-family: var(--hz-font-ui);
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  unicode-bidi: isolate;
+}
+.hz-binary-choice--yes.hz-binary-choice--active .hz-binary-choice__shares {
+  color: var(--hz-action-buy);
+}
+.hz-binary-choice--no.hz-binary-choice--active .hz-binary-choice__shares {
+  color: var(--hz-action-sell-strong);
+}
+.hz-binary-pill--yes.hz-binary-pill--active {
+  background: rgb(var(--hz-action-buy-rgb) / 0.18);
+  border-color: rgb(var(--hz-action-buy-rgb) / 0.6);
+  color: var(--hz-action-buy);
+}
+.hz-binary-pill--no.hz-binary-pill--active {
+  background: rgb(var(--hz-action-sell-rgb) / 0.18);
+  border-color: rgb(var(--hz-action-sell-rgb) / 0.6);
+  color: var(--hz-action-sell-strong);
+}
+.hz-binary-pill--yes.hz-binary-pill--active .hz-binary-pill__label,
+.hz-binary-pill--yes.hz-binary-pill--active .hz-binary-pill__price {
+  color: var(--hz-action-buy);
+}
+.hz-binary-pill--no.hz-binary-pill--active .hz-binary-pill__label,
+.hz-binary-pill--no.hz-binary-pill--active .hz-binary-pill__price {
+  color: var(--hz-action-sell-strong);
+}
+.hz-binary-pill--disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+/* Team-colored sides (sports/coloring markets): the active pill wears a soft kit-
+   color wash (--pill-team) with neutral white text — "chromatic ground, monochrome
+   type", consistent with the matchup cards. Overrides the yes/no green/red active
+   state (same specificity, declared later). */
+.hz-binary-pill--team.hz-binary-pill--active {
+  background: color-mix(in srgb, var(--pill-team) 22%, transparent);
+  border-color: color-mix(in srgb, var(--pill-team) 60%, transparent);
+  color: var(--hz-text);
+}
+.hz-binary-pill--team.hz-binary-pill--active .hz-binary-pill__label,
+.hz-binary-pill--team.hz-binary-pill--active .hz-binary-pill__price {
+  color: var(--hz-text);
+}
+/* The active team pill keeps (deepens) its kit wash on hover — without this the
+   generic neutral :hover (higher specificity) greys it out until the cursor leaves,
+   so a just-clicked side looked unselected while hovered. */
+@media (hover: hover) {
+  .hz-binary-pill--team.hz-binary-pill--active:hover:not(.hz-binary-pill--disabled) {
+    background: color-mix(in srgb, var(--pill-team) 30%, transparent);
+    border-color: color-mix(in srgb, var(--pill-team) 70%, transparent);
+  }
+}
+
+/* ---- amount shell + input + unit suffix ---- */
+.hz-amount-shell {
+  position: relative;
+  border: 1px solid var(--hz-border-soft);
+  border-radius: var(--hz-radius-lg);
+  background: rgba(2, 8, 19, 0.24);
+}
+.hz-amount-input {
+  min-height: 0;
+  height: auto;
+  padding: 1rem 3rem 1rem 1rem;
+  direction: ltr;
+  text-align: left;
+  font-size: 1.25rem;
+  font-weight: 700;
+}
+/* High specificity (element + class) so we beat Tailwind's forms plugin
+   which targets [type="text"] and forces a white bg on inputs. */
+input.hz-amount-input--stage,
+input.hz-amount-input--stage:disabled,
+input.hz-amount-input--stage:focus {
+  box-sizing: border-box;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  padding: 0.68rem 0.88rem 0.68rem 3.45rem;
+  color: var(--hz-text);
+  caret-color: var(--hz-text);
+  direction: ltr;
+  font-family: var(--hz-font-mono);
+  font-size: 1.46rem;
+  font-weight: 700;
+  text-align: right;
+  unicode-bidi: isolate;
+  box-shadow: none;
+}
+input.hz-amount-input--stage::-webkit-inner-spin-button,
+input.hz-amount-input--stage::-webkit-outer-spin-button {
+  margin: 0;
+  appearance: none;
+}
+.hz-trade-ticket__unit-suffix {
+  position: absolute;
+  left: 1rem;
+  right: auto;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--hz-text-faint);
+  font-family: var(--hz-font-mono);
+  font-size: 0.78rem;
+  font-weight: 700;
+  /* Direction follows the JS-set `dir` attribute (ltr for the V₪ mark in buy,
+     rtl for "חוזים" in sell). `isolate` keeps the suffix from reordering against
+     the input; an earlier `isolate-override; direction: ltr` forced Hebrew to
+     render reversed ("תוינמ"). */
+  unicode-bidi: isolate;
+}
+.hz-trade-ticket__unit-suffix .hz-vshekel-symbol {
+  inline-size: 1.42em;
+  block-size: 0.8em;
+  vertical-align: -0.03em;
+}
+
+/* ---- quick chips ---- */
+.hz-quick-chip {
+  border: 1px solid var(--hz-border-soft);
+  border-radius: var(--hz-radius-pill);
+  background: rgb(255 255 255 / 0.04);
+  color: var(--hz-text-muted);
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding-block: 0.38rem;
+  transition: all var(--hz-motion);
+}
+@media (hover: hover) {
+  .hz-quick-chip:hover {
+    border-color: var(--hz-border);
+    background: rgb(255 255 255 / 0.08);
+  }
+}
+.hz-quick-chip:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+/* Increment chips render as "+ V₪ N" (a leading plus, the currency mark, then the
+   amount). Tapping ADDS to the running amount (see TradeTicket handleChipClick),
+   so the plus is literal, not decorative. */
+.hz-quick-chip--inc {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.16rem;
+  /* LTR so the convention reads "+ V₪ number" left-to-right (plus, mark, amount)
+     regardless of the RTL page direction. */
+  direction: ltr;
+  font-family: var(--hz-font-mono);
+  letter-spacing: -0.01em;
+}
+.hz-quick-chip__plus { opacity: 0.6; }
+.hz-quick-chip__num { font-variant-numeric: tabular-nums; }
+.hz-quick-chip--inc .hz-vshekel-symbol {
+  inline-size: 1.05em;
+  block-size: 0.6em;
+  vertical-align: -0.02em;
+  opacity: 0.78;
+}
+
+@media (max-width: 960px) {
+  /* Buy/Sell as a compact SWAP TOGGLE (a sliding thumb between two segments),
+     positioned inline with the header on the inline-end (LEFT in RTL). Absolute so
+     it shares the header's row — the header's inline-start area is empty, no clash. */
+  .market-detail-stage-order-widget .hz-side-toggle--stage {
+    position: absolute;
+    top: 0.65rem; /* top-left corner, level with the drag handle */
+    inset-inline-end: 1rem; /* LEFT in RTL */
+    z-index: 3;
+    width: auto;
+    gap: 0;
+    padding: 0.18rem;
+    border-radius: var(--hz-radius-pill);
+    background: rgb(255 255 255 / 0.06);
+    border: 1px solid var(--hz-border-faint);
+    overflow: hidden;
+  }
+  /* The sliding thumb — tinted to the active side, slides to the other segment. */
+  .market-detail-stage-order-widget .hz-side-toggle--stage::before {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    inset-block: 0.18rem;
+    inset-inline-start: 0.18rem;
+    inline-size: calc(50% - 0.18rem);
+    border-radius: var(--hz-radius-pill);
+    background: rgb(var(--hz-action-buy-rgb) / 0.22);
+    transition: transform 240ms cubic-bezier(0.2, 0.8, 0.2, 1), background 200ms ease;
+  }
+  .market-detail-stage-order-widget .hz-trade-ticket[data-order-side='sell'] .hz-side-toggle--stage::before {
+    transform: translateX(-100%);
+    background: rgb(var(--hz-action-sell-rgb) / 0.22);
+  }
+  .market-detail-stage-order-widget .hz-side-toggle--stage .hz-side-toggle__button {
+    position: relative;
+    z-index: 1;
+    flex: 0 0 auto;
+    min-width: 3rem;
+    padding: 0.26rem 0.3rem;
+    border: 0;
+    border-radius: var(--hz-radius-pill);
+    font-size: 0.76rem;
+    background: transparent !important;
+    transition: color 180ms ease;
+  }
+  .market-detail-stage-order-widget .hz-trade-ticket[data-order-side='buy'] .hz-side-toggle__button--active {
+    color: var(--hz-action-buy-strong);
+  }
+  .market-detail-stage-order-widget .hz-trade-ticket[data-order-side='sell'] .hz-side-toggle__button--active {
+    color: var(--hz-action-sell-strong);
+  }
+
+  /* ── Sheet layout pass (Poly-leaning: deboxed, centered amount, reordered) ──
+     Scoped to the mobile sheet only — the desktop sticky rail keeps its denser,
+     bordered treatment. Two moves: (1) "deboxed" — drop hard borders on the inner
+     controls, lean on quiet tints + air; (2) reorder to Poly's flow:
+        context → buy/sell → AMOUNT (centered) → wallet → outcomes → chips → submit. */
+
+  .market-detail-stage-order-widget .hz-trade-ticket {
+    display: flex;
+    flex-direction: column;
+    gap: 0.7rem; /* compact — less air than the desktop rail */
+  }
+  /* The amount + wallet + chips ship inside a `.space-y-3` wrapper; hoist its
+     children into the ticket flex so leaf `order` can interleave them with the
+     outcomes (which are a sibling of the wrapper, not inside it). */
+  .market-detail-stage-order-widget .hz-trade-ticket > .space-y-3 { display: contents; }
+  /* Flow: buy/sell (top) → context → amount → wallet → outcomes → to-earn+price
+     (pops in) → money chips → submit. */
+  .market-detail-stage-order-widget .hz-side-toggle--stage { order: 0; }
+  .market-detail-stage-order-widget .hz-trade-ticket__context-header {
+    order: 1;
+    /* Reserve the absolutely-positioned buy/sell toggle's footprint (top-left) so a
+       long market name ellipsizes before it instead of sliding underneath. */
+    padding-inline-end: 7.4rem;
+  }
+  .market-detail-stage-order-widget [data-market-detail-trade-blocked-notice] { order: 1; }
+  /* sell-mode amount label travels with the amount block */
+  .market-detail-stage-order-widget .hz-trade-ticket > div:has([data-order-amount-label]) { order: 3; }
+  .market-detail-stage-order-widget .hz-amount-shell { order: 3; }
+  .market-detail-stage-order-widget .hz-trade-ticket__balance { order: 4; }
+  .market-detail-stage-order-widget .hz-binary-pill-duo { order: 5; }
+  .market-detail-stage-order-widget .hz-trade-ticket__summary { order: 6; }
+  .market-detail-stage-order-widget [data-order-quick-chips] { order: 7; }
+  .market-detail-stage-order-widget [data-order-feedback] { order: 8; }
+  .market-detail-stage-order-widget .hz-trade-ticket__submit { order: 9; }
+
+  /* Amount as the centered hero — deboxed, the V₪ mark sits inline before the
+     number (the input is sized to content via JS so the pair centers together). */
+  .market-detail-stage-order-widget .hz-amount-shell {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.3rem;
+    /* LTR so the V₪ mark sits to the LEFT of the number (canonical money order),
+       not the RTL-default right. */
+    direction: ltr;
+    border: 0;
+    background: transparent;
+    padding: 0.6rem 0 0.2rem;
+  }
+  .market-detail-stage-order-widget input.hz-amount-input--stage {
+    width: auto;
+    min-width: 1ch;
+    padding: 0;
+    text-align: center;
+    font-size: 2.4rem;
+  }
+  .market-detail-stage-order-widget .hz-trade-ticket__unit-suffix {
+    position: static;
+    transform: none;
+    order: -1; /* mark leads the number */
+    inset: auto;
+    font-size: 1.25rem;
+    color: var(--hz-text-muted);
+  }
+  .market-detail-stage-order-widget .hz-trade-ticket__unit-suffix .hz-vshekel-symbol {
+    inline-size: 1.15em;
+    block-size: 0.66em;
+  }
+
+  /* Wallet balance line under the amount ("בארנק V₪ X"), small + muted. */
+  .market-detail-stage-order-widget .hz-trade-ticket__balance {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.35rem;
+    margin-top: -0.35rem;
+    font-family: var(--hz-font-mono);
+    font-size: 0.78rem;
+    color: var(--hz-text-muted);
+  }
+  .market-detail-stage-order-widget .hz-trade-ticket__balance-label {
+    font-family: var(--hz-font-ui);
+  }
+
+  /* Outcomes as a SWAP TOGGLE — a sliding thumb (tinted to the active team color)
+     glides between the two outcomes. Contained + centered; the per-share price
+     moved under the "to win", so each segment carries only its label. */
+  .market-detail-stage-order-widget .hz-binary-pill-duo {
+    position: relative;
+    display: flex;
+    gap: 0;
+    width: 100%;
+    max-width: 19rem;
+    margin-inline: auto;
+    padding: 0.2rem;
+    border-radius: var(--hz-radius-pill);
+    background: rgb(255 255 255 / 0.06);
+    border: 1px solid var(--hz-border-faint);
+    overflow: hidden;
+  }
+  .market-detail-stage-order-widget .hz-binary-pill-duo::before {
+    content: "";
+    position: absolute;
+    z-index: 0;
+    inset-block: 0.2rem;
+    inset-inline-start: 0.2rem;
+    inline-size: calc(50% - 0.2rem);
+    border-radius: var(--hz-radius-pill);
+    background: color-mix(in srgb, var(--cta-team, var(--hz-info)) 26%, transparent);
+    box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--cta-team, var(--hz-info)) 48%, transparent);
+    transition: transform 240ms cubic-bezier(0.2, 0.8, 0.2, 1), background 220ms ease;
+  }
+  /* yes → thumb on the inline-start (right in RTL); no → slide to the other half */
+  .market-detail-stage-order-widget .hz-trade-ticket[data-active-side='no'] .hz-binary-pill-duo::before {
+    transform: translateX(-100%);
+  }
+  .market-detail-stage-order-widget .hz-binary-choice {
+    position: relative;
+    z-index: 1;
+    flex: 1 1 0;
+    min-width: 0;
+  }
+  .market-detail-stage-order-widget .hz-binary-pill {
+    width: 100%;
+    min-height: 2.7rem;
+    justify-content: center;
+    padding: 0.45rem 0.5rem;
+    background: transparent !important;
+    border: 0 !important;
+    color: var(--hz-text-muted);
+  }
+  .market-detail-stage-order-widget .hz-binary-pill--active { color: var(--hz-text); }
+  .market-detail-stage-order-widget .hz-binary-pill__price { display: none; }
+
+  /* The "to earn" + price-per-share sit between the outcomes and the money chips,
+     CENTERED, and POP IN together once an amount produces a quote (hidden until
+     then — `.is-hidden` keeps display:none). The sheet is bottom-anchored, so the
+     pop grows it UPWARD and the CTA below never shifts down. */
+  .market-detail-stage-order-widget .hz-trade-ticket__summary {
+    align-items: center;
+    text-align: center;
+    gap: 0.1rem;
+    animation: hz-sheet-summary-pop 220ms ease;
+  }
+  .market-detail-stage-order-widget .hz-trade-ticket__summary-divider { display: none; }
+  .market-detail-stage-order-widget .hz-trade-ticket__total-row {
+    justify-content: center;
+    gap: 0.45rem;
+  }
+  .market-detail-stage-order-widget .hz-trade-ticket__pershare {
+    display: flex;
+    align-items: baseline;
+    justify-content: center;
+    gap: 0.45rem;
+  }
+  .market-detail-stage-order-widget .hz-trade-ticket__pershare-label {
+    color: var(--hz-text-muted);
+    font-size: 0.76rem;
+    font-weight: 700;
+  }
+  .market-detail-stage-order-widget .hz-trade-ticket__pershare-value {
+    font-family: var(--hz-font-mono);
+    font-size: 0.9rem;
+    color: var(--hz-text-soft);
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Chips: 4 small inline pills in one row, flat, the +V₪ format reads clean. */
+  .market-detail-stage-order-widget [data-order-quick-chips] {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0.4rem;
+  }
+  .market-detail-stage-order-widget .hz-quick-chip {
+    min-height: 2.4rem;
+    padding: 0 0.2rem;
+    font-size: 0.72rem;
+    border-color: transparent;
+    background: rgb(255 255 255 / 0.05);
+  }
+  @media (hover: hover) {
+    .market-detail-stage-order-widget .hz-quick-chip:hover {
+      background: rgb(255 255 255 / 0.09);
+      border-color: transparent;
+    }
+  }
+}
+
+/* The to-earn + price-per-share pop (suppressed under reduced-motion by the
+   global reset catch-all). */
+@keyframes hz-sheet-summary-pop {
+  from { opacity: 0; transform: translateY(0.4rem); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Base (non-sheet) wallet-balance + per-share lines are hidden — both are
+   sheet-only affordances (desktop rail keeps the price inside the outcome pills). */
+.hz-trade-ticket__balance,
+.hz-trade-ticket__pershare { display: none; }
+.hz-quick-chip--active {
+  border-color: var(--hz-border);
+  background: rgb(255 255 255 / 0.08);
+}
+.hz-trade-ticket[data-order-side='sell'] .hz-quick-chip--active {
+  border-color: rgb(var(--hz-action-sell-rgb) / 0.4);
+  background: rgb(var(--hz-action-sell-rgb) / 0.12);
+}
+
+/* ---- summary ---- */
+.hz-trade-ticket__summary {
+  display: flex;
+  flex-direction: column;
+  gap: 0.72rem;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  padding: 0;
+}
+.hz-trade-ticket__summary.is-hidden {
+  display: none;
+}
+.hz-trade-ticket__summary-divider {
+  height: 1px;
+  background: var(--hz-border-soft);
+}
+
+/* ---- total row ---- */
+.hz-trade-ticket__total-row {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+.hz-trade-ticket__total-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  color: var(--hz-text-muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+}
+.hz-trade-ticket__total-value {
+  display: inline-flex;
+  justify-content: flex-end;
+  font-family: var(--hz-font-mono);
+  font-size: 1.58rem;
+  line-height: 1;
+  min-width: 6.4rem;
+  color: var(--hz-action-buy-strong);
+  direction: ltr;
+  text-align: left;
+  white-space: nowrap;
+  font-feature-settings: 'tnum' 1, 'lnum' 1;
+  font-variant-numeric: tabular-nums;
+  unicode-bidi: isolate;
+}
+.hz-trade-ticket__total-value .hz-money {
+  gap: 0.32em;
+}
+.hz-trade-ticket__total-value .hz-vshekel-symbol {
+  inline-size: 1.04em;
+  block-size: 0.6em;
+  vertical-align: -0.03em;
+}
+.hz-trade-ticket__total-value--negative {
+  color: var(--hz-action-sell);
+}
+.hz-trade-ticket[data-order-side='buy'] .hz-trade-ticket__total-value {
+  color: var(--hz-action-buy-strong);
+}
+.hz-trade-ticket[data-order-side='sell'] .hz-trade-ticket__total-value {
+  color: var(--hz-action-sell-strong);
+}
+
+/* ---- submit button ---- */
+.hz-button-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: var(--hz-radius-md);
+  background: var(--hz-info);
+  color: var(--hz-text);
+  font-weight: 700;
+  transition: all var(--hz-motion);
+}
+@media (hover: hover) {
+  .hz-button-primary:hover {
+    background: var(--hz-info);
+    filter: brightness(1.05);
+  }
+}
+.hz-button-primary--large {
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.875rem 1rem;
+  border-radius: var(--hz-radius-lg);
+  font-size: 1rem;
+  font-weight: 900;
+  box-shadow: 0 12px 28px rgb(var(--hz-info-rgb) / 0.25);
+}
+.hz-button-primary:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+.hz-trade-ticket__submit {
+  justify-content: center;
+  border-radius: var(--hz-radius-lg);
+  min-height: 2.64rem;
+  font-size: 0.94rem;
+  font-weight: 700;
+}
+.hz-trade-ticket__submit .hz-money {
+  gap: 0.34em;
+}
+.hz-trade-ticket__submit .hz-vshekel-symbol {
+  inline-size: 1.1em;
+  block-size: 0.64em;
+  vertical-align: -0.03em;
+}
+.hz-trade-ticket.is-trade-confirmed .hz-trade-ticket__submit {
+  background: linear-gradient(180deg, rgb(var(--hz-action-buy-rgb) / 0.98), rgb(var(--hz-action-buy-rgb) / 0.82));
+  color: var(--hz-text);
+  box-shadow: 0 16px 36px rgb(var(--hz-action-buy-rgb) / 0.24);
+  animation: hz-trade-submit-confirm 760ms cubic-bezier(0.2, 1.05, 0.24, 1) both;
+}
+.hz-trade-ticket.is-trade-confirmed[data-order-side='sell'] .hz-trade-ticket__submit {
+  background: linear-gradient(180deg, rgb(var(--hz-action-sell-rgb) / 0.98), rgb(var(--hz-action-sell-rgb) / 0.8));
+  box-shadow: 0 16px 36px rgb(var(--hz-action-sell-rgb) / 0.22);
+}
+.hz-trade-ticket__submit-check {
+  font-size: 1.05rem;
+  font-variation-settings: 'FILL' 1, 'wght' 700, 'GRAD' 0, 'opsz' 24;
+}
+.hz-trade-ticket.is-trade-confirmed .hz-trade-ticket__summary,
+.hz-trade-ticket.is-trade-confirmed [data-order-feedback][data-tone='success'] {
+  animation: hz-trade-confirm-soft-rise 560ms ease 80ms both;
+}
+.hz-trade-fx {
+  position: fixed;
+  inset: 0;
+  z-index: 1002;
+  width: 100vw;
+  height: 100dvh;
+  pointer-events: none;
+}
+.hz-trade-fallback-fx {
+  position: fixed;
+  inset: 0;
+  z-index: 1002;
+  pointer-events: none;
+  overflow: hidden;
+}
+.hz-trade-fallback-fx span {
+  position: absolute;
+  width: 0.32rem;
+  height: 0.54rem;
+  border-radius: 0.12rem;
+  background: var(--c);
+  box-shadow: 0 0 12px color-mix(in srgb, var(--c) 44%, transparent);
+  transform: translate(0, 0) rotate(0deg);
+  animation: hz-trade-fallback-confetti 780ms cubic-bezier(0.12, 0.8, 0.24, 1) forwards;
+}
+@keyframes hz-trade-submit-confirm {
+  0% { transform: scale(0.985); filter: brightness(0.96); }
+  42% { transform: translateY(-1px) scale(1.012); filter: brightness(1.08); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+@keyframes hz-trade-confirm-soft-rise {
+  0% { transform: translateY(0); opacity: 1; }
+  42% { transform: translateY(-2px); opacity: 1; }
+  100% { transform: translateY(0); opacity: 1; }
+}
+@keyframes hz-trade-fallback-confetti {
+  0% { opacity: 0; transform: translate(0, 0) rotate(0deg) scale(0.75); }
+  14% { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--tx), var(--ty)) rotate(var(--rot)) scale(1); }
+}
+/* side-aware submit tint — binary keys off data-active-side */
+.hz-trade-ticket--binary[data-active-side='yes'] .hz-button-primary--large {
+  background: linear-gradient(180deg, rgb(var(--hz-action-buy-rgb) / 0.95), rgb(var(--hz-action-buy-rgb) / 0.8));
+  box-shadow: 0 16px 36px rgb(var(--hz-action-buy-rgb) / 0.24);
+}
+.hz-trade-ticket--binary[data-active-side='no'] .hz-button-primary--large {
+  background: linear-gradient(180deg, rgb(var(--hz-action-sell-rgb) / 0.95), rgb(var(--hz-action-sell-rgb) / 0.78));
+  box-shadow: 0 16px 36px rgb(var(--hz-action-sell-rgb) / 0.22);
+}
+/* Team-colored execute CTA: solid kit color (--cta-team, tracks the selected side
+   on the ticket root) + a luminance-derived on-color so text stays readable on any
+   kit (e.g. Maccabi yellow → dark). Declared after the side green/red so it wins. */
+.hz-trade-ticket[data-team-colored] .hz-button-primary--large {
+  background: var(--cta-team);
+  color: var(--cta-team-on);
+  box-shadow: 0 16px 36px color-mix(in srgb, var(--cta-team) 28%, transparent);
+}
+@media (hover: hover) {
+  .hz-trade-ticket[data-team-colored] .hz-button-primary--large:hover {
+    filter: brightness(1.06);
+  }
+}
+.hz-trade-ticket[data-team-colored] .hz-trade-ticket__submit-price {
+  color: color-mix(in srgb, var(--cta-team-on) 60%, transparent);
+}
+
+/* ---- feedback tones ---- */
+[data-order-feedback][data-tone='error'] {
+  color: var(--hz-action-sell-strong);
+}
+[data-order-feedback][data-tone='success'] {
+  color: var(--hz-action-buy);
+}
+
+/* Inline link inside the feedback line (e.g. "בדקו בתיק" after a status-check
+   failure) — inherits the feedback tone color, underline is the only
+   affordance so it doesn't compete with the submit button as a CTA. */
+.hz-trade-ticket__feedback-link {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hz-trade-ticket.is-trade-confirmed .hz-trade-ticket__submit,
+  .hz-trade-ticket.is-trade-confirmed .hz-trade-ticket__summary,
+  .hz-trade-ticket.is-trade-confirmed [data-order-feedback][data-tone='success'],
+  .hz-trade-fallback-fx span {
+    animation: none;
+  }
+}

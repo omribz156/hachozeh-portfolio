@@ -1,0 +1,616 @@
+/* ──────────────────────────────────────────────────────────────
+   patterns/market-card.css
+   Reusable market card. Shape stays constant across variants:
+   thumb · title (+ optional chance ring) · body · footer.
+   Body never exceeds 2 outcomes. One bookmark, in the footer.
+   Body variants: binary | ladder | multi | match-up | live.
+   ────────────────────────────────────────────────────────────── */
+
+
+
+  .hz-card {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex-direction: column;
+    gap: var(--hz-space-2);
+    padding: var(--hz-space-3);
+    background: var(--hz-bg-raised);
+    border: 1px solid var(--hz-border-faint);
+    border-radius: var(--hz-radius-lg);
+    min-height: 11.5rem;
+    color: inherit;
+    text-decoration: none;
+    transition: border-color var(--hz-motion), transform var(--hz-motion);
+  }
+  .hz-card__link {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    border-radius: inherit;
+  }
+  @media (hover: hover) {
+    .hz-card:hover {
+      border-color: var(--hz-border-soft);
+      transform: translateY(-1px);
+    }
+  }
+
+  /* ── head: thumb · title · optional chance ring ── */
+  .hz-card__head {
+    position: relative;
+    z-index: 2;
+    display: grid;
+    grid-template-columns: 2.25rem 1fr auto;
+    gap: var(--hz-space-3);
+    align-items: center;
+    pointer-events: none;
+  }
+  .hz-card__thumb {
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: var(--hz-radius-sm);
+    display: grid;
+    place-items: center;
+    font-size: 1.4rem;
+    background: var(--hz-surface-2);
+    border: 1px solid var(--hz-border-faint);
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .hz-card__thumb--amber { background: rgba(232, 178, 87, 0.16); }
+  .hz-card__thumb--info  { background: rgba(122, 174, 230, 0.16); }
+  .hz-card__thumb--buy   { background: rgba(93, 211, 158, 0.16); }
+  .hz-card__thumb--sell  { background: rgba(231, 122, 138, 0.16); }
+  .hz-card__thumb--warn  { background: rgba(232, 154, 58, 0.16); }
+  .hz-card__thumb--mono  { background: var(--hz-surface-3); }
+  .hz-card__thumb img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .hz-card__title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.35;
+    color: var(--hz-text);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  /* ── chance ring (inline with title; binary + live + match-up) ── */
+  .hz-chance-ring {
+    --pct: 0%;
+    width: 3.05rem;
+    height: 3.05rem;
+    border-radius: 50%;
+    background: conic-gradient(var(--hz-brand) var(--pct), rgba(255, 248, 232, 0.08) 0);
+    display: grid;
+    place-items: center;
+    position: relative;
+    flex-shrink: 0;
+  }
+  .hz-chance-ring::before {
+    content: "";
+    position: absolute;
+    inset: 0.32rem;
+    background: var(--hz-bg-raised);
+    border-radius: 50%;
+  }
+  .hz-chance-ring__inner {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    line-height: 1;
+  }
+  .hz-chance-ring__value {
+    font-family: var(--hz-font-mono);
+    font-feature-settings: "tnum";
+    font-weight: 700;
+    font-size: 0.86rem;
+    color: var(--hz-text);
+    letter-spacing: -0.01em;
+  }
+  .hz-chance-ring__label {
+    font-size: 0.68rem;
+    color: var(--hz-text-muted);
+    margin-top: 0.12rem;
+    letter-spacing: 0;
+    line-height: 1.15;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 3.2rem;
+  }
+  .hz-chance-ring--info {
+    background: conic-gradient(var(--hz-info) var(--pct), rgba(255, 248, 232, 0.08) 0);
+  }
+  .hz-chance-ring--sell,
+  .hz-chance-ring--down {
+    background: conic-gradient(var(--hz-action-sell) var(--pct), rgba(255, 248, 232, 0.08) 0);
+  }
+
+  /* ── body (flex-grow; short bodies dock to bottom) ── */
+  .hz-card__body {
+    position: relative;
+    z-index: 2;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--hz-space-2);
+    justify-content: flex-end;
+    pointer-events: none;
+  }
+
+  /* ── footer: meta strip + bookmark ── */
+  .hz-card__foot {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--hz-space-2);
+    padding-top: var(--hz-space-2);
+    border-top: 1px solid var(--hz-border-faint);
+    pointer-events: none;
+  }
+  .hz-card__meta {
+    display: flex;
+    align-items: center;
+    gap: var(--hz-space-2);
+    color: var(--hz-text-muted);
+    font-size: 0.78rem;
+    min-width: 0;
+  }
+  .hz-card__meta .sep { opacity: 0.5; }
+  .hz-card__meta b {
+    color: var(--hz-text-soft);
+    font-weight: 600;
+    font-family: var(--hz-font-mono);
+    font-feature-settings: "tnum";
+  }
+  .hz-card__bookmark {
+    position: relative;
+    z-index: 3;
+    background: none;
+    border: none;
+    padding: 0;
+    color: var(--hz-text-muted);
+    cursor: pointer;
+    line-height: 0;
+    transition: color var(--hz-motion);
+    flex-shrink: 0;
+    pointer-events: auto;
+  }
+  @media (hover: hover) {
+    .hz-card__bookmark:hover { color: var(--hz-text-soft); }
+  }
+  .hz-card__bookmark.is-saved { color: var(--hz-brand); }
+
+  /* ── signal pills (in footer-meta, replace/augment vol) ── */
+  .hz-signal {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.18rem 0.5rem;
+    border-radius: var(--hz-radius-pill);
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0;
+    line-height: 1;
+  }
+  .hz-signal__dot {
+    width: 0.42rem;
+    height: 0.42rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .hz-signal--new     { background: var(--hz-signal-new-soft);     color: var(--hz-signal-new); }
+  .hz-signal--new     .hz-signal__dot { background: var(--hz-signal-new); }
+  .hz-signal--hot     { background: var(--hz-signal-hot-soft);     color: var(--hz-signal-hot); }
+  .hz-signal--hot     .hz-signal__dot { background: var(--hz-signal-hot); }
+  .hz-signal--live    { background: var(--hz-signal-live-soft);    color: var(--hz-signal-live); }
+  .hz-signal--live    .hz-signal__dot { background: var(--hz-signal-live); animation: hz-pulse 1.4s ease-in-out infinite; }
+  .hz-signal--closing { background: var(--hz-signal-closing-soft); color: var(--hz-signal-closing); }
+  .hz-signal--closing .hz-signal__dot { background: var(--hz-signal-closing); }
+
+  @keyframes hz-pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50%      { transform: scale(1.35); opacity: 0.6; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hz-signal--live .hz-signal__dot { animation: none; }
+  }
+
+  /* ── yes/no button pair (binary + live + match-up pick row) ── */
+  .hz-yn {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--hz-space-2);
+  }
+  .hz-yn--draw { grid-template-columns: 1fr 0.8fr 1fr; }
+
+  .hz-yn__btn {
+    position: relative;
+    z-index: 3;
+    padding: 0.6rem 0.5rem;
+    border-radius: var(--hz-radius-sm);
+    font-size: 0.84rem;
+    font-weight: 700;
+    background: transparent;
+    border: 1px solid transparent;
+    cursor: pointer;
+    transition: background var(--hz-motion);
+    font-family: inherit;
+    pointer-events: auto;
+  }
+  .hz-yn__btn--yes,
+  .hz-yn__btn--up {
+    color: var(--hz-action-buy-strong);
+    background: var(--hz-action-buy-soft);
+  }
+  @media (hover: hover) {
+    .hz-yn__btn--yes:hover,
+    .hz-yn__btn--up:hover { background: rgba(93, 211, 158, 0.22); }
+  }
+
+  .hz-yn__btn--no,
+  .hz-yn__btn--down {
+    color: var(--hz-action-sell-strong);
+    background: var(--hz-action-sell-soft);
+  }
+  @media (hover: hover) {
+    .hz-yn__btn--no:hover,
+    .hz-yn__btn--down:hover { background: rgba(231, 122, 138, 0.22); }
+  }
+
+  /* match-up tones — color tied to team identity */
+  .hz-yn__btn--amber {
+    color: var(--hz-brand-strong);
+    background: var(--hz-brand-soft);
+  }
+  @media (hover: hover) {
+    .hz-yn__btn--amber:hover { background: rgba(232, 178, 87, 0.22); }
+  }
+
+  .hz-yn__btn--info {
+    color: var(--hz-info);
+    background: var(--hz-info-soft);
+  }
+  @media (hover: hover) {
+    .hz-yn__btn--info:hover { background: rgba(122, 174, 230, 0.22); }
+  }
+
+  .hz-yn__btn--sell {
+    color: var(--hz-action-sell-strong);
+    background: var(--hz-action-sell-soft);
+  }
+  @media (hover: hover) {
+    .hz-yn__btn--sell:hover { background: rgba(231, 122, 138, 0.22); }
+  }
+
+  .hz-yn__btn--neutral {
+    color: var(--hz-text);
+    background: var(--hz-surface-soft);
+    border: 1px solid var(--hz-border-faint);
+  }
+  @media (hover: hover) {
+    .hz-yn__btn--neutral:hover {
+      background: var(--hz-surface-hover);
+      border-color: var(--hz-border-soft);
+    }
+  }
+
+  .hz-yn__btn--draw {
+    color: var(--hz-text-soft);
+    background: var(--hz-surface-soft);
+  }
+  @media (hover: hover) {
+    .hz-yn__btn--draw:hover {
+      background: var(--hz-surface-hover);
+      color: var(--hz-text);
+    }
+  }
+
+  /* ── matchup card: team jersey crests + team-tinted buy buttons ──
+     Rendered when the discovery feed resolves BOTH team brands (sportsTeams).
+     Unresolved matchups keep the default gold/blue card above. The jersey card
+     drops the head (thumb/title/ring): it's outcome rows + buttons + foot.
+     Design proof + doctrine: specs/2026-06-01-sports-team-colors-design.md. */
+  .hz-card--teammatch .hz-card__body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 0.8rem;
+  }
+  .hz-tm__rows { display: flex; flex-direction: column; gap: 0.5rem; }
+  .hz-tm__row { display: flex; align-items: center; gap: 0.6rem; min-width: 0; }
+  .hz-tm__crest {
+    inline-size: 1.95rem;
+    block-size: 1.95rem;
+    flex: none;
+    border-radius: 0.5rem;
+    overflow: hidden;
+  }
+  .hz-tm__crest img { inline-size: 100%; block-size: 100%; display: block; object-fit: cover; }
+  .hz-tm__name {
+    font-size: 0.96rem;
+    font-weight: 700;
+    color: var(--hz-text);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .hz-tm__prob {
+    margin-inline-start: auto;
+    flex: none;
+    font-size: 1.02rem;
+    font-weight: 800;
+    font-family: var(--hz-font-mono);
+    font-feature-settings: "tnum";
+    color: var(--hz-text);
+  }
+  .hz-tm__btns {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    gap: 0.45rem;
+  }
+  .hz-tm__btn {
+    position: relative;
+    z-index: 3;
+    border: 1px solid transparent;
+    border-color: color-mix(in srgb, var(--team) 38%, transparent);
+    border-radius: var(--hz-radius-sm);
+    padding: 0.6rem 0.4rem;
+    text-align: center;
+    font-size: 0.9rem;
+    font-weight: 800;
+    font-family: inherit;
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* Wash carries the kit color; text stays neutral white so the name reads
+       cleanly and arbitrary kit pairs never clash (matches hero matchup). */
+    background: color-mix(in srgb, var(--team) 18%, transparent);
+    color: var(--hz-text);
+    transition: background var(--hz-motion);
+    pointer-events: auto;
+  }
+  @media (hover: hover) {
+    .hz-tm__btn:hover { background: color-mix(in srgb, var(--team) 26%, transparent); }
+  }
+  .hz-tm__btn--draw {
+    background: color-mix(in srgb, var(--hz-text-muted) 12%, transparent);
+    color: var(--hz-text-muted);
+    border-color: var(--hz-border-soft);
+  }
+  @media (hover: hover) {
+    .hz-tm__btn--draw:hover { background: color-mix(in srgb, var(--hz-text-muted) 20%, transparent); }
+  }
+
+  /* ── inline yn (for ladder/multi rows) ── */
+  .hz-yn-inline { display: flex; gap: 0.3rem; }
+  .hz-yn-inline .hz-yn__btn {
+    position: relative;
+    padding: 0.28rem 0.55rem;
+    font-size: 0.74rem;
+    border-radius: var(--hz-radius-xs);
+    min-width: 2rem;
+  }
+  /* Touch calibration (round 2): owner verdict on the visible-44px floor was
+     "reads as bloat" — reverted. Original 22px-tall row stays at every
+     breakpoint; the 44px thumb target now comes from an invisible centered
+     ::before (same technique as .hz-shell__cat-item in site-shell.css), and
+     the only visible touch change is a modest bump to the button text
+     (0.74rem → 0.8rem) — an owner-approved lever that reads as "easier to
+     read/tap" without inflating the pill. Capped ::before width (28px, not
+     44px) so a pair's hit-areas meet at the row's own 0.3rem gap midpoint
+     instead of bleeding across into the neighbor's visible box — this pair
+     is כן/לא (buy/sell), where a mis-tap is a wrong trade, not a cosmetic
+     nit, so unlike the chip-rail precedent this one can't rely on "DOM order
+     wins the overlap and nobody cares." Height stays full 44px (only one
+     neighbor above/below within the row, not another button). */
+  @media (hover: none) and (pointer: coarse) {
+    .hz-yn-inline .hz-yn__btn {
+      font-size: 0.8rem;
+    }
+    .hz-yn-inline .hz-yn__btn::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 28px;
+      height: 44px;
+    }
+  }
+
+  /* ── outcome row (ladder/multi: name · % · yn-inline) ── */
+  /* No divider between rows (the body gap carries the separation). Symmetric
+     padding on every row so each outcome's content centers identically — the
+     first outcome no longer rides high vs the second. */
+  .hz-out-row {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    gap: var(--hz-space-3);
+    align-items: center;
+    padding-block: 0.2rem;
+  }
+  /* Separate the outcomes group from the head so the first row isn't crammed up
+     against the title (the rest of the rhythm is ~12px; the head wants more). */
+  .hz-out-row:first-child { margin-top: var(--hz-space-2); }
+  .hz-out-row__name {
+    font-size: 0.86rem;
+    color: var(--hz-text-soft);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: var(--hz-space-2);
+  }
+  .hz-out-row__prob {
+    font-family: var(--hz-font-mono);
+    font-feature-settings: "tnum";
+    font-weight: 700;
+    color: var(--hz-text);
+    font-size: 0.92rem;
+  }
+
+  /* ── live tape (mini price + spark + delta) ── */
+  .hz-live-tape {
+    display: flex;
+    align-items: center;
+    gap: var(--hz-space-2);
+    font-size: 0.78rem;
+    color: var(--hz-text-muted);
+    font-family: var(--hz-font-mono);
+    font-feature-settings: "tnum";
+  }
+  .hz-live-spark {
+    flex: 1;
+    height: 1.4rem;
+    border-radius: var(--hz-radius-xs);
+    background:
+      linear-gradient(90deg,
+        rgba(93, 211, 158, 0) 0%,
+        rgba(93, 211, 158, 0.18) 60%,
+        rgba(93, 211, 158, 0.32) 100%);
+    position: relative;
+  }
+  .hz-live-spark::after {
+    content: "";
+    position: absolute;
+    inset-inline-end: 0;
+    top: 0;
+    bottom: 0;
+    width: 0.18rem;
+    background: var(--hz-action-buy);
+    border-radius: 1px;
+  }
+  .hz-live-spark--down {
+    background:
+      linear-gradient(90deg,
+        rgba(231, 122, 138, 0) 0%,
+        rgba(231, 122, 138, 0.18) 60%,
+        rgba(231, 122, 138, 0.32) 100%);
+  }
+  .hz-live-spark--down::after { background: var(--hz-action-sell); }
+
+  /* ── resolved state (winner banded) ── */
+  .hz-card.is-resolved { opacity: 0.86; }
+  .hz-card.is-resolved .hz-yn,
+  .hz-card.is-resolved .hz-out-row .hz-yn-inline { display: none; }
+  .hz-resolved-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--hz-space-2);
+    padding: 0.55rem 0.7rem;
+    background: var(--hz-action-buy-soft);
+    border-radius: var(--hz-radius-sm);
+    color: var(--hz-action-buy-strong);
+    font-size: 0.84rem;
+    font-weight: 700;
+  }
+  .hz-resolved-banner--no {
+    background: var(--hz-action-sell-soft);
+    color: var(--hz-action-sell-strong);
+  }
+
+  /* ── user position held (badge inside body) ── */
+  .hz-position-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    align-self: flex-start;
+    padding: 0.28rem 0.55rem;
+    background: var(--hz-brand-soft);
+    border: 1px solid rgba(232, 178, 87, 0.32);
+    border-radius: var(--hz-radius-pill);
+    color: var(--hz-brand-strong);
+    font-size: 0.72rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .hz-position-badge .mono {
+    font-family: var(--hz-font-mono);
+    font-feature-settings: "tnum";
+  }
+
+  /* ── loading skeleton ── */
+  .hz-skel {
+    background: linear-gradient(
+      90deg,
+      var(--hz-surface-soft) 0%,
+      var(--hz-surface-hover) 50%,
+      var(--hz-surface-soft) 100%
+    );
+    background-size: 200% 100%;
+    animation: hz-shimmer 1.4s ease-in-out infinite;
+    border-radius: var(--hz-radius-xs);
+  }
+  @keyframes hz-shimmer {
+    0%   { background-position: 200% 0; }
+    100% { background-position: -200% 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hz-skel { animation: none; }
+  }
+  .hz-skel--line { height: 0.7rem; }
+  .hz-skel--line-sm { height: 0.55rem; }
+  .hz-skel--line-lg { height: 1.6rem; }
+  .hz-skel--thumb { border-radius: var(--hz-radius-pill); }
+
+  /* ── icon helper ── */
+  .hz-ico {
+    width: 1rem;
+    height: 1rem;
+    display: inline-block;
+    line-height: 0;
+  }
+  .hz-ico svg { width: 100%; height: 100%; display: block; }
+
+  /* ── touch tap-target floors (44px doctrine; phones/tablets only, so desktop
+        cards stay compact). Touch calibration round 2: the owner rejected visible
+        growth on .hz-yn/.hz-tm buttons too (same "reads as bloat" verdict as the
+        inline ladder) — both sat ~38-40px tall and a bare min-height: 44px pushed
+        them out a few visible px. Converted to the invisible ::before hit-area
+        (both rules already carry position: relative unconditionally, so no extra
+        positioning context needed here). Width capped to keep a neighbor's hit-area
+        off this button's visible box: .hz-yn is a כן/לא (buy/sell) pair and
+        .hz-tm__btns a team-pick row, both real trade actions where DOM-order-wins
+        overlap isn't acceptable (see .hz-yn-inline's note above for the full
+        reasoning) — .hz-shell__cat-item's uncapped 44×44 only works for same-type,
+        low-stakes nav chips. The bookmark keeps its 16px icon but gains a 44px
+        ::before hit-area, so the footer height — and thus every card's height in
+        the feed — is unchanged. The dense inline multi-row yn (.hz-yn-inline) has
+        its own matching touch block above. ── */
+  @media (hover: none) and (pointer: coarse) {
+    .hz-yn .hz-yn__btn::before,
+    .hz-tm__btn::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 32px;
+      height: 44px;
+    }
+    .hz-card__bookmark { position: relative; }
+    .hz-card__bookmark::before {
+      content: "";
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 44px;
+      height: 44px;
+    }
+  }

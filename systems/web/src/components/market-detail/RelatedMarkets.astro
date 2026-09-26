@@ -1,0 +1,194 @@
+---
+// Related markets — the tag co-graph module. Tabs = this market's visible tags
+// ("הכל" first); each panel lists co-tagged markets as real <a href> links, all
+// server-rendered (every panel present in HTML, inactive ones just hidden) so every
+// link is crawlable regardless of the active tab. The client script only toggles
+// visibility — it never fetches. Renders nothing when there are no related markets.
+import { categoryLook } from '../../lib/feed-helpers.js';
+
+const { data } = Astro.props;
+const tags = Array.isArray(data?.tags) ? data.tags : [];
+const panels = data?.panels ?? {};
+const hasContent = tags.length > 0 && Array.isArray(panels.all) && panels.all.length > 0;
+const tabs = hasContent
+  ? [{ slug: 'all', label: 'הכל' }, ...tags.map((t) => ({ slug: t.slug, label: t.label }))]
+  : [];
+
+function metaLabel(item) {
+  if (item?.marketStatus === 'resolved') return 'הוכרע';
+  return item?.prob != null ? `${item.prob}%` : '';
+}
+---
+{hasContent && (
+  <section class="rel" aria-label="שווקים קשורים" data-related-root>
+    <h2 class="rel__title">שווקים קשורים</h2>
+    <div class="rel__tabs" role="tablist">
+      {tabs.map((tab, i) => (
+        <button
+          type="button"
+          class={`rel__tab${i === 0 ? ' is-active' : ''}`}
+          role="tab"
+          aria-selected={i === 0 ? 'true' : 'false'}
+          data-related-tab={tab.slug}
+        >{tab.label}</button>
+      ))}
+    </div>
+    <div class="rel__panels">
+      {tabs.map((tab, i) => (
+        <ul class={`rel__panel${i === 0 ? ' is-active' : ''}`} data-related-panel={tab.slug} hidden={i !== 0}>
+          {(panels[tab.slug] || []).slice(0, 3).map((item) => {
+            const look = categoryLook(item.categoryKey);
+            return (
+              <li class="rel__row">
+                <a class="rel__link" href={item.href}>
+                  <span class={`rel__thumb rel__thumb--${look.tone}`} aria-hidden="true">{look.emoji}</span>
+                  <span class="rel__q">{item.title}</span>
+                  <span class="rel__meta">{metaLabel(item)}</span>
+                </a>
+              </li>
+            );
+          })}
+        </ul>
+      ))}
+    </div>
+  </section>
+)}
+
+<style>
+  .rel {
+    margin-top: 1.5rem;
+    padding-top: 1.25rem;
+    border-top: 1px solid var(--hz-border-faint, rgba(255, 255, 255, 0.08));
+  }
+  .rel__title {
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--hz-text, #f4f1ea);
+    margin: 0 0 0.75rem;
+  }
+  .rel__tabs {
+    display: flex;
+    gap: 0.4rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .rel__tabs::-webkit-scrollbar { display: none; }
+  .rel__tab {
+    flex: 0 0 auto;
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    border: 1px solid var(--hz-border-soft, rgba(255, 255, 255, 0.12));
+    background: transparent;
+    color: var(--hz-text-soft, #b9b3a7);
+    font-size: 0.8rem;
+    font-weight: 600;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: background 120ms ease, color 120ms ease, border-color 120ms ease;
+  }
+  .rel__tab:hover { color: var(--hz-text, #f4f1ea); }
+  .rel__tab.is-active {
+    background: var(--hz-text, #f4f1ea);
+    color: var(--hz-bg, #101512);
+    border-color: var(--hz-text, #f4f1ea);
+  }
+  .rel__panel { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+  .rel__panel[hidden] { display: none; }
+  .rel__row { margin: 0; }
+  .rel__link {
+    display: grid;
+    grid-template-columns: 2.25rem minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.7rem;
+    padding: 0.55rem 0.5rem;
+    border-radius: var(--hz-radius-md, 0.6rem);
+    text-decoration: none;
+    color: inherit;
+    transition: background 120ms ease;
+  }
+  .rel__link:hover { background: var(--hz-surface-soft, rgba(255, 255, 255, 0.04)); }
+  .rel__thumb {
+    width: 2.25rem;
+    height: 2.25rem;
+    display: grid;
+    place-items: center;
+    border-radius: var(--hz-radius-sm, 0.45rem);
+    background: var(--hz-surface, rgba(255, 255, 255, 0.05));
+    border: 1px solid var(--hz-border-faint, rgba(255, 255, 255, 0.08));
+    font-size: 1.05rem;
+    line-height: 1;
+  }
+  .rel__q {
+    min-width: 0;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--hz-text, #f4f1ea);
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    line-height: 1.3;
+  }
+  .rel__meta {
+    font-size: 0.85rem;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    color: var(--hz-text-soft, #b9b3a7);
+    white-space: nowrap;
+  }
+</style>
+
+<script>
+  // Tab toggle only — panels are all in the DOM (crawlable); we just show/hide.
+  function initRelated(root) {
+    if (!root || root.dataset.relatedBound === '1') return;
+    root.dataset.relatedBound = '1';
+    const tabs = [...root.querySelectorAll('[data-related-tab]')];
+    const panels = [...root.querySelectorAll('[data-related-panel]')];
+    root.addEventListener('click', (e) => {
+      const tab = e.target.closest('[data-related-tab]');
+      if (!tab || !root.contains(tab)) return;
+      const slug = tab.getAttribute('data-related-tab');
+      for (const t of tabs) {
+        const on = t === tab;
+        t.classList.toggle('is-active', on);
+        t.setAttribute('aria-selected', on ? 'true' : 'false');
+      }
+      for (const p of panels) {
+        const on = p.getAttribute('data-related-panel') === slug;
+        p.classList.toggle('is-active', on);
+        p.hidden = !on;
+      }
+    });
+  }
+  // Single SSR render lives under the rules (main column) — correct for mobile and a
+  // crawlable no-JS fallback. On desktop (>960px, matching the stage grid breakpoint)
+  // relocate it into the sticky sidebar so it sits under the ticket and moves with it.
+  const DESKTOP = window.matchMedia('(min-width: 961px)');
+  function relocate(root) {
+    const side = document.querySelector('.market-detail-stage-side');
+    if (!side) return;
+    if (!root.__home) {
+      root.__home = { parent: root.parentElement, next: root.nextElementSibling };
+    }
+    if (DESKTOP.matches) {
+      if (root.parentElement !== side) side.appendChild(root);
+    } else {
+      const home = root.__home;
+      if (home.parent && root.parentElement !== home.parent) {
+        home.parent.insertBefore(root, home.next);
+      }
+    }
+  }
+  function boot() {
+    for (const root of document.querySelectorAll('[data-related-root]')) {
+      initRelated(root);
+      relocate(root);
+    }
+  }
+  boot();
+  document.addEventListener('astro:page-load', boot);
+  DESKTOP.addEventListener('change', boot);
+</script>

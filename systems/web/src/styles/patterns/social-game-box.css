@@ -1,0 +1,298 @@
+/* ──────────────────────────────────────────────────────────────
+   patterns/social-game-box.css
+   Community panel beside the hero. Two auth-state variants share
+   the leaderboard + streaks. Only the third section differs:
+     · logged-in  → "You vs Crowd" (.hz-yvc)
+     · logged-out → "Wisdom of Crowds" (.hz-wisdom)
+   The HTML always has both; CSS toggles via [data-auth-state] on
+   the root .hz-social.
+   ────────────────────────────────────────────────────────────── */
+
+
+
+  /* Column that owns the panel + the CTA beneath it. Stretches to hero height
+     (grid align-items: stretch). The panel fills it 1:1 (= carousel card
+     height); the CTA is taken OUT of flow and floated into the band below, so
+     it doesn't inflate the row and ride down onto the filter divider. */
+  .hz-social-col {
+    position: relative;
+    height: 100%;
+  }
+  .hz-social {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    padding: clamp(0.75rem, 1.5vw, 1.15rem);
+    border: 1px solid var(--hz-border-soft);
+    border-radius: var(--hz-radius-md);
+    background: var(--hz-surface-1);
+  }
+  .hz-social__title {
+    color: var(--hz-text);
+    font-size: 1rem;
+    font-weight: 700;
+    margin-block: 0 var(--hz-space-4);
+  }
+
+  .hz-social__section { padding-block: var(--hz-space-3); }
+  .hz-social__section + .hz-social__section {
+    border-top: 1px solid var(--hz-border-faint);
+  }
+  .hz-social__section-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: var(--hz-space-2);
+  }
+  .hz-social__section-title {
+    color: var(--hz-text-muted);
+    font-size: 0.82rem;
+    font-weight: 700;
+    letter-spacing: 0;
+    line-height: 1.35;
+  }
+  .hz-social__section-link {
+    color: var(--hz-text-faint);
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
+  .hz-social__section-link[aria-disabled="true"] {
+    cursor: default;
+  }
+
+  /* auth-state visibility — JS sets data-auth-state="guest" or "user" */
+  .hz-social[data-auth-state="user"]  .hz-social__section--wisdom { display: none; }
+  .hz-social[data-auth-state="guest"] .hz-social__section--yvc    { display: none; }
+
+  /* ── leaderboard rows ── */
+  .hz-leader {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: var(--hz-space-3);
+    padding-block: 0.32rem;
+    color: inherit;
+    text-decoration: none;
+    border-radius: var(--hz-radius-sm);
+  }
+  a.hz-leader:hover .hz-leader__name,
+  a.hz-leader:focus-visible .hz-leader__name {
+    color: var(--hz-brand);
+  }
+  a.hz-leader:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--hz-brand) 70%, transparent);
+    outline-offset: 3px;
+  }
+  .hz-leader__rank {
+    width: 1.2rem;
+    text-align: center;
+    color: var(--hz-text-faint);
+    font-family: var(--hz-font-mono);
+    font-feature-settings: "tnum";
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+  .hz-leader--gold   .hz-leader__rank { color: var(--hz-brand); }
+  .hz-leader--silver .hz-leader__rank { color: var(--hz-text-soft); }
+  .hz-leader--bronze .hz-leader__rank { color: #c08660; }
+  .hz-leader__name {
+    color: var(--hz-text);
+    font-size: 0.86rem;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .hz-leader__stat {
+    font-family: var(--hz-font-mono);
+    font-feature-settings: "tnum";
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--hz-action-buy);
+  }
+  .hz-leader__stat--down { color: var(--hz-action-sell); }
+  .hz-social__empty {
+    margin: 0;
+    color: var(--hz-text-muted);
+    font-size: 0.82rem;
+    line-height: 1.45;
+  }
+
+  /* ── streaks ── */
+  .hz-streak {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    align-items: center;
+    gap: var(--hz-space-3);
+    padding-block: 0.32rem;
+  }
+  .hz-streak__avatar {
+    width: 1.5rem;
+    height: 1.5rem;
+    border-radius: var(--hz-radius-pill);
+    background: linear-gradient(135deg, var(--hz-bg-raised), var(--hz-bg-muted));
+    color: var(--hz-text-soft);
+    font-size: 0.68rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .hz-streak__name {
+    color: var(--hz-text);
+    font-size: 0.86rem;
+    font-weight: 600;
+  }
+  .hz-streak__count {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    color: var(--hz-signal-hot);
+    font-family: var(--hz-font-mono);
+    font-feature-settings: "tnum";
+    font-size: 0.82rem;
+    font-weight: 700;
+  }
+  .hz-streak__count::before {
+    content: "";
+    width: 0.45rem;
+    height: 0.45rem;
+    border-radius: var(--hz-radius-pill);
+    background: var(--hz-signal-hot);
+  }
+
+  /* ── You-vs-Crowd (logged-in only) ── */
+  .hz-yvc {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: center;
+    gap: var(--hz-space-3);
+    padding: var(--hz-space-3) 0 0.4rem;
+  }
+  .hz-yvc__stat {
+    display: flex;
+    flex-direction: column;
+    gap: 0.18rem;
+  }
+  .hz-yvc__stat-value {
+    color: var(--hz-text);
+    font-family: var(--hz-font-mono);
+    font-feature-settings: "tnum";
+    font-size: 1.5rem;
+    font-weight: 700;
+    line-height: 1;
+  }
+  .hz-yvc__stat-label {
+    color: var(--hz-text-muted);
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
+  .hz-yvc__compare {
+    color: var(--hz-text-faint);
+    font-family: var(--hz-font-mono);
+    font-feature-settings: "tnum";
+    font-size: 0.78rem;
+    font-weight: 500;
+    text-align: end;
+  }
+  .hz-yvc__rank {
+    margin-top: var(--hz-space-3);
+    padding-top: var(--hz-space-3);
+    border-top: 1px dashed var(--hz-border-faint);
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    color: var(--hz-text-muted);
+    font-size: 0.78rem;
+  }
+  .hz-yvc__rank-value {
+    color: var(--hz-brand);
+    font-family: var(--hz-font-mono);
+    font-feature-settings: "tnum";
+    font-weight: 700;
+  }
+
+  /* ── Wisdom of Crowds (logged-out only) ── */
+  .hz-wisdom {
+    text-align: center;
+    padding: var(--hz-space-2) 0 0.3rem;
+  }
+  .hz-wisdom__ring {
+    inline-size: 5.15rem;
+    block-size: 5.15rem;
+    margin: 0.2rem auto 0.8rem;
+    border: 0.44rem solid rgb(255 248 232 / 0.08);
+    border-radius: var(--hz-radius-pill);
+    display: grid;
+    place-items: center;
+    color: var(--hz-text-muted);
+    font-family: var(--hz-font-mono);
+    font-size: 1.35rem;
+    font-weight: 900;
+    line-height: 1;
+  }
+  .hz-wisdom__ring span {
+    transform: translateY(-0.04rem);
+  }
+  .hz-wisdom__gauge {
+    display: inline-block;
+    color: var(--hz-text);
+    font-family: var(--hz-font-mono);
+    font-feature-settings: "tnum";
+    font-size: 1.9rem;
+    font-weight: 700;
+    line-height: 1;
+    background: linear-gradient(180deg, var(--hz-text), var(--hz-brand));
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .hz-wisdom__label {
+    color: var(--hz-text-muted);
+    font-size: 0.74rem;
+    font-weight: 600;
+    margin-top: var(--hz-space-1);
+  }
+  .hz-wisdom__meta {
+    margin-top: var(--hz-space-3);
+    padding-top: var(--hz-space-2);
+    border-top: 1px dashed var(--hz-border-faint);
+    color: var(--hz-text-faint);
+    font-size: 0.72rem;
+    line-height: 1.45;
+    text-align: start;
+  }
+
+  /* Community engagement CTA — floated into the band UNDER the panel, in the
+     same row as the carousel's dots/nav chips (matching offset + height). */
+  .hz-social__cta {
+    position: absolute;
+    top: 100%;
+    inset-inline: 0;
+    margin-top: 0.55rem; /* same band offset as .hz-hero-carousel__nav */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+    width: 100%;
+    padding: 0.3rem 1rem; /* height-matched to the nav chips */
+    line-height: 1.2;
+    border: 1px solid rgb(var(--hz-brand-rgb) / 0.45);
+    border-radius: var(--hz-radius-pill);
+    background: rgb(var(--hz-brand-rgb) / 0.1);
+    color: var(--hz-brand);
+    font-family: inherit;
+    font-size: 0.74rem;
+    font-weight: 700;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background var(--hz-motion);
+  }
+  @media (hover: hover) {
+    .hz-social__cta:hover { background: rgb(var(--hz-brand-rgb) / 0.16); }
+  }
+  .hz-social__cta:focus-visible {
+    outline: 2px solid rgb(var(--hz-brand-rgb) / 0.7);
+    outline-offset: 3px;
+  }
+  .hz-social__cta-arrow { font-size: 0.95rem; }

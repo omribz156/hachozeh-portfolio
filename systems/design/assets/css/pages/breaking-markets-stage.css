@@ -1,0 +1,507 @@
+/* Breaking-markets stage.
+ *
+ * Owns: layout + visual treatments specific to the breaking discovery
+ * surface. Anything that's truly platform-wide (typography helpers,
+ * tokens, primitives) lives in base/. Tailwind utilities and patterns/
+ * own everything else.
+ *
+ * Surface guide: ../../../guide/surfaces/discovery/breaking-page.md
+ */
+
+/* Reserve vertical space for site-shell before it mounts.
+ * Mounted shell measures ~107px at desktop (top bar + nav row). Reserve
+ * close to that so the page doesn't slide on shell mount. Should
+ * eventually move to patterns/site-shell.css so every page benefits;
+ * page-local for now to avoid stepping on the parallel shell session. */
+[data-site-shell]:empty {
+  display: block;
+  min-height: 6.5rem;
+}
+
+/* Hide the entire stage (hero + chips + rows + rail) until JS marks it
+ * data-ready. Hero alone above an invisible body reads as an orphan
+ * floating on a blank page during the load window — worse than waiting
+ * for the whole stage to arrive together. visibility (not display)
+ * keeps the layout reserved so the page doesn't reflow on reveal. */
+[data-breaking-stage]:not([data-ready]) {
+  visibility: hidden;
+}
+
+/* Shared numeric helpers (mirror what trending-stage.css uses inline).
+ * Kept page-local so we don't ship them to pages that don't need them. */
+.hz-num     { font-variant-numeric: tabular-nums; letter-spacing: -0.01em; }
+.hz-mono    { font-family: var(--hz-font-mono); font-variant-numeric: tabular-nums; }
+.hz-display { font-family: "Noto Sans Hebrew", var(--hz-font-ui); letter-spacing: -0.02em; }
+
+/* ───── Page frame ───── */
+.hz-breaking {
+  max-width: 1320px;
+  margin: 0 auto;
+  padding: 2.2rem 3rem 3rem;
+}
+
+/* ───── Hero banner ───── */
+.hz-breaking__hero {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 2rem;
+  align-items: stretch;
+  background: var(--hz-bg-raised);
+  border: 1px solid var(--hz-border-faint);
+  border-radius: var(--hz-radius-lg);
+  padding: 1.5rem 2rem;
+  margin-bottom: 1.8rem;
+  overflow: hidden;
+}
+.hz-breaking__hero-text {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.4rem;
+}
+.hz-breaking__hero-date {
+  font-size: 0.78rem;
+  color: var(--hz-text-faint);
+  letter-spacing: 0;
+}
+.hz-breaking__hero-title {
+  font-family: "Noto Sans Hebrew", var(--hz-font-ui);
+  font-size: 1.55rem;
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  margin: 0;
+  color: var(--hz-text);
+}
+.hz-breaking__hero-sub {
+  margin: 0;
+  color: var(--hz-text-muted);
+  font-size: 0.92rem;
+  line-height: 1.5;
+  max-width: 50ch;
+}
+.hz-breaking__hero-motif {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-height: 100px;
+  width: 320px;
+  flex-shrink: 0;
+}
+
+/* ───── Two-column body ───── */
+.hz-breaking__body {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 2.6rem;
+  align-items: start;
+}
+.hz-breaking__content { min-width: 0; }
+
+/* ───── Category chips (mirrors hz-trending__chip) ───── */
+.hz-breaking__chips {
+  display: flex;
+  gap: 0.45rem;
+  flex-wrap: wrap;
+  padding: 0.6rem 0 1.2rem;
+}
+.hz-breaking__chip {
+  padding: 0.42rem 0.95rem;
+  border: 1px solid var(--hz-border-soft);
+  border-radius: var(--hz-radius-pill);
+  background: transparent;
+  color: var(--hz-text-muted);
+  font-family: inherit;
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all var(--hz-motion);
+}
+.hz-breaking__chip:hover {
+  color: var(--hz-text);
+  border-color: var(--hz-border-soft);
+}
+.hz-breaking__chip.is-active {
+  background: var(--hz-brand-soft);
+  border-color: rgba(var(--hz-brand-rgb) / 0.3);
+  color: var(--hz-brand-strong);
+}
+
+/* ───── Glyph swatch — category initial on tinted square ─────
+ * PLASTER · page-local visual vocabulary. See shared-seam S1 in
+ * workspace/coordination/front-breaking.md — the long-term home is
+ * assets/js/data/category-presentation.js shared across discovery
+ * siblings. Delete these modifiers when the shared module lands. */
+.hz-breaking__glyph {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  border: 1px solid var(--hz-border-faint);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "Noto Sans Hebrew", var(--hz-font-ui);
+  font-weight: 800;
+  font-size: 15px;
+  flex-shrink: 0;
+}
+.hz-breaking__glyph--politics { background: linear-gradient(135deg, #5e4830 0%, #1a1c24 100%); color: #e8b257; }
+.hz-breaking__glyph--crypto   { background: linear-gradient(135deg, #3a3a4d 0%, #1a1c24 100%); color: #bba0ff; }
+.hz-breaking__glyph--economy  { background: linear-gradient(135deg, #2c4233 0%, #1a1c24 100%); color: #7be0a8; }
+.hz-breaking__glyph--tech-ai  { background: linear-gradient(135deg, #2f3c4e 0%, #1a1c24 100%); color: #7aaee6; }
+.hz-breaking__glyph--tech     { background: linear-gradient(135deg, #3a3344 0%, #1a1c24 100%); color: #c79ee6; }
+.hz-breaking__glyph--sports   { background: linear-gradient(135deg, #4d3334 0%, #1a1c24 100%); color: #e89aa1; }
+.hz-breaking__glyph--world    { background: linear-gradient(135deg, #3a3a3a 0%, #1a1c24 100%); color: #c8c0b3; }
+
+/* ───── Market row ───── */
+.hz-breaking__row {
+  display: grid;
+  grid-template-columns: 2.2rem 36px 1fr auto 5.5rem;
+  align-items: center;
+  gap: 1.3rem;
+  padding: 1.1rem 1rem;
+  border-radius: var(--hz-radius-md);
+  border-bottom: 1px solid var(--hz-border-faint);
+  transition: background var(--hz-motion);
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+}
+.hz-breaking__row:last-child { border-bottom: 0; }
+.hz-breaking__row:hover { background: var(--hz-surface-soft); }
+.hz-breaking__row-rank {
+  font-family: var(--hz-font-mono);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--hz-text-faint);
+  letter-spacing: 0.04em;
+  text-align: center;
+}
+.hz-breaking__row-title {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  font-family: "Noto Sans Hebrew", var(--hz-font-ui);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--hz-text);
+  line-height: 1.3;
+  min-width: 0;
+  text-wrap: pretty;
+}
+
+/* Mover sub-label: names the outcome that actually moved (multi/matchup), since
+   the question alone can't say who fell/rose. Name reads neutral-strong; the
+   arrow carries direction in the delta tone (green up / red down). */
+.hz-breaking__row-mover {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: var(--hz-text-muted);
+  min-width: 0;
+}
+.hz-breaking__row-mover-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.hz-breaking__row-mover-arrow {
+  font-weight: 800;
+  line-height: 1;
+  flex-shrink: 0;
+}
+.hz-breaking__row-mover--up   .hz-breaking__row-mover-arrow { color: var(--hz-action-buy); }
+.hz-breaking__row-mover--down .hz-breaking__row-mover-arrow { color: var(--hz-action-sell); }
+.hz-breaking__row-track { padding: 0.1rem 0; }
+.hz-breaking__row-price {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  line-height: 1.1;
+  gap: 0.2rem;
+}
+.hz-breaking__row-pct {
+  font-family: "Noto Sans Hebrew", var(--hz-font-ui);
+  font-size: 1.45rem;
+  font-weight: 700;
+  color: var(--hz-text);
+  letter-spacing: -0.02em;
+}
+.hz-breaking__row-pct-unit {
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: var(--hz-text-muted);
+}
+.hz-breaking__row-delta {
+  font-family: var(--hz-font-mono);
+  font-size: 0.82rem;
+  font-weight: 600;
+}
+.hz-breaking__row-delta--up   { color: var(--hz-action-buy); }
+.hz-breaking__row-delta--down { color: var(--hz-action-sell); }
+.hz-breaking__row-delta--none { color: var(--hz-text-faint); }
+
+/* ───── Right rail ───── */
+.hz-breaking__rail {
+  position: sticky;
+  top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.4rem;
+}
+
+/* PLASTER · daily mail signup
+ * See workspace/coordination/front-breaking.md.
+ * DELETE WHEN: a real mail-list endpoint exists for breaking-digest
+ * (may share the landing-page signup or split off as its own list). */
+.hz-breaking__mail {
+  background: linear-gradient(180deg, rgba(232,178,87,0.06) 0%, var(--hz-surface-soft) 100%);
+  border: 1px solid var(--hz-border-faint);
+  border-radius: var(--hz-radius-lg);
+  padding: 1.3rem 1.3rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.hz-breaking__mail-head { display: flex; gap: 0.85rem; align-items: flex-start; }
+.hz-breaking__mail-bell {
+  width: 2.4rem;
+  height: 2.4rem;
+  flex-shrink: 0;
+  border-radius: 999px;
+  background: rgba(232,178,87,0.16);
+  color: var(--hz-brand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.hz-breaking__mail-title {
+  font-family: "Noto Sans Hebrew", var(--hz-font-ui);
+  font-size: 1.02rem;
+  font-weight: 700;
+  color: var(--hz-text);
+  margin: 0 0 0.3rem 0;
+  line-height: 1.3;
+}
+.hz-breaking__mail-sub {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--hz-text-muted);
+  line-height: 1.4;
+}
+/* Selector intentionally qualifies `input` to outweigh the Tailwind Forms
+ * plugin reset (`[type='email']` at specificity 0,1,0). Our class alone
+ * ties and loses on source order because the CDN injects its reset at
+ * runtime after this file. */
+input.hz-breaking__mail-input {
+  width: 100%;
+  background: var(--hz-bg);
+  border: 1px solid var(--hz-border-soft);
+  border-radius: var(--hz-radius-md);
+  padding: 0.75rem 0.95rem;
+  color: var(--hz-text);
+  font-family: var(--hz-font-mono);
+  font-size: 0.88rem;
+  transition: all var(--hz-motion);
+  box-shadow: none;
+}
+input.hz-breaking__mail-input::placeholder { color: var(--hz-text-faint); }
+input.hz-breaking__mail-input:focus {
+  outline: none;
+  border-color: var(--hz-brand);
+  background: var(--hz-bg-raised);
+  box-shadow: 0 0 0 3px rgba(var(--hz-brand-rgb) / 0.18);
+}
+.hz-breaking__mail-cta {
+  background: var(--hz-brand);
+  color: var(--hz-text-inverse);
+  font-weight: 700;
+  font-size: 0.9rem;
+  padding: 0.8rem 1rem;
+  border: 0;
+  border-radius: var(--hz-radius-md);
+  cursor: pointer;
+  transition: all var(--hz-motion);
+}
+.hz-breaking__mail-cta:hover {
+  background: var(--hz-brand-strong);
+  transform: translateY(-1px);
+}
+.hz-breaking__mail-thanks {
+  display: flex;
+  gap: 0.6rem;
+  align-items: center;
+  font-size: 0.88rem;
+  color: var(--hz-text-soft);
+  padding: 0.4rem 0;
+}
+.hz-breaking__mail-thanks-mark {
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 999px;
+  background: var(--hz-action-buy-soft);
+  color: var(--hz-action-buy);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+/* PLASTER · @hachozeh live social feed
+ * See workspace/coordination/front-breaking.md.
+ * DELETE WHEN: a real social-feed source exists (endpoint or X syndication). */
+.hz-breaking__feed {
+  border: 1px solid var(--hz-border-faint);
+  border-radius: var(--hz-radius-lg);
+  padding: 1.2rem 1.3rem 0.9rem;
+  background: var(--hz-surface-soft);
+}
+.hz-breaking__feed-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 0.95rem;
+  border-bottom: 1px solid var(--hz-border-faint);
+  margin-bottom: 0.5rem;
+}
+.hz-breaking__feed-handle {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: "Noto Sans Hebrew", var(--hz-font-ui);
+  font-size: 0.94rem;
+  font-weight: 600;
+  color: var(--hz-text);
+}
+.hz-breaking__feed-handle-at {
+  color: var(--hz-brand);
+  font-family: var(--hz-font-mono);
+  font-weight: 500;
+}
+.hz-breaking__feed-pulse {
+  width: 0.5rem;
+  height: 0.5rem;
+  border-radius: 999px;
+  background: var(--hz-signal-live);
+  box-shadow: 0 0 0 0 rgba(var(--hz-signal-live-rgb) / 0.6);
+  animation: hzPulse 1.8s ease-out infinite;
+  display: inline-block;
+}
+@keyframes hzPulse {
+  0%   { box-shadow: 0 0 0 0 rgba(var(--hz-signal-live-rgb) / 0.6); }
+  70%  { box-shadow: 0 0 0 0.6rem rgba(var(--hz-signal-live-rgb) / 0); }
+  100% { box-shadow: 0 0 0 0 rgba(var(--hz-signal-live-rgb) / 0); }
+}
+.hz-breaking__feed-follow {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.4rem 0.85rem;
+  background: var(--hz-text);
+  color: var(--hz-bg);
+  font-size: 0.78rem;
+  font-weight: 600;
+  border: 0;
+  border-radius: var(--hz-radius-pill);
+  cursor: pointer;
+  transition: all var(--hz-motion);
+}
+.hz-breaking__feed-follow:hover { transform: translateY(-1px); }
+.hz-breaking__feed-list { list-style: none; padding: 0; margin: 0; }
+.hz-breaking__feed-item {
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--hz-border-faint);
+}
+.hz-breaking__feed-item:last-child { border-bottom: 0; }
+.hz-breaking__feed-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  margin-bottom: 0.4rem;
+}
+.hz-breaking__feed-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.74rem;
+  color: var(--hz-text-muted);
+  font-weight: 500;
+}
+.hz-breaking__feed-tag--breaking {
+  color: var(--hz-warning);
+  font-weight: 600;
+}
+.hz-breaking__feed-tag--breaking::before {
+  content: "◆";
+  color: var(--hz-warning);
+  font-size: 0.8rem;
+}
+.hz-breaking__feed-time {
+  font-family: var(--hz-font-mono);
+  font-size: 0.7rem;
+  color: var(--hz-text-faint);
+}
+.hz-breaking__feed-text {
+  margin: 0;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--hz-text-soft);
+  text-wrap: pretty;
+}
+.hz-breaking__feed-more {
+  width: 100%;
+  padding: 0.7rem;
+  margin-top: 0.4rem;
+  font-size: 0.82rem;
+  color: var(--hz-text-muted);
+  background: transparent;
+  border: 0;
+  border-radius: var(--hz-radius-md);
+  cursor: pointer;
+  transition: all var(--hz-motion);
+}
+.hz-breaking__feed-more:hover {
+  color: var(--hz-text);
+  background: var(--hz-bg-raised);
+}
+
+/* ───── Empty / loading / error states ───── */
+.hz-breaking__state {
+  padding: 3rem 1rem;
+  text-align: center;
+  color: var(--hz-text-muted);
+  font-size: 0.95rem;
+  border: 1px dashed var(--hz-border-faint);
+  border-radius: var(--hz-radius-md);
+}
+
+/* ───── Responsive · single breakpoint @ 1024px ─────
+ * Family contract: full opening above 1024, condensed below.
+ * For breaking specifically: rail (mail + social) is editorial,
+ * not value-core for "what moved in 24h" — collapse it below 1024.
+ * Rows are already row-shaped, so they stack as-is. */
+@media (max-width: 1024px) {
+  .hz-breaking { padding: 1.6rem 1.25rem 2.5rem; }
+  .hz-breaking__hero {
+    grid-template-columns: 1fr;
+    padding: 1.25rem 1.25rem;
+    gap: 1rem;
+  }
+  .hz-breaking__hero-motif { display: none; }
+  .hz-breaking__body {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .hz-breaking__rail { display: none; }
+  .hz-breaking__row {
+    grid-template-columns: 1.6rem 32px 1fr auto;
+    gap: 0.9rem;
+    padding: 0.95rem 0.5rem;
+  }
+  .hz-breaking__row-track { display: none; }
+}

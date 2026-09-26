@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="security market image">
+  <defs>
+    <linearGradient id="g" x1="62" y1="48" x2="456" y2="468" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1d3343"/>
+      <stop offset=".58" stop-color="#18212d"/>
+      <stop offset="1" stop-color="#0b111b"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#g)"/>
+  <path d="M256 88 386 142v96c0 88-49 158-130 198-81-40-130-110-130-198v-96l130-54Z" fill="none" stroke="#f7c66a" stroke-width="28" stroke-linejoin="round"/>
+  <path d="M256 184v78" stroke="#e7edf4" stroke-width="28" stroke-linecap="round"/>
+  <circle cx="256" cy="326" r="18" fill="#6ee7b7"/>
+</svg>

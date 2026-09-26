@@ -1,0 +1,26 @@
+/* live-pulse — the shared "this value just changed" cue.
+   A single calm pulse, fired ONLY when a pushed value actually changes (never loops,
+   never on a no-op). Up = buy-green, down = sell-red. This is the legibility layer over
+   the SSE push: the data was already updating; this makes the change perceptible —
+   while honoring the no-synthetic-movement doctrine (no motion unless the number moved). */
+@keyframes hz-live-flash-up {
+  from { background-color: rgb(var(--hz-action-buy-rgb) / 0.20); }
+  to   { background-color: rgb(var(--hz-action-buy-rgb) / 0); }
+}
+@keyframes hz-live-flash-down {
+  from { background-color: rgb(var(--hz-action-sell-rgb) / 0.20); }
+  to   { background-color: rgb(var(--hz-action-sell-rgb) / 0); }
+}
+.hz-live-flash--up,
+.hz-live-flash--down {
+  border-radius: var(--hz-radius-sm);
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+.hz-live-flash--up { animation: hz-live-flash-up 600ms ease-out; }
+.hz-live-flash--down { animation: hz-live-flash-down 600ms ease-out; }
+
+@media (prefers-reduced-motion: reduce) {
+  .hz-live-flash--up,
+  .hz-live-flash--down { animation: none; }
+}

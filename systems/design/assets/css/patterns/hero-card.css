@@ -1,0 +1,494 @@
+/* ──────────────────────────────────────────────────────────────
+   patterns/hero-card.css
+   The big market hero used in the trending carousel.
+   Two variants: binary (single Yes/No with chart)
+                 multi (ranked outcomes with multi-line chart)
+   ────────────────────────────────────────────────────────────── */
+
+
+
+  .hz-hero {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: clamp(0.85rem, 1.8vw, 1.25rem);
+    border: 1px solid var(--hz-border-soft);
+    border-radius: var(--hz-radius-md);
+    background:
+      radial-gradient(circle at 85% 0%, var(--hz-brand-soft), transparent 26rem),
+      var(--hz-surface-1);
+    box-shadow: var(--hz-shadow-soft);
+    overflow: hidden;
+  }
+
+  /* ── head: thumb + (eyebrow row + title) ──
+     Thumb sits at the RTL-start side of the title block; same fallback
+     chain as the card (image.src → category emoji + tone). */
+  .hz-hero__head {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--hz-space-3);
+    margin-bottom: var(--hz-space-4);
+  }
+  .hz-hero__thumb {
+    width: clamp(3rem, 4vw, 3.75rem);
+    height: clamp(3rem, 4vw, 3.75rem);
+    border-radius: var(--hz-radius-sm);
+    display: grid;
+    place-items: center;
+    font-size: clamp(1.6rem, 2.2vw, 2rem);
+    background: var(--hz-surface-2);
+    border: 1px solid var(--hz-border-faint);
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+  .hz-hero__thumb--amber { background: rgba(232, 178, 87, 0.16); }
+  .hz-hero__thumb--info  { background: rgba(122, 174, 230, 0.16); }
+  .hz-hero__thumb--buy   { background: rgba(93, 211, 158, 0.16); }
+  .hz-hero__thumb--sell  { background: rgba(231, 122, 138, 0.16); }
+  .hz-hero__thumb--warn  { background: rgba(232, 154, 58, 0.16); }
+  .hz-hero__thumb--mono  { background: var(--hz-surface-3); }
+  /* Editorial photo variant — the doctrine: SVG is the icon floor (small,
+     geometric), photo is the editorial topping (bigger, image-led). Grow the
+     photo so it reads as a real photograph, not "different-shaped icon".
+     The hero header is flex so the title flows around the larger thumb without
+     layout pop between slides as long as the photo height stays near the
+     title block height (~2 lines × line-height ≈ 4-5rem). */
+  .hz-hero__thumb--photo {
+    width: clamp(4.5rem, 6vw, 5.5rem);
+    height: clamp(4.5rem, 6vw, 5.5rem);
+    background: var(--hz-surface-2);
+    border-color: var(--hz-border-soft);
+  }
+  .hz-hero__thumb img {
+    width: 100%; height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .hz-hero__head-text {
+    min-width: 0;
+    flex: 1;
+  }
+  .hz-hero__top {
+    display: flex;
+    align-items: center;
+    gap: var(--hz-space-3);
+    color: var(--hz-text-muted);
+    font-size: 0.76rem;
+    font-weight: 600;
+    margin-bottom: var(--hz-space-2);
+  }
+  .hz-hero__eyebrow {
+    color: var(--hz-brand);
+    letter-spacing: 0;
+    line-height: 1.35;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+  .hz-hero__signal {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.16rem 0.5rem;
+    border-radius: var(--hz-radius-pill);
+    background: var(--hz-signal-hot-soft);
+    color: var(--hz-signal-hot);
+    font-size: 0.74rem;
+    font-weight: 700;
+    letter-spacing: 0;
+  }
+  .hz-hero__signal::before {
+    content: "";
+    width: 0.36rem; height: 0.36rem;
+    border-radius: var(--hz-radius-pill);
+    background: currentColor;
+  }
+  .hz-hero__close-meta { margin-inline-start: auto; }
+  .hz-hero__title {
+    color: var(--hz-text);
+    font-size: clamp(1.4rem, 2.1vw, 1.85rem);
+    font-weight: 700;
+    line-height: 1.15;
+    letter-spacing: -0.018em;
+    margin-block: 0;
+    /* One line — long questions (e.g. the weather Q) truncate with an ellipsis
+       instead of wrapping to a second line. head-text already has min-width:0. */
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  /* Headline links to the market detail page. Inherit the heading's type;
+     a soft brand wash on hover signals it's clickable without shouting. */
+  .hz-hero__title a {
+    color: inherit;
+    text-decoration: none;
+    transition: color var(--hz-motion);
+  }
+  .hz-hero__title a:hover { color: var(--hz-brand-strong); }
+  .hz-hero__title a:focus-visible {
+    outline: 2px solid var(--hz-brand);
+    outline-offset: 3px;
+    border-radius: var(--hz-radius-xs);
+  }
+
+  /* ── main row: outcomes column (right in RTL) + chart (left) ── */
+  .hz-hero__main {
+    display: grid;
+    /* Info column gets more weight (was 0.3fr) so the chart isn't a stretched
+       wide stripe — brings it toward ~1.6:1 like Poly/Kalshi, whose hero charts
+       sit beside a rich info column rather than spanning the whole card. */
+    grid-template-columns: minmax(11rem, 0.58fr) minmax(0, 1fr);
+    gap: clamp(0.85rem, 1.6vw, 1.25rem);
+    align-items: stretch;
+    margin-bottom: var(--hz-space-4);
+    /* Grow to fill the card so the chart claims the vertical space instead of
+       leaving a void above the footer. When the running-comments band ships it
+       slots between main and footer and this flex naturally yields the room. */
+    flex: 1;
+    min-height: 0;
+  }
+  .hz-hero__outcomes {
+    display: flex;
+    flex-direction: column;
+    gap: var(--hz-space-3);
+    min-width: 0;
+  }
+
+  /* ── probability headline (binary) ── */
+  .hz-hero__prob {
+    display: flex;
+    align-items: baseline;
+    gap: var(--hz-space-2);
+  }
+  .hz-hero__prob-value {
+    color: var(--hz-brand);
+    font-size: clamp(2rem, 3vw, 2.6rem);
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-family: var(--hz-font-mono);
+    font-feature-settings: "tnum";
+  }
+  .hz-hero__prob-trend {
+    color: var(--hz-action-buy);
+    font-size: 0.74rem;
+    font-weight: 600;
+  }
+  .hz-hero__prob-trend--down { color: var(--hz-action-sell); }
+
+  /* ── trade buttons (binary) ── */
+  .hz-hero__trade {
+    display: flex;
+    flex-direction: row;
+    gap: var(--hz-space-2);
+  }
+  .hz-hero__trade-btn {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.55rem 0.8rem;
+    border: 1px solid;
+    border-radius: var(--hz-radius-sm);
+    background: transparent;
+    font-family: inherit;
+    font-size: 0.82rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all var(--hz-motion);
+  }
+  .hz-hero__trade-btn-name {
+    font-size: 0.95rem;
+    color: var(--hz-text);
+  }
+  .hz-hero__trade-btn-prob {
+    font-family: var(--hz-font-mono);
+    font-feature-settings: "tnum";
+    font-size: 1.1rem;
+  }
+  .hz-hero__trade-btn--yes {
+    border-color: rgba(var(--hz-action-buy-rgb) / 0.25);
+    background: rgba(var(--hz-action-buy-rgb) / 0.05);
+  }
+  .hz-hero__trade-btn--yes:hover {
+    background: var(--hz-action-buy-soft);
+    border-color: rgba(var(--hz-action-buy-rgb) / 0.5);
+  }
+  .hz-hero__trade-btn--yes .hz-hero__trade-btn-prob { color: var(--hz-action-buy); }
+
+  .hz-hero__trade-btn--no {
+    border-color: rgba(var(--hz-action-sell-rgb) / 0.25);
+    background: rgba(var(--hz-action-sell-rgb) / 0.05);
+  }
+  .hz-hero__trade-btn--no:hover {
+    background: var(--hz-action-sell-soft);
+    border-color: rgba(var(--hz-action-sell-rgb) / 0.5);
+  }
+  .hz-hero__trade-btn--no .hz-hero__trade-btn-prob { color: var(--hz-action-sell); }
+
+  /* ── matchup buttons (sports: Team · [Draw] · Team, in market order) ── */
+  .hz-hero__matchup {
+    display: flex;
+    gap: var(--hz-space-2);
+  }
+  .hz-hero__matchup-btn {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.2rem;
+    padding: 0.55rem 0.4rem;
+    /* Team buttons take a soft translucent wash of their kit color (--mc) over
+       the dark hero — colored, not loud. Draw has no --mc → neutral outline. */
+    border: 1px solid color-mix(in srgb, var(--mc, var(--hz-border-soft)) 45%, transparent);
+    border-radius: var(--hz-radius-sm);
+    background: color-mix(in srgb, var(--mc, transparent) 20%, transparent);
+    text-decoration: none;
+    transition: all var(--hz-motion);
+  }
+  .hz-hero__matchup-btn:hover {
+    background: color-mix(in srgb, var(--mc, transparent) 32%, transparent);
+  }
+  /* Draw stays neutral (no kit color) but gets a soft grey fill so it's not
+     invisible; still quieter than the color-washed team buttons. */
+  .hz-hero__matchup-btn--draw {
+    opacity: 0.9;
+    background: rgba(255, 255, 255, 0.07);
+    border-color: var(--hz-border);
+  }
+  /* Text stays neutral white — the kit color lives in the wash behind it, not in
+     the type. Coloring the name *and* washing the button doubled the signal and
+     clashed for arbitrary kit pairs; white text reads clean over any tint. */
+  .hz-hero__matchup-name {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--hz-text);
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    text-align: center;
+  }
+  .hz-hero__matchup-prob {
+    font-family: var(--hz-font-mono);
+    font-feature-settings: "tnum";
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--hz-text);
+  }
+
+  /* ── ranked outcome rows (multi variant) ── */
+  .hz-hero__outcome-row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--hz-space-2);
+    padding-block: 0.3rem;
+  }
+  .hz-hero__outcome-row + .hz-hero__outcome-row {
+    border-top: 1px solid var(--hz-border-faint);
+  }
+  .hz-hero__outcome-dot {
+    width: 0.52rem;
+    height: 0.52rem;
+    border-radius: var(--hz-radius-pill);
+    flex-shrink: 0;
+  }
+  .hz-hero__outcome-dot--1 { background: var(--hz-brand); }
+  .hz-hero__outcome-dot--2 { background: var(--hz-info); }
+  .hz-hero__outcome-dot--3 { background: var(--hz-action-buy); }
+  .hz-hero__outcome-dot--4 { background: var(--hz-action-sell); }
+  .hz-hero__outcome-name {
+    color: var(--hz-text);
+    font-size: 0.85rem;
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
+  .hz-hero__outcome-prob {
+    color: var(--hz-text);
+    font-family: var(--hz-font-mono);
+    font-feature-settings: "tnum";
+    font-weight: 700;
+    font-size: 0.95rem;
+    line-height: 1;
+  }
+
+  /* ── chart panel with axes ──
+     Trending hero is a *preview* chart, not the full market-detail chart.
+     Keep it compact so the hero zone doesn't eat the viewport. */
+  .hz-hero__chart {
+    position: relative;
+    min-width: 0;
+    /* Taller box (~2:1 at desktop, was ~2.6:1) so the now-real movement has
+       vertical room to breathe — toward Poly/Kalshi's taller hero charts
+       without dominating the fold. Calibration target. */
+    min-height: clamp(13rem, 18vw, 17rem);
+  }
+  /* The chart is the market-detail L1 renderer mounted compact (the SVG carries
+     the class .chart-card__svg). Fill the stretched cell — the compact mount
+     renders L1 at the measured pixel size, so the viewBox is 1:1 with the box
+     and axis text stays crisp (no preserveAspectRatio="none" distortion). The
+     descendant selector outranks probability-chart.css's `.chart-card__svg
+     { height: auto }`. */
+  .hz-hero__chart .chart-card__svg {
+    width: 100%;
+    height: 100%;
+    display: block;
+    cursor: crosshair;
+  }
+  /* The hero renders L1 at 1:1 (viewBox = measured px), so the shared 1.5u line
+     reads thinner here than on market-detail (whose viewBox is scaled up to its
+     display width). Bump it for the hero's larger showcase chart. The third
+     class outranks probability-chart.css's `.chart-card__svg .line`. */
+  .hz-hero__chart .chart-card__svg .line {
+    stroke-width: 2.5;
+  }
+
+  /* ── live commentary inside hero ── */
+  .hz-hero__commentary {
+    padding-top: var(--hz-space-3);
+    border-top: 1px solid var(--hz-border-faint);
+    margin-bottom: var(--hz-space-3);
+  }
+  .hz-hero__commentary-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: var(--hz-space-2);
+  }
+  .hz-hero__commentary-title {
+    color: var(--hz-text-muted);
+    font-size: 0.78rem;
+    font-weight: 600;
+  }
+  .hz-hero__commentary-live {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    color: var(--hz-live);
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0;
+  }
+  .hz-hero__commentary-live::before {
+    content: "";
+    width: 0.4rem; height: 0.4rem;
+    border-radius: var(--hz-radius-pill);
+    background: var(--hz-live);
+    box-shadow: 0 0 0 3px rgba(var(--hz-live-rgb) / 0.20);
+    animation: hz-pulse-soft 1.6s ease-in-out infinite;
+  }
+  @keyframes hz-pulse-soft {
+    0%, 100% { opacity: 1; }
+    50%      { opacity: 0.4; }
+  }
+
+  .hz-comment {
+    display: flex;
+    gap: var(--hz-space-2);
+    padding-block: 0.4rem;
+  }
+  .hz-comment + .hz-comment { border-top: 1px dashed var(--hz-border-faint); }
+  .hz-comment__avatar {
+    flex: 0 0 auto;
+    width: 1.55rem; height: 1.55rem;
+    border-radius: var(--hz-radius-pill);
+    background: linear-gradient(135deg, var(--hz-bg-raised), var(--hz-bg-muted));
+    color: var(--hz-text-soft);
+    font-size: 0.65rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .hz-comment__body { min-width: 0; flex: 1; }
+  .hz-comment__head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--hz-space-2);
+    color: var(--hz-text);
+    font-size: 0.76rem;
+    font-weight: 600;
+  }
+  .hz-comment__time {
+    color: var(--hz-text-faint);
+    font-size: 0.66rem;
+    font-weight: 500;
+  }
+  .hz-comment__side {
+    display: inline-block;
+    padding: 0.05rem 0.38rem;
+    border-radius: var(--hz-radius-pill);
+    font-size: 0.62rem;
+    font-weight: 700;
+  }
+  .hz-comment__side--yes { background: var(--hz-action-buy-soft); color: var(--hz-action-buy); }
+  .hz-comment__side--no  { background: var(--hz-action-sell-soft); color: var(--hz-action-sell); }
+  .hz-comment__text {
+    color: var(--hz-text-soft);
+    font-size: 0.78rem;
+    line-height: 1.4;
+    margin-top: 0.1rem;
+  }
+
+  /* ── footer strip: vol / participants / close ── */
+  .hz-hero__footer {
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--hz-space-3);
+    padding-top: var(--hz-space-3);
+    border-top: 1px solid var(--hz-border-faint);
+    color: var(--hz-text-faint);
+    font-size: 0.74rem;
+    font-weight: 600;
+  }
+
+  /* ── carousel nav chips (prev/next slide, named) — live in the dots row at
+     the carousel level (see hero-carousel.css .hz-hero-carousel__nav) ── */
+  .hz-hero__nav-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    min-width: 0;
+    max-width: 11rem;
+    padding: 0.3rem 0.6rem;
+    border: 1px solid var(--hz-border-soft);
+    border-radius: var(--hz-radius-pill);
+    background: transparent;
+    color: var(--hz-text-muted);
+    font-family: inherit;
+    font-size: 0.74rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all var(--hz-motion);
+  }
+  .hz-hero__nav-chip:hover {
+    border-color: var(--hz-border);
+    color: var(--hz-text);
+    background: rgba(255, 255, 255, 0.04);
+  }
+  .hz-hero__nav-chip-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
+  .hz-hero__nav-chip-arrow { flex-shrink: 0; opacity: 0.7; }
+  .hz-hero__footer .mono {
+    color: var(--hz-text-muted);
+    font-weight: 700;
+    font-family: var(--hz-font-mono);
+    font-feature-settings: "tnum";
+  }
+
+  @media (max-width: 720px) {
+    .hz-hero__trade { grid-template-columns: 1fr 1fr; }
+  }

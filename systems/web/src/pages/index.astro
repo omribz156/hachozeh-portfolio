@@ -1,0 +1,24 @@
+---
+import FeedPage from '../components/FeedPage.astro';
+import { getCategoryHub } from '../lib/category-hubs.js';
+
+const requestedCategory = Astro.url.searchParams.get('category');
+const requestedHub = getCategoryHub(requestedCategory);
+const homeTitle = 'החוזה · שוק תחזיות עברי';
+const homeDescription = 'יודעים מה הולך לקרות מחר? החוזה הוא שוק התחזיות של ישראל, שבו אתם יכולים לסחור בציפיות שלכם על פוליטיקה, אקטואליה, תרבות וכל מה שמעניין עכשיו. כנסו, נתחו את המגמות ותראו אם אתם יכולים לנצח את השוק.';
+
+if (requestedHub) {
+  return Astro.redirect(`/topics/${encodeURIComponent(requestedHub.key)}`, 301);
+}
+---
+
+<FeedPage
+  feed="trending"
+  title={homeTitle}
+  description={homeDescription}
+  activePage="trending"
+  canonicalPath="/"
+  shareImagePath="/og-image.jpg"
+  descriptionMaxLength={320}
+  breadcrumbItems={[{ name: 'החוזה', href: '/' }]}
+/>

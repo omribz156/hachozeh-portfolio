@@ -1,0 +1,20 @@
+---
+const measurementId = String(process.env.PUBLIC_GA4_MEASUREMENT_ID || '').trim();
+const shouldRender = /^G-[A-Z0-9]{8,14}$/.test(measurementId);
+---
+
+{shouldRender && (
+  <>
+    <script is:inline async src={`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(measurementId)}`}></script>
+    <script is:inline define:vars={{ ga4MeasurementId: measurementId }}>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){window.dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', ga4MeasurementId, {
+        allow_ad_personalization_signals: false,
+        allow_google_signals: false,
+        send_page_view: true,
+      });
+    </script>
+  </>
+)}

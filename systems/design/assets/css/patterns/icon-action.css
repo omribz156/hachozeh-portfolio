@@ -1,0 +1,38 @@
+/* ──────────────────────────────────────────────────────────────
+   patterns/icon-action.css
+   Small pill-shaped icon-only button used in utility action rows —
+   download, share, comment, bookmark. Carries minimal chrome at
+   rest; expresses state via background + color rather than borders.
+   Two state modifiers:
+     --active — sticky-on state (e.g. "saved").
+     --flash  — transient confirmation pulse after an action lands.
+   Used on market-detail's header today; reusable wherever a row of
+   utility actions sits beside a title.
+   ────────────────────────────────────────────────────────────── */
+
+
+  .hz-icon-action {
+    display: inline-flex;
+    align-items: center;
+    border: 0;
+    border-radius: var(--hz-radius-pill);
+    background: rgba(255, 255, 255, 0.04);
+    padding: 0.42rem;
+    color: var(--hz-text-muted);
+    transition: all var(--hz-motion);
+  }
+
+  .hz-icon-action:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--hz-text);
+  }
+
+  .hz-icon-action--active {
+    background: var(--hz-info-soft);
+    color: var(--hz-info);
+  }
+
+  .hz-icon-action--flash {
+    background: var(--hz-action-buy-soft);
+    color: var(--hz-action-buy);
+  }

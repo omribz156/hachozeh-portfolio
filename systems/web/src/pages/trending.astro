@@ -1,0 +1,14 @@
+---
+import { getCategoryHub } from '../lib/category-hubs.js';
+
+const requestedCategory = Astro.url.searchParams.get('category');
+const requestedHub = getCategoryHub(requestedCategory);
+
+if (requestedHub) {
+  return Astro.redirect(`/topics/${encodeURIComponent(requestedHub.key)}`, 301);
+}
+
+const rootUrl = new URL('/', Astro.url);
+rootUrl.search = Astro.url.search;
+return Astro.redirect(`${rootUrl.pathname}${rootUrl.search}`, 301);
+---

@@ -1,0 +1,1498 @@
+/* ──────────────────────────────────────────────────────────────
+   pages/portfolio.css
+   Canonical portfolio surface styles.
+   Surface contract: systems/design/guide/surfaces/portfolio/README.md
+   ────────────────────────────────────────────────────────────── */
+
+@import url("../patterns/position-pill.css");
+
+.portfolio-page {
+}
+
+/* ── Shared primitives ────────────────────────────────────── */
+
+.pf-empty {
+  color: var(--hz-text-muted);
+  font-size: 0.85rem;
+}
+
+.pf-empty--padded {
+  padding: 1.25rem;
+  border-radius: 0.75rem;
+  background: var(--hz-surface-1);
+  text-align: center;
+}
+
+/* Initial-load placeholder for the whole portfolio page — deboxed (no card
+   chrome), a single quiet centered line. Painted by portfolio.js while the
+   first backend fetch is in flight; never re-painted on subsequent refreshes
+   (those keep the previous content visible).
+
+   min-height keeps the page tall enough during load that the
+   site-shell footer (mounted on DOMContentLoaded, always present in
+   the HTML) stays below the fold. Otherwise the footer rides up
+   right under the loading line and the page reads as "header + tiny
+   loading line + footer" all at once for a frame, which looks
+   broken even though the loading text itself is fine. Subtract the
+   approximate shell-spacer so the loading text sits roughly centered
+   in the visible viewport. */
+.pf-loading {
+  min-height: calc(100vh - 12rem);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-inline: 0.5rem;
+  text-align: center;
+  color: var(--hz-text-muted);
+  font-size: 0.88rem;
+  /* Delay-the-spinner: stay invisible for a beat, then fade in. A fast (cache-hit) paint
+     removes this skeleton before the delay elapses → no "loading" flash behind the cards.
+     A genuinely slow fetch still surfaces the indicator after ~280ms. */
+  opacity: 0;
+  animation: pf-loading-reveal 160ms ease-out 280ms forwards;
+}
+
+@keyframes pf-loading-reveal {
+  to { opacity: 1; }
+}
+
+.pf-auth-gate {
+  min-height: calc(100vh - 12rem);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.85rem;
+  padding: 2rem 1rem;
+  text-align: center;
+}
+
+.pf-auth-gate__mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  inline-size: 2.6rem;
+  block-size: 2.6rem;
+  border: 1px solid rgba(var(--hz-brand-rgb) / 0.35);
+  border-radius: 50%;
+  background: rgba(var(--hz-brand-rgb) / 0.12);
+  color: var(--hz-brand-strong);
+  font-family: var(--hz-font-mono);
+  font-size: 0.78rem;
+  font-weight: 800;
+  direction: ltr;
+}
+
+.pf-auth-gate__title {
+  margin: 0;
+  color: var(--hz-text);
+  font-size: clamp(1.35rem, 2.4vw, 1.9rem);
+  font-weight: 900;
+  line-height: 1.2;
+}
+
+.pf-auth-gate__body {
+  max-width: 30rem;
+  margin: 0;
+  color: var(--hz-text-muted);
+  font-size: 0.95rem;
+  line-height: 1.75;
+}
+
+.pf-auth-gate__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.65rem;
+  margin-block-start: 0.35rem;
+}
+
+.pf-auth-gate__button {
+  appearance: none;
+  min-inline-size: 7.5rem;
+  border-radius: 0.5rem;
+  padding: 0.72rem 1.05rem;
+  font: inherit;
+  font-size: 0.9rem;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.pf-auth-gate__button--primary {
+  border: 1px solid rgba(var(--hz-brand-rgb) / 0.45);
+  background: var(--hz-brand);
+  color: #07140f;
+}
+
+.pf-auth-gate__button--secondary {
+  border: 1px solid var(--hz-border-soft);
+  background: var(--hz-surface-1);
+  color: var(--hz-text);
+}
+
+/* ── Total State Card ──────────────────────────────────────── */
+
+.pf-card-eyebrow {
+  color: var(--hz-text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.pf-card-meta {
+  margin-block-start: 1rem;
+  color: var(--hz-text-faint);
+  font-size: 0.7rem;
+}
+
+.pf-total-card {
+  /* lined zone — borrows the trending hero's lining pattern: subtle border
+     + platform radius + soft shadow for lift. Tighter padding than the
+     trending hero because portfolio's tone is sober and the content is
+     short (number + label + meta) — the lining should hug the content. */
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.1rem 1.25rem;
+  border: 1px solid var(--hz-border-soft);
+  border-radius: var(--hz-radius-md);
+  background: var(--hz-surface-1);
+  box-shadow: var(--hz-shadow-soft);
+}
+
+.pf-total-value {
+  font-family: var(--hz-font-mono);
+  font-size: clamp(1.4rem, 2.2vw, 1.9rem);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--hz-text);
+  direction: ltr;
+  text-align: end;
+  unicode-bidi: isolate;
+  white-space: nowrap;
+}
+
+.pf-total-secondary {
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.pf-total-secondary-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+/* The total ("שווי תיק") shares the same label-right / value-left row as the other
+   two values, but stays the card's lede — a larger value (matches the old
+   .pf-total-value size) with a slightly stronger label. */
+.pf-total-secondary-row--lede {
+  margin-bottom: 0.2rem; /* sets the total slightly apart from the two breakdown values */
+}
+.pf-total-secondary-row--lede dt {
+  font-size: 1rem;
+  color: var(--hz-text-soft);
+}
+.pf-total-secondary-row--lede dd {
+  font-size: clamp(1.4rem, 2.2vw, 1.9rem);
+  font-weight: 700;
+}
+
+.pf-total-secondary-row dt {
+  color: var(--hz-text-muted);
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.pf-total-secondary-row dd {
+  margin: 0;
+  font-family: var(--hz-font-mono);
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--hz-text);
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+.pf-total-deposit {
+  align-self: stretch;
+  margin-block-start: 0.4rem;
+  appearance: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  border: 1px solid rgba(var(--hz-brand-rgb) / 0.45);
+  border-radius: 0.5rem;
+  background: var(--hz-brand-soft);
+  color: var(--hz-brand-strong);
+  padding: 0.55rem 0.9rem;
+  font: inherit;
+  font-size: 0.88rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.pf-total-deposit:hover,
+.pf-total-deposit:focus-visible {
+  background: rgba(var(--hz-brand-rgb) / 0.22);
+  outline: none;
+}
+
+/* ── PnL Card (rebuilt 2026-05-28) ────────────────────────────
+   Was "change card"; renamed conceptually to PnL card. Structure:
+     head: eyebrow + sub-eyebrow on the right (RTL start); timeframe
+           pills on the left (RTL end)
+     body: hero signed V₪ + subline (pct + context)
+     mini-stats: trade/realization count, muted
+     sparkline: only when backend series has ≥ 2 points (sparse-series rule)
+   The card reads typography-first; sparkline is a soft accent below
+   the data when it has real shape to show.
+   ────────────────────────────────────────────────────────────── */
+
+.pf-change-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  padding: 1.1rem 1.25rem;
+  border: 1px solid var(--hz-border-soft);
+  border-radius: var(--hz-radius-md);
+  background: var(--hz-surface-1);
+  box-shadow: var(--hz-shadow-soft);
+}
+
+.pf-change-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.pf-change-head-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.18rem;
+  /* Allow this column to shrink within the capped card so the nowrap hero
+     number can't force the card (and the layout) wider. */
+  min-width: 0;
+}
+
+.pf-change-sub-eyebrow {
+  /* Sits directly under the main eyebrow — gives the timeframe
+     context inline so the hero number reads with its window. */
+  color: var(--hz-text-faint);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.pf-change-total {
+  /* Hero — paired with the right-card's lede. Stays clearly smaller
+     than .pf-total-value (the page's lede) per the hierarchy rule
+     in §2 of the surface contract. Tone-colored by direction via
+     .pf-tone-* applied alongside this class (set by change-card.js;
+     re-toned by the sparkline hover callback to track the scrub).
+     Default color below is the flat/neutral fallback used when no
+     tone class is present (zero / null state). It now sits directly under the
+     "רווח/הפסד" eyebrow in the head-text column. Capped to its column width
+     (min-width:0 + ellipsis) so an unusually long value clips instead of
+     widening the card — for realistic values it always shows in full. */
+  margin-block-start: 0.1rem;
+  font-family: var(--hz-font-mono);
+  font-size: clamp(1.15rem, 1.5vw, 1.45rem);
+  font-weight: 700;
+  line-height: 1.1;
+  color: var(--hz-text);
+  direction: ltr;
+  unicode-bidi: isolate;
+  white-space: nowrap;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pf-change-direction {
+  /* Small ▲ / ▼ / · glyph next to the "רווח/הפסד" eyebrow text.
+     Carries the buy/sell tone via .pf-tone-* alongside the hero
+     number — both flip together so the direction reads at any
+     glance distance. Sits inline with the eyebrow text, at the
+     start of the reading flow (visual right in RTL). */
+  display: inline-block;
+  margin-inline-end: 0.35rem;
+  font-size: 0.78em;
+  line-height: 1;
+  /* font-variant: not all fonts have great Unicode triangle glyphs;
+     fall back to the system sans for these specific characters. */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.pf-change-mini-stats {
+  margin-block-start: 0.1rem;
+  color: var(--hz-text-muted);
+  font-size: 0.76rem;
+  font-weight: 500;
+  letter-spacing: 0;
+}
+
+.pf-change-sparkline-wrap {
+  /* Host for HzPnlSparklineRenderer. The renderer mounts its own SVG
+     into the .hz-pnl-spark child and owns all path/line/circle
+     styling (see patterns/pnl-sparkline.css). The wrap just gives
+     the SVG breathing room above the card content and a stable
+     height for the renderer to project into. */
+  margin-block-start: 0.4rem;
+  width: 100%;
+  height: 72px;
+  transition: opacity 0.18s ease;
+}
+
+/* While a newly-selected timeframe's data loads, the chart keeps showing the
+   current range (no blank-flash jump) and just dims to signal the reload. */
+.pf-change-card.is-loading .pf-change-sparkline-wrap {
+  opacity: 0.45;
+}
+
+.pf-tone-buy {
+  color: var(--hz-action-buy);
+}
+
+.pf-tone-sell {
+  color: var(--hz-action-sell);
+}
+
+.pf-tone-info {
+  /* Used for flat/zero PnL — quiet muted tone, no green/red push.
+     Avoids "your loss is highlighted in red even though it's zero". */
+  color: var(--hz-text-muted);
+}
+
+.pf-timeframes {
+  display: inline-flex;
+  gap: 0.15rem;
+  padding: 0.2rem;
+  border-radius: 0.55rem;
+  background: var(--hz-border-faint);
+}
+
+.pf-timeframe {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--hz-text-muted);
+  padding: 0.3rem 0.7rem;
+  border-radius: 0.4rem;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pf-timeframe.is-active {
+  background: var(--hz-brand-soft);
+  color: var(--hz-text);
+}
+
+/* ── Claims Strip (resolved-won positions awaiting redemption) ── */
+
+.pf-claims-card {
+  /* Sibling of closing-soon — same lining family. Only rendered when there
+     are positions ready to claim, so the strip never sits there empty. */
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.9rem 1.1rem;
+  margin-block-start: 1rem;
+  border: 1px solid var(--hz-border-soft);
+  border-radius: var(--hz-radius-md);
+  background: var(--hz-surface-1);
+  box-shadow: var(--hz-shadow-soft);
+}
+
+.pf-claims-head {
+  /* Header carries only the "נצחונות" eyebrow — total summary
+     dropped (per-market amount lives on each row). */
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding-inline: 0.55rem;
+  margin-block-end: 0.1rem;
+}
+
+.pf-claims-columns,
+.pf-claim-row {
+  /* Four-column grid: market | outcome chip | amount | claim button.
+     Polymarket/positions shape: market takes the slack (minmax(0, 1fr))
+     while outcome + win + collect are TIGHT fixed tracks clustered on the
+     far edge. Fixed rem keeps the header and data grids resolving to the
+     same widths (they're separate grids sharing only this template), and
+     justify-items: start pins each cell to its track's start (right) edge
+     under the header. The market title is stretched back below to ellipsize. */
+  display: grid;
+  /* Win amount track is wide enough for 3-4 digit V₪ values (winning
+     positions above V₪ 100) — a narrower fixed track clipped them and the V₪
+     spilled toward the collect button. */
+  grid-template-columns: minmax(0, 1fr) 6.5rem 8.5rem 4.5rem;
+  gap: 1rem;
+  align-items: center;
+  justify-items: start;
+  padding-inline: 0.55rem;
+}
+
+.pf-claims-columns {
+  padding-block: 0.3rem 0.35rem;
+  border-block-end: 1px solid var(--hz-border-faint);
+  color: var(--hz-text-faint);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.pf-claims-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.pf-claim-row {
+  padding-block: 0.45rem;
+}
+
+/* Market column (header + title) opts out of centering: it's long text that
+   must fill its track and ellipsize, anchored to the start (right) edge. */
+.pf-claims-columns > span:first-child,
+.pf-claim-title {
+  justify-self: stretch;
+  text-align: start;
+}
+
+.pf-claim-title {
+  overflow: hidden;
+  color: var(--hz-text);
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pf-claim-amount {
+  font-family: var(--hz-font-mono);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--hz-brand-strong);
+  direction: ltr;
+  unicode-bidi: isolate;
+  white-space: nowrap;
+}
+
+.pf-claim-button {
+  appearance: none;
+  border: 1px solid rgba(var(--hz-brand-rgb) / 0.45);
+  border-radius: var(--hz-radius-pill);
+  background: var(--hz-brand-soft);
+  color: var(--hz-brand-strong);
+  padding: 0.3rem 0.85rem;
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 120ms ease;
+}
+
+.pf-claim-button:hover,
+.pf-claim-button:focus-visible {
+  background: rgba(var(--hz-brand-rgb) / 0.22);
+  outline: none;
+}
+
+/* ── Closing Soon Sub-Card ────────────────────────────────── */
+
+.pf-closing-card {
+  /* Full-width strip below the top fold. Tighter padding + gap for a
+     compact ribbon feel; same lining family as the top-fold cards. */
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  padding: 0.8rem 1.1rem;
+  margin-block-start: 1rem;
+  border: 1px solid var(--hz-border-soft);
+  border-radius: var(--hz-radius-md);
+  background: var(--hz-surface-1);
+  box-shadow: var(--hz-shadow-soft);
+}
+
+.pf-closing-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.pf-closing-row {
+  border-radius: 0.5rem;
+}
+
+.pf-closing-row:hover {
+  background: var(--hz-border-faint);
+}
+
+.pf-closing-columns,
+.pf-closing-link {
+  /* Five-column grid:
+       market title | אני (user state) | השוק (market) | value | time
+     The chip columns are flexible fr tracks (not tight fixed rem) so a long
+     outcome ("31% נפתלי בנט") gets real room; the chip caps + ellipsizes within
+     its cell (see `.pf-closing-link .pf-state-chip`) so it can never overflow
+     into a neighbor. fr stays content-independent, so header + data grids still
+     align. Title takes the largest share and ellipsizes; value/time are fixed. */
+  display: grid;
+  grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 1fr) 6rem 6.5rem;
+  gap: 1rem;
+  align-items: center;
+  justify-items: start;
+  padding-inline: 0.55rem;
+}
+
+.pf-closing-columns {
+  padding-block: 0.3rem 0.35rem;
+  border-block-end: 1px solid var(--hz-border-faint);
+  color: var(--hz-text-faint);
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.pf-closing-link {
+  padding-block: 0.4rem;
+  color: var(--hz-text);
+  text-decoration: none;
+}
+
+.pf-closing-title {
+  /* Fills its track (overriding justify-items: start) so it can ellipsize
+     instead of shrinking to content — same as the wins/positions title. */
+  justify-self: stretch;
+  overflow: hidden;
+  font-size: 0.88rem;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pf-state-chip {
+  /* Shared chip used in closing-soon strip + positions table for outcome
+     + current price. Tone-colored: buy (leading), sell (behind), info
+     (neutral market data). */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--hz-radius-pill);
+  padding: 0.18rem 0.6rem;
+  font-size: 0.72rem;
+  font-weight: 700;
+  white-space: nowrap;
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+.pf-state-chip.pf-tone-buy {
+  background: var(--hz-action-buy-soft);
+  color: var(--hz-action-buy);
+}
+
+.pf-state-chip.pf-tone-sell {
+  background: var(--hz-action-sell-soft);
+  color: var(--hz-action-sell);
+}
+
+.pf-state-chip.pf-tone-info {
+  /* Neutral chip — used by the "השוק" column. Cool blue conveys data
+     rather than user-state direction. */
+  background: var(--hz-info-soft);
+  color: var(--hz-info);
+}
+
+/* Closing-soon chips sit in flexible grid cells — cap + ellipsize so a long
+   outcome ("31% נפתלי בנט …") truncates inside its column instead of overflowing
+   and colliding with the neighbor. Scoped to the closing strip; the positions-
+   table chips (which size their own row) are untouched. */
+.pf-closing-link .pf-state-chip {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: center;
+}
+
+.pf-closing-value {
+  font-family: var(--hz-font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--hz-text-muted);
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+.pf-closing-time {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--hz-text-muted);
+}
+
+.pf-closing-row.is-live .pf-closing-time {
+  /* Live countdown: warm-amber color + mono numerals. NO direction: ltr —
+     that would force LTR paragraph direction onto a mixed Hebrew + digit
+     string and visually flip it relative to the surrounding RTL row.
+     Default RTL flow + unicode-bidi handle the mixed runs correctly. */
+  color: var(--hz-brand);
+  font-family: var(--hz-font-mono);
+  unicode-bidi: isolate;
+}
+
+/* ── Page shell + Top fold grid ───────────────────────────── */
+
+.portfolio-page-shell {
+  /* Narrower than trending/market-detail (1280px) — portfolio is reflection,
+     not action, so a tighter column reads more like an analyst's report
+     and less like a dashboard sprawl. */
+  width: min(1020px, calc(100% - 32px));
+  padding-block: 1.5rem 4rem;
+}
+
+/* The page title ("התיק שלי") is SSR'd, so it paints before the Preact islands
+   hydrate — it used to sit alone above the loading skeleton. Hold it hidden
+   until the cards island signals it's painting (the shell adds is-content-ready
+   on navi:portfolio-content-ready), so the title rides in WITH the content. */
+.portfolio-page-shell > h1 {
+  display: none;
+}
+.portfolio-page-shell.is-content-ready > h1 {
+  display: block;
+}
+
+.pf-top-fold {
+  /* Two equal-width zones; both stretch to share the height of the taller
+     card so they read as sibling heroes. RTL places the first child on the
+     right — the lede. minmax(0, 1fr) (not bare 1fr) keeps the tracks strictly
+     equal — a long PnL number can't grow its track's min-content and shove the
+     sibling card sideways. */
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: stretch;
+}
+
+.pf-total-card {
+  /* When stretched to match the sibling change card, push the deposit
+     button to the bottom so the card breathes evenly. The PnL card
+     no longer uses this since its content is top-aligned (hero →
+     subline → mini-stats → sparkline) with natural top-flow. */
+  justify-content: space-between;
+}
+
+@media (max-width: 880px) {
+  .pf-top-fold {
+    /* minmax(0, 1fr), NOT bare 1fr — a bare 1fr track grows to its items'
+       min-content, and the PnL card's nowrap 6-pill timeframe row (~360px) then
+       balloons the track past the narrow page shell, dragging both stacked
+       cards off the inline-start edge (the ~19px overflow at 360px). */
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  /* Let the cards shrink to the capped track instead of forcing it wider. */
+  .pf-total-card,
+  .pf-change-card {
+    min-width: 0;
+  }
+
+  /* And let the pills wrap (head + the row) so they fit inside the capped card
+     at narrow widths rather than overflowing it. No-op once they fit. */
+  .pf-change-head {
+    flex-wrap: wrap;
+  }
+
+  .pf-timeframes {
+    flex-wrap: wrap;
+  }
+}
+
+/* ── Depth layer + Positions tab ──────────────────────────────────────── */
+
+.pf-depth {
+  margin-block-start: 2.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.pf-depth-bar {
+  /* Tabs (RTL-start, right) + search (RTL-end, left) on one row,
+     pushed apart by space-between. Bottom border is owned by the bar
+     so the underline runs continuously beneath both. align-items:end
+     aligns tab baseline with search input baseline so the active-tab
+     underline overlaps the bar's border line precisely. */
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  border-block-end: 1px solid var(--hz-border-soft);
+}
+
+.pf-tablist {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.pf-tab {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--hz-text-muted);
+  padding: 0.6rem 0;
+  margin-block-end: -1px;
+  border-block-end: 2px solid transparent;
+  font: inherit;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.pf-tab.is-active {
+  color: var(--hz-text);
+  border-block-end-color: var(--hz-brand);
+}
+
+.pf-depth-search {
+  /* Inline with the tablist; lives at the bar's left end (LTR-end) in RTL.
+     Margin-block-end lifts it just above the bar border to align with the
+     tab text baseline. */
+  position: relative;
+  width: min(320px, 42%);
+  margin-block-end: 0.4rem;
+}
+
+.pf-depth-search-icon {
+  position: absolute;
+  inset-inline-start: 0.7rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--hz-brand);
+  font-size: 1rem;
+  line-height: 1;
+  pointer-events: none;
+}
+
+.pf-depth-search input {
+  width: 100%;
+  border: 1px solid rgba(var(--hz-brand-rgb) / 0.28);
+  border-radius: 0.5rem;
+  background: linear-gradient(180deg, rgba(var(--hz-brand-rgb) / 0.08), rgba(255, 255, 255, 0.015)), var(--hz-surface-1);
+  color: var(--hz-text);
+  padding: 0.5rem 2.05rem 0.5rem 0.75rem;
+  font: inherit;
+  font-size: 0.85rem;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.025) inset;
+}
+
+.pf-depth-search input:focus {
+  outline: 2px solid var(--hz-brand-soft);
+  outline-offset: 1px;
+  border-color: var(--hz-brand);
+}
+
+/* Polymarket-mirrored 5-column grid:
+     שוק (title + chip + qty) | מחיר (entry/now) | הושקעו | לזכייה | שווי
+   Grid template matches header and rows so labels sit directly above
+   their data. ARIA roles preserve table semantics on div elements. */
+.pf-positions {
+  display: flex;
+  flex-direction: column;
+}
+
+.pf-positions-head,
+.pf-position-row {
+  /* MARKET | כניסה→נוכחי | הושקעו | לזכייה | שווי | share — Polymarket shape:
+     the data columns are DISTRIBUTED across the row (like the reference), not
+     clustered on the far edge. Each numeric column is minmax(rem-floor, fr) so
+     the leftover width spreads evenly between them instead of pooling behind
+     the market title; market gets the largest share (1.5fr). minmax(_, fr)
+     tracks stay content-independent, so the header grid and each row grid still
+     resolve to identical widths and align. justify-items: start pins each cell
+     to its track's start (right) edge; the market title stretches to ellipsize. */
+  display: grid;
+  grid-template-columns:
+    minmax(0, 2.5fr) minmax(5rem, 1fr) minmax(5rem, 1fr) minmax(5rem, 1fr) minmax(6.5rem, 1fr) 2.5rem;
+  gap: 1rem;
+  align-items: center;
+  justify-items: start;
+  padding-inline: 0.8rem;
+}
+
+.pf-positions-head {
+  padding-block: 0.7rem;
+  border-block-end: 1px solid var(--hz-border-soft);
+  color: var(--hz-text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-align: start;
+}
+
+/* Sortable column header — borderless button reading like a label, with
+   a small sort indicator. Active column shows direction; inactive shows
+   the neutral unfold_more chevrons. */
+.pf-position-header {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.15rem;
+  color: var(--hz-text-muted);
+  font: inherit;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0;
+  cursor: pointer;
+  text-align: start;
+}
+
+.pf-position-header:hover {
+  color: var(--hz-text);
+}
+
+.pf-position-header.is-active {
+  color: var(--hz-text);
+}
+
+.pf-sort-icon {
+  font-size: 1rem;
+  color: var(--hz-text-faint);
+  opacity: 0.55;
+  transition: opacity 120ms ease;
+}
+
+.pf-position-header:hover .pf-sort-icon {
+  opacity: 0.85;
+}
+
+.pf-sort-icon--active {
+  color: var(--hz-brand);
+  opacity: 1;
+}
+
+.pf-positions-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.pf-position-row {
+  padding-block: 1rem;
+  border-block-end: 1px solid var(--hz-border-faint);
+}
+
+.pf-position-row:last-child {
+  border-block-end: 0;
+}
+
+.pf-position-market {
+  /* Stretch back to fill its track (overriding justify-items: start) so the
+     title ellipsizes instead of shrink-wrapping. */
+  justify-self: stretch;
+  text-align: start;
+  min-width: 0;
+}
+
+.pf-position-market-link {
+  /* Row: market avatar + a stacked text column (title over chip/qty). */
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.7rem;
+  min-width: 0;
+  color: inherit;
+  text-decoration: none;
+}
+
+.pf-position-market-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+/* Leading market thumbnail. Holds a real image once the snapshot carries
+   one; until then a tinted tile with the title's first letter. */
+.pf-position-avatar {
+  flex-shrink: 0;
+  width: 2.1rem;
+  height: 2.1rem;
+  border-radius: var(--hz-radius-sm, 0.5rem);
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background: var(--hz-surface-2);
+  border: 1px solid var(--hz-border-soft);
+  color: var(--hz-text-muted);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.pf-position-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pf-position-market-link:hover .pf-position-title {
+  color: var(--hz-brand);
+}
+
+/* Share CTA — icon button at the row's far (left) edge, mirroring the
+   market-detail share affordance. */
+.pf-position-share-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pf-position-share {
+  appearance: none;
+  border: 0;
+  background: transparent;
+  color: var(--hz-text-faint);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem;
+  border-radius: var(--hz-radius-sm, 0.5rem);
+  cursor: pointer;
+  transition: color 120ms ease, background 120ms ease;
+}
+
+.pf-position-share:hover,
+.pf-position-share:focus-visible {
+  color: var(--hz-brand);
+  background: var(--hz-surface-2);
+  outline: none;
+}
+
+.pf-position-share .material-symbols-outlined {
+  font-size: 1.15rem;
+}
+
+.pf-position-title {
+  color: var(--hz-text);
+  font-size: 0.92rem;
+  font-weight: 600;
+  text-align: start;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pf-position-sub {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-block-start: 0.3rem;
+}
+
+.pf-position-quantity {
+  color: var(--hz-text-faint);
+  font-size: 0.78rem;
+}
+
+.pf-position-numeric {
+  font-family: var(--hz-font-mono);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--hz-text);
+  direction: ltr;
+  unicode-bidi: isolate;
+  /* end == right here (direction: ltr). Right-aligns the amount AND the
+     pnl% sub within the cell so both snap to the track's right edge — a
+     plain `start` would push them LEFT (ltr start) and the value column
+     would jitter row-to-row when the two lines differ in width. */
+  text-align: end;
+}
+
+.pf-position-pnl-sub {
+  margin-block-start: 0.15rem;
+  font-family: var(--hz-font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  opacity: 0.85;
+}
+
+/* avg → now cell: two price tags with a directional mark between. direction:
+   ltr so the entry→current progression reads left-to-right like the numbers
+   themselves; the cell is pinned to its track's start (right) edge by the
+   grid's justify-items: start. "now" carries full text weight; "avg" + the
+   mark are muted so the eye lands on the current price. */
+.pf-position-arrow {
+  display: flex;
+  align-items: baseline;
+  justify-content: flex-start;
+  gap: 0.3rem;
+  direction: ltr;
+  white-space: nowrap;
+  font-family: var(--hz-font-mono);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.pf-position-arrow-from {
+  color: var(--hz-text-muted);
+}
+
+.pf-position-arrow-mark {
+  color: var(--hz-text-faint);
+}
+
+.pf-position-arrow-to {
+  color: var(--hz-text);
+}
+
+/* ── History tab — Activity table (rebuilt 2026-05-20) ─────
+   Mirrors Polymarket Activity's structure: 3 columns (סוג | שוק |
+   סכום). Reuses the .pf-position-header sortable-header primitive
+   so sort affordances feel native to the page. Day grouping
+   dropped in favor of per-row relative time.
+   ────────────────────────────────────────────────────────────── */
+
+.pf-history {
+  display: flex;
+  flex-direction: column;
+}
+
+.pf-history-head,
+.pf-history-row {
+  display: grid;
+  /* 4 columns: type chip (סוג) | market (שוק) | time (זמן) | amount (סכום).
+     Type is a tight fixed track and market takes the slack (1fr), so the
+     market title hugs right up against the type chip. Time + amount are their
+     own fixed tracks on the FAR (left) side — type+market cluster on the right,
+     amount sits on the far edge (the value), time just to its right. Fixed rem
+     keeps tracks content-independent so header≡data align. */
+  grid-template-columns: 3.25rem minmax(0, 1fr) 7rem 6rem;
+  gap: 1rem;
+  align-items: center;
+  justify-items: start;
+  padding-inline: 0.8rem;
+}
+
+.pf-history-head {
+  padding-block: 0.7rem;
+  border-block-end: 1px solid var(--hz-border-soft);
+  color: var(--hz-text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-align: start;
+}
+
+.pf-history-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+}
+
+.pf-history-row {
+  padding-block: 0.9rem;
+  border-block-end: 1px solid var(--hz-border-faint);
+}
+
+.pf-history-row:last-child {
+  border-block-end: 0;
+}
+
+.pf-history-cell {
+  min-width: 0;
+}
+
+.pf-history-cell--type {
+  justify-self: start;
+}
+
+.pf-history-cell--market {
+  /* Fill the track (overriding justify-items: start) so the title can
+     ellipsize rather than shrink-wrap and overflow into the next column. */
+  justify-self: stretch;
+}
+
+.pf-history-market-link {
+  /* Whole market cell is clickable — taps land on market-detail.
+     Resets anchor defaults so the cell reads as text + chip, not
+     as an underlined link. Hover gives a subtle bg shift via the
+     row, not the link. */
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  color: var(--hz-text);
+  text-decoration: none;
+}
+
+.pf-history-market-link:hover .pf-history-market-title {
+  color: var(--hz-brand);
+}
+
+.pf-history-market-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pf-history-market-sub {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.pf-history-quantity {
+  color: var(--hz-text-faint);
+  font-size: 0.78rem;
+}
+
+.pf-history-cell--amount {
+  /* Amount is its own column now; time is a separate sortable column to its
+     left. Cells use the grid's default start (right) pin, so each header sits
+     directly above its data. */
+  font-variant-numeric: tabular-nums;
+}
+
+.pf-history-cell--time {
+  font-variant-numeric: tabular-nums;
+}
+
+.pf-history-amount {
+  font-family: var(--hz-font-mono);
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--hz-text);
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+.pf-history-time {
+  color: var(--hz-text-faint);
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+/* ── Mobile composition (≤767px) ──────────────────────────────
+   Three table-grids collapse to card-row stacks. Pattern lifted
+   from market-detail's viewer-positions: hide the desktop columns
+   header, lay each row as a vertical card with grid-areas, attach
+   per-cell column labels via ::before pseudo-elements.
+
+   Top fold already collapses at 880px (see above). This block owns
+   closing-soon, positions table, claims strip, and the tab/search
+   bar's mobile breathing.
+   ────────────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  /* Page shell — tighten outer padding so cards have more room. */
+  .portfolio-page-shell {
+    padding-block: 1rem 3rem;
+  }
+
+  /* ─── Closing-soon strip (5-col → card-row) ─────────────── */
+  .pf-closing-columns {
+    /* Desktop header strip: hidden on mobile — each card carries
+       its own inline labels via ::before pseudos. */
+    display: none;
+  }
+
+  .pf-closing-link {
+    /* Mobile reads as a quiet glanceable list — market title +
+       closing time on one line. Chips and value hide; the user
+       drills in via tap if they want the diagnostic detail.
+       Single row, title takes remaining flex space and truncates
+       with ellipsis ("something happ…"). */
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding-block: 0.7rem;
+    padding-inline: 0.25rem;
+    /* Override desktop's grid layout. */
+    grid-template-columns: none;
+    grid-template-areas: none;
+  }
+
+  .pf-closing-row {
+    border-block-end: 1px solid var(--hz-border-faint);
+  }
+
+  .pf-closing-row:last-child {
+    border-block-end: 0;
+  }
+
+  .pf-closing-title {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 0.92rem;
+    /* Keep ellipsis truncation so the row stays one line. */
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Hide the diagnostic chips and value on mobile — strip is just
+     a peek-list. Tap-through to market-detail carries the full
+     state. */
+  .pf-closing-link .pf-state-chip,
+  .pf-closing-value {
+    display: none;
+  }
+
+  .pf-closing-time {
+    flex: 0 0 auto;
+    font-size: 0.85rem;
+  }
+
+  /* ─── Claims strip (4-col → card-row) ───────────────────── */
+  .pf-claims-columns {
+    display: none;
+  }
+
+  .pf-claim-row {
+    /* Mobile: one-line peek — market title + claim amount. Chip
+       and אסוף button hide; the strip becomes a glanceable count
+       of wins. CTA reappears on tap-through (or future bottom-
+       sheet). Mirrors closing-soon's mobile shape. */
+    display: flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding-block: 0.7rem;
+    padding-inline: 0.25rem;
+    border-block-end: 1px solid var(--hz-border-faint);
+    /* Override desktop's grid. */
+    grid-template-columns: none;
+    grid-template-areas: none;
+  }
+
+  .pf-claim-row:last-child {
+    border-block-end: 0;
+  }
+
+  .pf-claim-title {
+    flex: 1 1 auto;
+    min-width: 0;
+    font-size: 0.92rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .pf-claim-outcome,
+  .pf-claim-button {
+    display: none;
+  }
+
+  /* The amount becomes the tap target on mobile — replaces the hidden
+     אסוף CTA. Brand-amber tint signals interactivity; the span carries
+     its own onClick (role="button", island-owned) so the tap claims.
+     Tap padding gives it a 44pt-equivalent target. */
+  .pf-claim-amount {
+    flex: 0 0 auto;
+    font-family: var(--hz-font-mono);
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--hz-brand);
+    direction: ltr;
+    unicode-bidi: isolate;
+    padding: 0.5rem 0.65rem;
+    margin: -0.5rem -0.65rem;
+    border-radius: var(--hz-radius-pill, 999px);
+    cursor: pointer;
+  }
+
+  .pf-claim-amount:active {
+    background: var(--hz-brand-soft);
+  }
+
+  /* ─── Positions table (4-col → card-row) ────────────────── */
+  .pf-positions-head {
+    /* Desktop sortable-header strip: hidden on mobile. Sort still
+       reachable via a future mobile control if needed; today we
+       lean on the natural value-ordering by row. */
+    display: none;
+  }
+
+  .pf-position-row {
+    /* Mobile card — true peek shape, one line per position:
+         market title (truncate)  |  שווי tone-colored + pnl% sub
+       Everything else (chip, qty, entry/now prices, cost, toWin)
+       drops off — tap-through to market-detail carries the rest.
+       Matches closing-soon and claims: one diagnostic number per
+       row, title for identity, no chrome. */
+    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: "title  value";
+    column-gap: 0.8rem;
+    padding-block: 0.7rem 0.8rem;
+    padding-inline: 0.25rem;
+    align-items: center;
+  }
+
+  .pf-position-market {
+    grid-area: title;
+    min-width: 0;
+  }
+
+  .pf-position-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    font-size: 0.92rem;
+  }
+
+  /* Hide everything that isn't title or שווי-value on mobile — the
+     chip + qty (.pf-position-sub), the avg→now cell, and the הושקעו /
+     לזכייה numeric columns all drop. Selecting .pf-position-numeric that
+     ISN'T the value cell keeps this robust to column-count changes.
+     Mobile is a glanceable peek; detail lives one tap away. */
+  .pf-position-sub,
+  .pf-position-share-cell,
+  .pf-position-arrow,
+  .pf-position-numeric:not(.pf-position-value) {
+    display: none;
+  }
+
+  /* שווי cell — top-right of card, tone-colored, mono. Carries the pnl-sub
+     directly beneath the headline value. */
+  .pf-position-value {
+    grid-area: value;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    justify-content: center;
+    gap: 0.15rem;
+    font-size: 1.05rem;
+    text-align: end;
+  }
+
+  .pf-position-pnl-sub {
+    /* Already styled as a small muted line under the headline value;
+       on mobile we just keep it tight. No need to relocate — the
+       compact 2-row card reads cleanly with שווי on top and pnl% as
+       its sub directly below, still inside the value cell. */
+    font-size: 0.72rem;
+    margin-block-start: 0;
+  }
+
+  /* ─── Depth bar (tabs + search) — stacked on mobile ─────── */
+  .pf-depth-bar {
+    flex-wrap: wrap;
+    align-items: stretch;
+    gap: 0.65rem;
+    justify-content: flex-start;
+  }
+
+  .pf-tablist {
+    width: 100%;
+    padding-block-end: 0.1rem;
+    gap: 0.7rem;
+  }
+
+  .pf-tab {
+    font-size: 0.82rem;
+    padding-block: 0.45rem;
+  }
+
+  .pf-depth-search {
+    flex: 1 1 100%;
+    width: 100%;
+    min-width: 0;
+    margin-block-end: 0;
+    margin-inline-start: 0;
+  }
+
+  .pf-depth-search input {
+    padding: 0.45rem 2rem 0.45rem 0.65rem;
+    font-size: 0.82rem;
+  }
+
+  /* ─── History Activity table (3-col → card-row) ─────────── */
+  .pf-history-head {
+    /* Desktop sortable headers hide on mobile — same call as
+       positions table; default time-desc sort carries most of the
+       value. Sort-on-mobile becomes a follow-up question if needed. */
+    display: none;
+  }
+
+  .pf-history-row {
+    /* Mobile card — true peek shape, mirrors positions:
+         [type chip] [title (truncate)]   [amount]
+                                          [time muted]
+       Amount + time are separate cells (desktop columns) but stack back into
+       the right edge on mobile via grid-areas. Outcome chip + qty drop off
+       mobile (defer to tap-through). The type chip is the diagnostic. */
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas:
+      "type title amount"
+      "type title time";
+    column-gap: 0.7rem;
+    row-gap: 0.12rem;
+    padding-block: 0.75rem;
+    padding-inline: 0.25rem;
+    align-items: center;
+  }
+
+  .pf-history-cell--type {
+    grid-area: type;
+    justify-self: start;
+  }
+
+  .pf-history-cell--market {
+    grid-area: title;
+  }
+
+  .pf-history-market-link {
+    /* Drop the column-flex layout; on mobile the sub-row hides so
+       the link reads as a single title line. */
+    gap: 0;
+  }
+
+  /* Hide outcome chip + qty on mobile — they live on tap-through. */
+  .pf-history-market-sub {
+    display: none;
+  }
+
+  .pf-history-market-title {
+    font-size: 0.92rem;
+  }
+
+  .pf-history-cell--amount {
+    grid-area: amount;
+    justify-self: end;
+    text-align: end;
+  }
+
+  .pf-history-cell--time {
+    grid-area: time;
+    justify-self: end;
+    text-align: end;
+  }
+
+  .pf-history-amount {
+    font-size: 0.95rem;
+  }
+
+  .pf-history-time {
+    font-size: 0.7rem;
+  }
+}

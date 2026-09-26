@@ -1,0 +1,65 @@
+{
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "CodeQL",
+          "version": "0.0.0",
+          "rules": [
+            {
+              "id": "MR-1",
+              "properties": {
+                "security-severity": "7.2"
+              }
+            },
+            {
+              "id": "MR-2",
+              "properties": {
+                "security-severity": "4.9"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleIndex": 0,
+          "message": {
+            "text": "Multiple run high severity"
+          }
+        },
+        {
+          "ruleIndex": 1,
+          "message": {
+            "text": "Multiple run low severity"
+          }
+        }
+      ]
+    },
+    {
+      "tool": {
+        "driver": {
+          "name": "CodeQL",
+          "version": "0.0.0",
+          "rules": [
+            {
+              "id": "MR-3",
+              "properties": {
+                "security-severity": "9.0"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleIndex": 0,
+          "message": {
+            "text": "Second run high severity"
+          }
+        }
+      ]
+    }
+  ]
+}

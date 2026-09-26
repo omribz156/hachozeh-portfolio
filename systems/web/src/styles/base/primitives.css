@@ -1,0 +1,171 @@
+.material-symbols-outlined {
+  font-family: "Material Symbols Outlined";
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-feature-settings: "liga";
+  font-feature-settings: "liga";
+  -webkit-font-smoothing: antialiased;
+  font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+}
+
+.category-scroll::-webkit-scrollbar,
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.category-scroll,
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Hide the page scrollbar globally — scrolling stays fully functional, the
+   grey gutter is removed for a cleaner surface (Omri 2026-06-04). Same
+   pattern as .no-scrollbar, applied to the document scroller. */
+html::-webkit-scrollbar,
+body::-webkit-scrollbar {
+  display: none;
+}
+html,
+body {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.14);
+  border-radius: var(--hz-radius-pill);
+}
+
+.chart-container-ltr {
+  direction: ltr !important;
+}
+
+/* Duplicate of the rule in patterns/auth-overlays.css (harmless — same
+   declaration, cascade-neutral). The touch-only iOS rubber-band hardening
+   (overscroll-behavior/touch-action) lives ONLY there — don't re-add it here
+   too, keep one source of truth for the hardened block. */
+body.overlay-open {
+  overflow: hidden;
+}
+
+.navi-overlay-root {
+  position: fixed;
+  inset: 0;
+  z-index: 120;
+  pointer-events: none;
+}
+
+.navi-overlay-root[data-active="true"] {
+  pointer-events: auto;
+}
+
+/* .navi-overlay-backdrop is defined once, in patterns/auth-overlays.css (the
+   design-authoritative file, loaded after this base). The old duplicate here —
+   a heavier flat dim + blur(12px) — was dead (always overridden) yet a landmine:
+   removing the override elsewhere unmasked its blur. Single source of truth now;
+   blur is opt-in per overlay there (default = no blur). */
+
+.navi-overlay-shell {
+  position: relative;
+  z-index: 1;
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* Pad by the safe-area insets so a centered panel never tucks under the notch
+     or home indicator on a notched phone (now that viewport-fit=cover is on). */
+  padding: var(--hz-space-4);
+  padding-top: max(var(--hz-space-4), env(safe-area-inset-top));
+  padding-bottom: max(var(--hz-space-4), env(safe-area-inset-bottom));
+}
+
+.navi-overlay-panel {
+  width: min(100%, 44rem);
+  max-height: calc(100dvh - 2rem);
+  overflow: auto;
+  border: 1px solid var(--hz-border-soft);
+  border-radius: var(--hz-radius-xl);
+  background:
+    radial-gradient(circle at top, var(--hz-brand-soft), transparent 40%),
+    linear-gradient(145deg, rgba(26, 28, 36, 0.96), rgba(19, 20, 26, 0.98));
+  box-shadow: var(--hz-shadow-overlay);
+  animation: navi-overlay-enter var(--hz-motion) ease-out;
+}
+
+.navi-overlay-panel--wide {
+  width: min(100%, 56rem);
+}
+
+.hz-panel {
+  border: 1px solid var(--hz-border-soft);
+  border-radius: var(--hz-radius-xl);
+  background: var(--hz-surface-1);
+  box-shadow: var(--hz-shadow-soft);
+}
+
+.hz-chip {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  border: 1px solid var(--hz-border-soft);
+  border-radius: var(--hz-radius-pill);
+  background: var(--hz-surface-soft);
+  color: var(--hz-text-soft);
+  font-weight: 700;
+}
+
+.hz-sparkline {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.hz-live-bubble {
+  animation: hz-float-up 2s ease-out infinite;
+}
+
+@keyframes navi-overlay-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes hz-float-up {
+  0% {
+    transform: translateY(0);
+    opacity: 0;
+  }
+
+  20%,
+  80% {
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(-20px);
+    opacity: 0;
+  }
+}

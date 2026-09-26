@@ -1,0 +1,215 @@
+---
+// Entity tag hub (/t/<latin-slug>). Indexable topical cluster for one entity —
+// bank-of-israel, world-cup-2026, knesset, eurovision… — the fine-grained SEO
+// surface the broad /topics/ category hubs don't cover. Registry = the 070 `tags`
+// table (Latin slug + Hebrew label). Routing, Poly-mirrored:
+//   • slug that duplicates a category hub  → 301 to /topics/<key> (no dup page)
+//   • unknown or below the market gate      → 302 to the noindex /search fallback
+//     (never a dead 404, never a thin *indexable* page)
+//   • known + populated                     → this indexable hub
+import Layout from '../../layouts/Layout.astro';
+import { fetchTagPage } from '../../lib/tag-page.js';
+import { partitionHubs, shortDate } from '../../lib/market-hubs.js';
+import { getCategoryHub, categoryHubPath } from '../../lib/category-hubs.js';
+import {
+  buildCanonicalUrl,
+  buildWebPageJsonLd,
+  buildBreadcrumbJsonLd,
+  buildMarketItemListJsonLd,
+} from '../../lib/seo.js';
+
+// Minimum published markets for an entity to earn its own indexable page.
+const MIN_MARKETS = 3;
+
+const rawSlug = String(Astro.params.slug || '').trim().toLowerCase();
+
+// A tag slug that mirrors a category hub belongs at the canonical /topics/<key>.
+if (getCategoryHub(rawSlug)) {
+  return Astro.redirect(categoryHubPath(rawSlug), 301);
+}
+
+let data = null;
+try {
+  data = await fetchTagPage(rawSlug);
+} catch (e) {
+  console.error('[t/slug] tag fetch failed', rawSlug, e);
+}
+
+const marketCount = data?.markets?.length || 0;
+
+// Unknown slug or too few markets → hand off to the noindex /search surface, which
+// shows fuzzy matches. Poly-style: no dead end, but no thin indexable page either.
+if (!data || marketCount < MIN_MARKETS) {
+  const term = encodeURIComponent(data?.tag?.label || rawSlug).replace(/%20/g, '+');
+  return Astro.redirect(`/search?q=${term}`, 302);
+}
+
+const { tag } = data;
+const { openHubs, resolvedHubs } = partitionHubs(data.markets);
+const totalHubs = openHubs.length + resolvedHubs.length;
+
+// Sibling entity hubs — cross-links that build the tag-to-tag graph. Only other populated
+// entity tags (drop self, category mirrors, and thin tags that would 302 to /search).
+const relatedHubs = (data.relatedTags || [])
+  .filter((t) => t.slug !== tag.slug && (t.count ?? 0) >= 3 && !getCategoryHub(t.slug))
+  .slice(0, 6);
+
+// Parent-category up-link — the dominant category among this hub's markets, so the
+// breadcrumb reads as the real hierarchy (החוזה → קטגוריה → ישות) and the entity cluster
+// links up to its strong /topics/ page. Falls back to /markets when no category resolves.
+const catTally: Record<string, number> = {};
+for (const m of data.markets) {
+  const key = m?.category?.key;
+  if (key) catTally[key] = (catTally[key] || 0) + 1;
+}
+const topCatKey = Object.entries(catTally).sort((a, b) => b[1] - a[1])[0]?.[0] || null;
+const parentCat = topCatKey && getCategoryHub(topCatKey)
+  ? { label: getCategoryHub(topCatKey).label, href: categoryHubPath(topCatKey) }
+  : { label: 'כל השווקים', href: '/markets' };
+
+const CANONICAL = `/t/${encodeURIComponent(tag.slug)}`;
+const TITLE = `${tag.label} · שווקי תחזיות · החוזה`;
+const DESCRIPTION = `כל שווקי התחזיות של החוזה על ${tag.label}: פתוחים למסחר ושכבר הוכרעו, עם ההסתברות שהקהל נותן לכל תוצאה.`;
+
+const structuredData = [
+  buildWebPageJsonLd({
+    title: TITLE,
+    description: DESCRIPTION,
+    canonicalUrl: buildCanonicalUrl(CANONICAL),
+    type: 'CollectionPage',
+  }),
+  buildBreadcrumbJsonLd({
+    items: [
+      { name: 'החוזה', href: '/' },
+      { name: parentCat.label, href: parentCat.href },
+      { name: tag.label, href: CANONICAL },
+    ],
+  }),
+  buildMarketItemListJsonLd({
+    name: `שווקים על ${tag.label}`,
+    items: [...openHubs, ...resolvedHubs].map((h) => ({
+      href: h.path,
+      title: h.title,
+      closeLabel: h.open ? shortDate(h.closeAt) : shortDate(h.resolvedAt),
+    })),
+  }),
+];
+---
+
+<Layout title={TITLE} description={DESCRIPTION} canonicalPath={CANONICAL} structuredData={structuredData}>
+  <main class="taghub">
+    <div class="taghub__inner">
+      <nav class="taghub__crumb" aria-label="breadcrumb">
+        <a href="/">החוזה</a><span class="taghub__crumb-sep">/</span><a href={parentCat.href}>{parentCat.label}</a><span class="taghub__crumb-sep">/</span><span>{tag.label}</span>
+      </nav>
+      <h1 class="taghub__title">{tag.label}</h1>
+      <p class="taghub__lede">כל שווקי התחזיות של החוזה על {tag.label} במקום אחד. לחצו על שוק כדי לראות את המחיר, הגרף וההיסטוריה.</p>
+
+      {openHubs.length > 0 && (
+        <section class="taghub__section" aria-labelledby="taghub-open">
+          <h2 class="taghub__heading" id="taghub-open">פתוחים למסחר <span class="taghub__count">{openHubs.length}</span></h2>
+          <ul class="taghub__list">
+            {openHubs.map((h) => (
+              <li class="taghub__item">
+                <a class="taghub__link" href={h.path}>
+                  <span class="taghub__name">{h.title}</span>
+                  {shortDate(h.closeAt) && <span class="taghub__meta">ייסגר {shortDate(h.closeAt)}</span>}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {resolvedHubs.length > 0 && (
+        <section class="taghub__section" aria-labelledby="taghub-resolved">
+          <h2 class="taghub__heading" id="taghub-resolved">הוכרעו <span class="taghub__count">{resolvedHubs.length}</span></h2>
+          <ul class="taghub__list">
+            {resolvedHubs.map((h) => (
+              <li class="taghub__item">
+                <a class="taghub__link taghub__link--resolved" href={h.path}>
+                  <span class="taghub__name">{h.title}</span>
+                  {h.winner && <span class="taghub__meta taghub__meta--winner">הוכרע: {h.winner}</span>}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {relatedHubs.length > 0 && (
+        <nav class="taghub__related" aria-label="נושאים קשורים">
+          <span class="taghub__related-label">נושאים קשורים:</span>
+          {relatedHubs.map((t) => (
+            <a class="taghub__related-link" href={`/t/${encodeURIComponent(t.slug)}`}>{t.label}</a>
+          ))}
+        </nav>
+      )}
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .taghub { padding-block: clamp(1.5rem, 4vw, 3rem); }
+  .taghub__inner {
+    max-width: var(--hz-content-max, 1280px);
+    margin: 0 auto;
+    padding-inline: var(--hz-content-pad, 1.5rem);
+  }
+  .taghub__crumb {
+    display: flex; align-items: center; gap: 0.4rem; flex-wrap: wrap;
+    font-size: 0.8rem; color: var(--hz-text-faint, #8a857b); margin-bottom: 0.75rem;
+  }
+  .taghub__crumb a { color: inherit; text-decoration: none; }
+  .taghub__crumb a:hover { color: var(--hz-text-soft, #b9b3a7); }
+  .taghub__crumb-sep { opacity: 0.6; }
+  .taghub__title { font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 800; color: var(--hz-text, #f4f1ea); margin: 0 0 0.4rem; }
+  .taghub__lede { color: var(--hz-text-soft, #b9b3a7); margin: 0 0 2rem; max-width: 44rem; }
+  .taghub__section { margin-bottom: 2.25rem; }
+  .taghub__heading {
+    display: flex; align-items: baseline; gap: 0.5rem;
+    font-size: 1.05rem; font-weight: 700; color: var(--hz-text, #f4f1ea);
+    margin: 0 0 0.9rem; padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--hz-border-soft, rgba(255,255,255,0.1));
+  }
+  .taghub__count { font-size: 0.8rem; font-weight: 600; color: var(--hz-text-faint, #8a857b); }
+  .taghub__list {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; gap: 0.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+  }
+  .taghub__item { margin: 0; }
+  .taghub__link {
+    display: flex; flex-direction: column; gap: 0.2rem;
+    padding: 0.7rem 0.85rem;
+    border: 1px solid var(--hz-border-soft, rgba(255,255,255,0.1));
+    border-radius: var(--hz-radius-md, 0.6rem);
+    background: var(--hz-surface, rgba(255,255,255,0.03));
+    text-decoration: none;
+    transition: border-color 120ms ease, background 120ms ease;
+  }
+  .taghub__link:hover { border-color: var(--hz-border, rgba(255,255,255,0.2)); background: var(--hz-surface-soft, rgba(255,255,255,0.06)); }
+  .taghub__name { font-weight: 600; color: var(--hz-text, #f4f1ea); line-height: 1.35; }
+  .taghub__meta { font-size: 0.8rem; color: var(--hz-text-faint, #8a857b); }
+  .taghub__meta--winner { color: var(--hz-text-soft, #b9b3a7); }
+  .taghub__related {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem;
+    margin-top: 0.5rem; padding-top: 1.25rem;
+    border-top: 1px solid var(--hz-border-faint, rgba(255,255,255,0.06));
+  }
+  .taghub__related-label { font-size: 0.8rem; color: var(--hz-text-faint, #8a857b); margin-inline-end: 0.15rem; }
+  .taghub__related-link {
+    font-size: 0.82rem; font-weight: 600;
+    color: var(--hz-text-soft, #b9b3a7); text-decoration: none;
+    padding: 0.3rem 0.75rem;
+    border: 1px solid var(--hz-border-soft, rgba(255,255,255,0.1));
+    border-radius: var(--hz-radius-pill, 999px);
+    background: var(--hz-surface, rgba(255,255,255,0.03));
+    transition: border-color 120ms ease, color 120ms ease, background 120ms ease;
+  }
+  .taghub__related-link:hover {
+    color: var(--hz-text, #f4f1ea);
+    border-color: var(--hz-border, rgba(255,255,255,0.2));
+    background: var(--hz-surface-soft, rgba(255,255,255,0.06));
+  }
+</style>

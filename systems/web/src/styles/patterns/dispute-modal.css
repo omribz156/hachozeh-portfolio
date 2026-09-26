@@ -1,0 +1,135 @@
+/* ───────────────────────────────────────────────────────────────
+   dispute-modal.css — resolution dispute entry (trust surface, F11)
+   A small "report a resolution problem" action in the market trust block,
+   opening a compact modal that posts to the feedback inbox. Calm, not alarmist.
+   Layer: hz.patterns
+   ─────────────────────────────────────────────────────────────── */
+@layer hz.patterns {
+
+/* compact action row under the rules area — "report a problem" + "help center" */
+.hz-rule-actions {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  margin-block-start: 0.9rem;
+}
+.hz-rule-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--hz-radius-pill);
+  border: 1px solid var(--hz-border-soft);
+  background: transparent;
+  color: var(--hz-text-muted);
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color var(--hz-motion), background var(--hz-motion), border-color var(--hz-motion);
+}
+@media (hover: hover) {
+  .hz-rule-action:hover {
+    color: var(--hz-text);
+    background: var(--hz-surface-hover);
+    border-color: var(--hz-border);
+  }
+}
+/* On phones the extra "learn more" help links wrap onto a second row — hide them
+   there to keep the actions row to one line. They stay in the SSR HTML (display:none),
+   so crawlers still follow these internal links to the help articles (SEO intact);
+   only the visual pill is dropped on narrow screens. */
+@media (max-width: 640px) {
+  .hz-rule-action--learn { display: none; }
+}
+
+.hz-dispute-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 96;
+  display: none;
+  background: rgba(8, 9, 13, 0.6);
+}
+.hz-dispute-scrim.is-open { display: block; }
+
+.hz-dispute {
+  position: fixed;
+  z-index: 97;
+  inset: 0;
+  margin: auto;
+  height: fit-content;
+  max-height: calc(100dvh - 2rem);
+  width: min(26rem, calc(100vw - 2rem));
+  display: none;
+  flex-direction: column;
+  gap: 0.85rem;
+  padding: 1.4rem 1.3rem 1.2rem;
+  /* Safe-area floor (mobile-audit E5) — same treatment as the sibling
+     centered overlay (.navi-overlay-shell in base/primitives.css): a
+     self-centered fixed panel needs its own bottom padding raised so the
+     home-indicator area never eats the last button row on a notched phone. */
+  padding-bottom: max(1.2rem, env(safe-area-inset-bottom));
+  background: var(--hz-bg-raised);
+  border: 1px solid var(--hz-border-soft);
+  border-radius: var(--hz-radius-lg);
+  box-shadow: var(--hz-shadow-overlay);
+}
+.hz-dispute.is-open { display: flex; animation: hz-dispute-in 200ms ease; }
+@media (prefers-reduced-motion: reduce) { .hz-dispute.is-open { animation: none; } }
+@keyframes hz-dispute-in {
+  from { opacity: 0; transform: translateY(0.5rem) scale(0.98); }
+  to   { opacity: 1; transform: none; }
+}
+
+.hz-dispute__title { font-size: 1.05rem; font-weight: 700; color: var(--hz-text); line-height: 1.35; }
+/* single-line input that auto-grows with content (height driven by JS, capped) */
+.hz-dispute__textarea {
+  width: 100%;
+  min-height: 2.6rem;
+  max-height: 240px;
+  resize: none;
+  overflow-y: auto;
+  padding: 0.6rem 0.8rem;
+  font: inherit;
+  font-size: 16px; /* 16px floor: below it iOS zooms+pans on focus and the zoom sticks */
+  line-height: 1.4;
+  color: var(--hz-text);
+  background: var(--hz-surface-1);
+  border: 1px solid var(--hz-border-soft);
+  border-radius: var(--hz-radius-md);
+}
+.hz-dispute__textarea:focus { outline: 2px solid var(--hz-brand); outline-offset: 1px; }
+.hz-dispute__error { font-size: 0.8125rem; color: var(--hz-action-sell); }
+
+.hz-dispute__actions { display: flex; gap: 0.6rem; justify-content: flex-end; margin-block-start: 0.2rem; }
+.hz-dispute__btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.55rem 1rem;
+  border-radius: var(--hz-radius-pill);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--hz-border-soft);
+  background: transparent;
+  color: var(--hz-text);
+  transition: background var(--hz-motion), border-color var(--hz-motion), opacity var(--hz-motion);
+}
+@media (hover: hover) {
+  .hz-dispute__btn:hover { background: var(--hz-surface-hover); }
+}
+.hz-dispute__btn--primary { border-color: transparent; background: var(--hz-brand); color: var(--hz-text-inverse); }
+@media (hover: hover) {
+  .hz-dispute__btn--primary:hover { background: var(--hz-brand-strong); }
+}
+.hz-dispute__btn[disabled] { opacity: 0.5; cursor: default; }
+
+/* success state — calm acknowledgement, not celebratory */
+.hz-dispute__ok { display: flex; flex-direction: column; gap: 0.5rem; }
+.hz-dispute__ok-title { font-size: 1rem; font-weight: 700; color: var(--hz-text); }
+.hz-dispute__ok-sub { font-size: 0.85rem; color: var(--hz-text-muted); line-height: 1.45; }
+
+} /* @layer hz.patterns */

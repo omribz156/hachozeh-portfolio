@@ -1,0 +1,27 @@
+---
+// LegalPageShell — same contract as StaticPageShell, but on the shell-less
+// HelpLayout (no SiteHeader / auth shell) so legal pages can be PRERENDERED
+// safely and live on the same standalone surface as the help center. Pages that
+// still need the app shell keep using StaticPageShell.
+import HelpLayout from '../../layouts/HelpLayout.astro';
+import '../../styles/pages/static-page.css';
+
+const {
+  title,
+  description = 'החוזה — שוק תחזיות עברי',
+  routeKey = 'static',
+  canonicalPath = `/${routeKey}`,
+  robots = 'index, follow',
+} = Astro.props;
+---
+
+<HelpLayout
+  title={title}
+  description={description}
+  canonicalPath={canonicalPath}
+  robots={robots}
+>
+  <div class="hz-static-page" data-static-page={routeKey}>
+    <slot />
+  </div>
+</HelpLayout>

@@ -1,0 +1,6360 @@
+{
+  "objectType": "market_visual_asset_registry_v1",
+  "updatedAt": "2026-07-06",
+  "rightsPolicy": "Portfolio copy: project-owned generic artwork; licensed flags. No show, celebrity, or team-logo imagery.",
+  "assets": [
+    {
+      "assetId": "bucket.economy.default.v1",
+      "kind": "category",
+      "canonicalCategory": "economics",
+      "frontendKey": "economy",
+      "aliases": [
+        "economy"
+      ],
+      "label": "כלכלה",
+      "path": "/assets/images/market-buckets/economy.svg",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh"
+      },
+      "theme": {
+        "primary": "#f7c66a",
+        "secondary": "#6ee7b7",
+        "surface": "#172330",
+        "accentReason": "market charts and macro finance",
+        "source": "category"
+      }
+    },
+    {
+      "assetId": "bucket.business.default.v1",
+      "kind": "category",
+      "canonicalCategory": "business",
+      "frontendKey": "business",
+      "aliases": [
+        "companies",
+        "company"
+      ],
+      "label": "עסקים",
+      "path": "/assets/images/market-buckets/business.svg",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh"
+      },
+      "theme": {
+        "primary": "#6ee7b7",
+        "secondary": "#f7c66a",
+        "surface": "#172330",
+        "accentReason": "company and earnings markets",
+        "source": "category"
+      }
+    },
+    {
+      "assetId": "bucket.politics.default.v1",
+      "kind": "category",
+      "canonicalCategory": "politics",
+      "frontendKey": "politics",
+      "aliases": [],
+      "label": "פוליטיקה",
+      "path": "/assets/images/market-buckets/politics.svg",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh"
+      },
+      "theme": {
+        "primary": "#f7c66a",
+        "secondary": "#e7edf4",
+        "surface": "#1a2330",
+        "accentReason": "civic and election markets",
+        "source": "category"
+      }
+    },
+    {
+      "assetId": "bucket.world.default.v1",
+      "kind": "category",
+      "canonicalCategory": "world",
+      "frontendKey": "world",
+      "aliases": [
+        "geopolitics",
+        "geopolitical"
+      ],
+      "label": "עולם",
+      "path": "/assets/images/market-buckets/world.svg",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh"
+      },
+      "theme": {
+        "primary": "#6ee7b7",
+        "secondary": "#f7c66a",
+        "surface": "#162233",
+        "accentReason": "world and geopolitics markets",
+        "source": "category"
+      }
+    },
+    {
+      "assetId": "bucket.legislation.default.v1",
+      "kind": "category",
+      "canonicalCategory": "legislation",
+      "frontendKey": "legislation",
+      "aliases": [],
+      "label": "חקיקה",
+      "path": "/assets/images/market-buckets/legislation.svg",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh"
+      },
+      "theme": {
+        "primary": "#e7edf4",
+        "secondary": "#6ee7b7",
+        "surface": "#17212d",
+        "accentReason": "law and parliamentary process",
+        "source": "category"
+      }
+    },
+    {
+      "assetId": "bucket.sports.default.v1",
+      "kind": "category",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [],
+      "label": "ספורט",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh"
+      },
+      "theme": {
+        "primary": "#6ee7b7",
+        "secondary": "#f7c66a",
+        "surface": "#142437",
+        "accentReason": "generic matchup energy, not official team marks",
+        "source": "category"
+      }
+    },
+    {
+      "assetId": "bucket.esports.default.v1",
+      "kind": "category",
+      "canonicalCategory": "esports",
+      "frontendKey": "esports",
+      "aliases": [
+        "e-sports"
+      ],
+      "label": "איספורט",
+      "path": "/assets/images/market-buckets/esports.svg",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh"
+      },
+      "theme": {
+        "primary": "#f7c66a",
+        "secondary": "#6ee7b7",
+        "surface": "#182137",
+        "accentReason": "competitive gaming without publisher logos",
+        "source": "category"
+      }
+    },
+    {
+      "assetId": "bucket.crypto.default.v1",
+      "kind": "category",
+      "canonicalCategory": "crypto",
+      "frontendKey": "crypto",
+      "aliases": [],
+      "label": "קריפטו",
+      "path": "/assets/images/market-buckets/crypto.svg",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh"
+      },
+      "theme": {
+        "primary": "#f7c66a",
+        "secondary": "#6ee7b7",
+        "surface": "#17212d",
+        "accentReason": "crypto price and token markets",
+        "source": "category"
+      }
+    },
+    {
+      "assetId": "bucket.fx.default.v1",
+      "kind": "category",
+      "canonicalCategory": "fx",
+      "frontendKey": "fx",
+      "aliases": [
+        "forex",
+        "מט\"ח",
+        "מטח",
+        "שער הדולר",
+        "שער היורו",
+        "שער השקל",
+        "usd/ils",
+        "ils/usd"
+      ],
+      "label": "מט\"ח",
+      "path": "/assets/images/market-buckets/fx.svg",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh"
+      },
+      "theme": {
+        "primary": "#6ee7b7",
+        "secondary": "#e7edf4",
+        "surface": "#172330",
+        "accentReason": "currency and exchange-rate markets",
+        "source": "category"
+      }
+    },
+    {
+      "assetId": "bucket.commodities.default.v1",
+      "kind": "category",
+      "canonicalCategory": "commodities",
+      "frontendKey": "commodities",
+      "aliases": [
+        "commodity"
+      ],
+      "label": "סחורות",
+      "path": "/assets/images/market-buckets/commodities.svg",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh"
+      },
+      "theme": {
+        "primary": "#f7c66a",
+        "secondary": "#6ee7b7",
+        "surface": "#182330",
+        "accentReason": "oil, gas, metals, and commodity markets",
+        "source": "category"
+      }
+    },
+    {
+      "assetId": "bucket.weather.default.v1",
+      "kind": "category",
+      "canonicalCategory": "weather",
+      "frontendKey": "climate",
+      "aliases": [
+        "weather"
+      ],
+      "label": "מזג אוויר",
+      "path": "/assets/images/market-buckets/weather.svg",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh"
+      },
+      "theme": {
+        "primary": "#6ee7b7",
+        "secondary": "#f7c66a",
+        "surface": "#142437",
+        "accentReason": "weather and climate observations",
+        "source": "category"
+      }
+    },
+    {
+      "assetId": "bucket.technology.default.v1",
+      "kind": "category",
+      "canonicalCategory": "technology",
+      "frontendKey": "technology",
+      "aliases": [
+        "tech"
+      ],
+      "label": "טכנולוגיה",
+      "path": "/assets/images/market-buckets/technology.svg",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh"
+      },
+      "theme": {
+        "primary": "#6ee7b7",
+        "secondary": "#f7c66a",
+        "surface": "#151f33",
+        "accentReason": "technology markets without brand logos",
+        "source": "category"
+      }
+    },
+    {
+      "assetId": "bucket.ai.default.v1",
+      "kind": "category",
+      "canonicalCategory": "ai",
+      "frontendKey": "ai",
+      "aliases": [
+        "artificial-intelligence"
+      ],
+      "label": "בינה מלאכותית",
+      "path": "/assets/images/market-buckets/ai.svg",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh"
+      },
+      "theme": {
+        "primary": "#6ee7b7",
+        "secondary": "#f7c66a",
+        "surface": "#142238",
+        "accentReason": "AI markets without model-company marks",
+        "source": "category"
+      }
+    },
+    {
+      "assetId": "bucket.entertainment.default.v1",
+      "kind": "category",
+      "canonicalCategory": "entertainment",
+      "frontendKey": "entertainment",
+      "aliases": [
+        "culture"
+      ],
+      "label": "בידור",
+      "path": "/assets/images/market-buckets/entertainment.svg",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh"
+      },
+      "theme": {
+        "primary": "#f7c66a",
+        "secondary": "#e7edf4",
+        "surface": "#1b2030",
+        "accentReason": "culture and entertainment markets",
+        "source": "category"
+      }
+    },
+    {
+      "assetId": "bucket.awards.default.v1",
+      "kind": "category",
+      "canonicalCategory": "awards",
+      "frontendKey": "awards",
+      "aliases": [],
+      "label": "פרסים",
+      "path": "/assets/images/market-buckets/awards.svg",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh"
+      },
+      "theme": {
+        "primary": "#f7c66a",
+        "secondary": "#e7edf4",
+        "surface": "#1b2030",
+        "accentReason": "awards without ceremony logos",
+        "source": "category"
+      }
+    },
+    {
+      "assetId": "bucket.social.default.v1",
+      "kind": "category",
+      "canonicalCategory": "social",
+      "frontendKey": "social",
+      "aliases": [
+        "mentions"
+      ],
+      "label": "שיח ברשת",
+      "path": "/assets/images/market-buckets/social.svg",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh"
+      },
+      "theme": {
+        "primary": "#6ee7b7",
+        "secondary": "#f7c66a",
+        "surface": "#182131",
+        "accentReason": "mention and social-attention markets",
+        "source": "category"
+      }
+    },
+    {
+      "assetId": "bucket.security.default.v1",
+      "kind": "category",
+      "canonicalCategory": "security",
+      "frontendKey": "security",
+      "aliases": [],
+      "label": "ביטחון",
+      "path": "/assets/images/market-buckets/security.svg",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh"
+      },
+      "theme": {
+        "primary": "#6ee7b7",
+        "secondary": "#f7c66a",
+        "surface": "#17212d",
+        "accentReason": "security markets without flags or violent imagery",
+        "source": "category"
+      }
+    },
+    {
+      "assetId": "bucket.travel.default.v1",
+      "kind": "category",
+      "canonicalCategory": "travel",
+      "frontendKey": "travel",
+      "aliases": [],
+      "label": "נסיעות",
+      "path": "/assets/images/market-buckets/travel.svg",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh"
+      },
+      "theme": {
+        "primary": "#f7c66a",
+        "secondary": "#6ee7b7",
+        "surface": "#132536",
+        "accentReason": "travel and flight disruption markets",
+        "source": "category"
+      }
+    },
+    {
+      "assetId": "bucket.transportation.default.v1",
+      "kind": "category",
+      "canonicalCategory": "transportation",
+      "frontendKey": "transportation",
+      "aliases": [
+        "transport"
+      ],
+      "label": "תחבורה",
+      "path": "/assets/images/market-buckets/transportation.svg",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh"
+      },
+      "theme": {
+        "primary": "#f7c66a",
+        "secondary": "#6ee7b7",
+        "surface": "#152232",
+        "accentReason": "transport and infrastructure markets",
+        "source": "category"
+      }
+    },
+    {
+      "assetId": "bucket.science.default.v1",
+      "kind": "category",
+      "canonicalCategory": "science",
+      "frontendKey": "science",
+      "aliases": [],
+      "label": "מדע",
+      "path": "/assets/images/market-buckets/science.svg",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh"
+      },
+      "theme": {
+        "primary": "#6ee7b7",
+        "secondary": "#f7c66a",
+        "surface": "#14242f",
+        "accentReason": "science and measurable natural events",
+        "source": "category"
+      }
+    },
+    {
+      "assetId": "bucket.health.default.v1",
+      "kind": "category",
+      "canonicalCategory": "health",
+      "frontendKey": "health",
+      "aliases": [
+        "pandemics",
+        "pandemic"
+      ],
+      "label": "בריאות",
+      "path": "/assets/images/market-buckets/health.svg",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh"
+      },
+      "theme": {
+        "primary": "#6ee7b7",
+        "secondary": "#f7c66a",
+        "surface": "#14252f",
+        "accentReason": "health and public-health markets",
+        "source": "category"
+      }
+    },
+    {
+      "assetId": "bucket.education.default.v1",
+      "kind": "category",
+      "canonicalCategory": "education",
+      "frontendKey": "education",
+      "aliases": [
+        "schools",
+        "school",
+        "learning",
+        "השכלה",
+        "לימודים",
+        "בית ספר",
+        "מערכת החינוך"
+      ],
+      "label": "חינוך",
+      "path": "/assets/images/market-buckets/education.svg",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh"
+      },
+      "theme": {
+        "primary": "#6ee7b7",
+        "secondary": "#f7c66a",
+        "surface": "#142437",
+        "accentReason": "education, schools, exams, and learning policy",
+        "source": "category"
+      }
+    },
+    {
+      "assetId": "bucket.energy.default.v1",
+      "kind": "category",
+      "canonicalCategory": "energy",
+      "frontendKey": "energy",
+      "aliases": [
+        "fuel",
+        "oil",
+        "gas",
+        "electricity",
+        "דלק",
+        "בנזין",
+        "אנרגיה",
+        "חשמל"
+      ],
+      "label": "אנרגיה",
+      "path": "/assets/images/market-buckets/energy.svg",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh"
+      },
+      "theme": {
+        "primary": "#f7c66a",
+        "secondary": "#6ee7b7",
+        "surface": "#172330",
+        "accentReason": "energy, fuel, electricity, and infrastructure markets",
+        "source": "category"
+      }
+    },
+    {
+      "assetId": "bucket.general.default.v1",
+      "kind": "category",
+      "canonicalCategory": "general",
+      "frontendKey": "general",
+      "aliases": [],
+      "label": "כללי",
+      "path": "/assets/images/market-buckets/general.svg",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh"
+      },
+      "theme": {
+        "primary": "#f7c66a",
+        "secondary": "#6ee7b7",
+        "surface": "#17212d",
+        "accentReason": "neutral fallback",
+        "source": "category"
+      }
+    },
+    {
+      "assetId": "entity.bank-of-israel.v1",
+      "kind": "entity",
+      "canonicalCategory": "economics",
+      "frontendKey": "economy",
+      "aliases": [
+        "bank-of-israel",
+        "boi",
+        "בנק ישראל"
+      ],
+      "label": "בנק ישראל",
+      "path": "/assets/images/market-buckets/economy.svg",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Entity-level BOI asset now uses the owned economy SVG only.",
+          "Old editorial photo removed 2026-07-01."
+        ]
+      },
+      "theme": {
+        "primary": "#f7c66a",
+        "secondary": "#6ee7b7",
+        "surface": "#17212d",
+        "accentReason": "BoI is a macro/economy anchor entity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.team.maccabi-tel-aviv.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "מכבי תל אביב",
+        "מכבי ת״א",
+        "maccabi tel aviv",
+        "maccabi ta"
+      ],
+      "label": "מכבי תל אביב",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "מכבי ת״א",
+        "shortName": "מכבי",
+        "colorPrimary": "#ffd500",
+        "colorOn": "#16213e",
+        "crestLabel": "מ",
+        "colorSecondary": "#14306b",
+        "crestPath": "/assets/images/sports/football/il-premier-league/maccabi-tel-aviv.svg",
+        "sport": "football"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#ffd500",
+        "secondary": "#16213e",
+        "surface": "#142437",
+        "accentReason": "Maccabi Tel Aviv club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.team.hapoel-tel-aviv.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "הפועל תל אביב",
+        "הפועל ת״א",
+        "hapoel tel aviv",
+        "hapoel ta"
+      ],
+      "label": "הפועל תל אביב",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "הפועל ת״א",
+        "shortName": "הפועל",
+        "colorPrimary": "#e2231a",
+        "colorOn": "#ffffff",
+        "crestLabel": "ה",
+        "colorSecondary": "#f4f4f4",
+        "crestPath": "/assets/images/sports/football/il-premier-league/hapoel-tel-aviv.svg",
+        "sport": "football"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#e2231a",
+        "secondary": "#ffffff",
+        "surface": "#142437",
+        "accentReason": "Hapoel Tel Aviv club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.team.maccabi-haifa.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "מכבי חיפה",
+        "maccabi haifa"
+      ],
+      "label": "מכבי חיפה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "מכבי חיפה",
+        "shortName": "מכבי",
+        "colorPrimary": "#00a651",
+        "colorOn": "#08231a",
+        "crestLabel": "מ",
+        "colorSecondary": "#f4f4f4",
+        "crestPath": "/assets/images/sports/football/il-premier-league/maccabi-haifa.svg",
+        "sport": "football"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#00843d",
+        "secondary": "#ffffff",
+        "surface": "#142437",
+        "accentReason": "Maccabi Haifa club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.team.hapoel-haifa.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "הפועל חיפה",
+        "hapoel haifa"
+      ],
+      "label": "הפועל חיפה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "הפועל חיפה",
+        "shortName": "הפועל",
+        "colorPrimary": "#c02128",
+        "colorOn": "#ffffff",
+        "crestLabel": "ה",
+        "colorSecondary": "#1a1a1a",
+        "crestPath": "/assets/images/sports/football/il-premier-league/hapoel-haifa.svg",
+        "sport": "football"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#c02128",
+        "secondary": "#ffffff",
+        "surface": "#142437",
+        "accentReason": "Hapoel Haifa club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.team.beitar-jerusalem.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "בית״ר ירושלים",
+        "ביתר ירושלים",
+        "beitar jerusalem"
+      ],
+      "label": "בית״ר ירושלים",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "בית״ר ירושלים",
+        "shortName": "בית״ר",
+        "colorPrimary": "#f7c948",
+        "colorOn": "#161616",
+        "crestLabel": "ב",
+        "colorSecondary": "#161616",
+        "crestPath": "/assets/images/sports/football/il-premier-league/beitar-jerusalem.svg",
+        "sport": "football"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#f7c948",
+        "secondary": "#161616",
+        "surface": "#142437",
+        "accentReason": "Beitar Jerusalem club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.team.hapoel-beer-sheva.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "הפועל באר שבע",
+        "הפועל ב״ש",
+        "hapoel beer sheva",
+        "hapoel beersheva"
+      ],
+      "label": "הפועל באר שבע",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "הפועל ב״ש",
+        "shortName": "הפועל",
+        "colorPrimary": "#e4002b",
+        "colorOn": "#ffffff",
+        "crestLabel": "ה",
+        "colorSecondary": "#f4f4f4",
+        "crestPath": "/assets/images/sports/football/il-premier-league/hapoel-beer-sheva.svg",
+        "sport": "football"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#e4002b",
+        "secondary": "#ffffff",
+        "surface": "#142437",
+        "accentReason": "Hapoel Beer Sheva club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.team.bnei-yehuda.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "בני יהודה תל אביב",
+        "בני יהודה ת״א",
+        "בני יהודה",
+        "bnei yehuda"
+      ],
+      "label": "בני יהודה תל אביב",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "בני יהודה",
+        "shortName": "בני יהודה",
+        "colorPrimary": "#f57f1f",
+        "colorOn": "#161616",
+        "crestLabel": "ב",
+        "colorSecondary": "#161616",
+        "crestPath": "/assets/images/sports/football/il-premier-league/bnei-yehuda.svg",
+        "sport": "football"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#f57f1f",
+        "secondary": "#161616",
+        "surface": "#142437",
+        "accentReason": "Bnei Yehuda club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.team.hapoel-jerusalem.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "הפועל ירושלים",
+        "הפועל י-ם",
+        "hapoel jerusalem"
+      ],
+      "label": "הפועל ירושלים",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "הפועל י-ם",
+        "shortName": "הפועל",
+        "colorPrimary": "#d52b1e",
+        "colorOn": "#ffffff",
+        "crestLabel": "ה",
+        "colorSecondary": "#1a1a1a",
+        "crestPath": "/assets/images/sports/football/il-premier-league/hapoel-jerusalem.svg",
+        "sport": "football"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#d52b1e",
+        "secondary": "#ffffff",
+        "surface": "#142437",
+        "accentReason": "Hapoel Jerusalem club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.team.maccabi-netanya.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "מכבי נתניה",
+        "maccabi netanya"
+      ],
+      "label": "מכבי נתניה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "מכבי נתניה",
+        "shortName": "נתניה",
+        "colorPrimary": "#ffd500",
+        "colorOn": "#161616",
+        "crestLabel": "מ",
+        "colorSecondary": "#161616",
+        "crestPath": "/assets/images/sports/football/il-premier-league/maccabi-netanya.svg",
+        "sport": "football"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#ffd500",
+        "secondary": "#161616",
+        "surface": "#142437",
+        "accentReason": "מכבי נתניה club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.team.fc-ashdod.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "מ.ס. אשדוד",
+        "מ\"ס אשדוד",
+        "אשדוד",
+        "fc ashdod",
+        "ms ashdod"
+      ],
+      "label": "מ.ס. אשדוד",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "מ.ס. אשדוד",
+        "shortName": "אשדוד",
+        "colorPrimary": "#e4002b",
+        "colorOn": "#ffffff",
+        "crestLabel": "מ",
+        "colorSecondary": "#ffd700",
+        "crestPath": "/assets/images/sports/football/il-premier-league/fc-ashdod.svg",
+        "sport": "football"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#e4002b",
+        "secondary": "#ffd700",
+        "surface": "#142437",
+        "accentReason": "מ.ס. אשדוד club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.team.bnei-sakhnin.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "בני סכנין",
+        "איחוד בני סכנין",
+        "sakhnin",
+        "bnei sakhnin"
+      ],
+      "label": "בני סכנין",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "בני סכנין",
+        "shortName": "סכנין",
+        "colorPrimary": "#cc0000",
+        "colorOn": "#ffffff",
+        "crestLabel": "ב",
+        "colorSecondary": "#f4f4f4",
+        "crestPath": "/assets/images/sports/football/il-premier-league/bnei-sakhnin.svg",
+        "sport": "football"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#cc0000",
+        "secondary": "#f4f4f4",
+        "surface": "#142437",
+        "accentReason": "בני סכנין club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.team.hapoel-petah-tikva.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "הפועל פתח תקווה",
+        "הפועל פ\"ת",
+        "הפועל פתח-תקווה",
+        "hapoel petah tikva"
+      ],
+      "label": "הפועל פתח תקווה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "הפועל פתח תקווה",
+        "shortName": "הפועל פ\"ת",
+        "colorPrimary": "#003399",
+        "colorOn": "#ffffff",
+        "crestLabel": "ה",
+        "colorSecondary": "#f4f4f4",
+        "crestPath": "/assets/images/sports/football/il-premier-league/hapoel-petah-tikva.svg",
+        "sport": "football"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#003399",
+        "secondary": "#f4f4f4",
+        "surface": "#142437",
+        "accentReason": "הפועל פתח תקווה club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.team.ironi-kiryat-shmona.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "עירוני קריית שמונה",
+        "עירוני קרית שמונה",
+        "קריית שמונה",
+        "ironi kiryat shmona",
+        "kiryat shmona"
+      ],
+      "label": "עירוני קריית שמונה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "עירוני קריית שמונה",
+        "shortName": "קריית שמונה",
+        "colorPrimary": "#1a4fa0",
+        "colorOn": "#ffffff",
+        "crestLabel": "ע",
+        "colorSecondary": "#f4f4f4",
+        "crestPath": "/assets/images/sports/football/il-premier-league/ironi-kiryat-shmona.svg",
+        "sport": "football"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#1a4fa0",
+        "secondary": "#f4f4f4",
+        "surface": "#142437",
+        "accentReason": "עירוני קריית שמונה club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.team.ironi-tiberias.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "עירוני טבריה",
+        "טבריה",
+        "ironi tiberias",
+        "tiberias"
+      ],
+      "label": "עירוני טבריה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "עירוני טבריה",
+        "shortName": "טבריה",
+        "colorPrimary": "#2a6fc0",
+        "colorOn": "#ffffff",
+        "crestLabel": "ע",
+        "colorSecondary": "#f4f4f4",
+        "crestPath": "/assets/images/sports/football/il-premier-league/ironi-tiberias.svg",
+        "sport": "football"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#2a6fc0",
+        "secondary": "#f4f4f4",
+        "surface": "#142437",
+        "accentReason": "עירוני טבריה club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.team.maccabi-bnei-reineh.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "מכבי בני ריינה",
+        "בני ריינה",
+        "maccabi bnei reineh",
+        "bnei reineh"
+      ],
+      "label": "מכבי בני ריינה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "מכבי בני ריינה",
+        "shortName": "ריינה",
+        "colorPrimary": "#ffd500",
+        "colorOn": "#161616",
+        "crestLabel": "מ",
+        "colorSecondary": "#003399",
+        "crestPath": "/assets/images/sports/football/il-premier-league/maccabi-bnei-reineh.svg",
+        "sport": "football"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#ffd500",
+        "secondary": "#003399",
+        "surface": "#142437",
+        "accentReason": "מכבי בני ריינה club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.dz.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "אלג׳יריה",
+        "נבחרת אלג׳יריה",
+        "algeria"
+      ],
+      "label": "אלג׳יריה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "אלג׳יריה",
+        "shortName": "אלג׳יריה",
+        "colorPrimary": "#006233",
+        "colorOn": "#ffffff",
+        "crestLabel": "א",
+        "colorSecondary": "#d21034",
+        "crestPath": "/assets/images/flags/dz.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#006233",
+        "secondary": "#d21034",
+        "surface": "#142437",
+        "accentReason": "Algeria national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.ar.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "ארגנטינה",
+        "נבחרת ארגנטינה",
+        "argentina"
+      ],
+      "label": "ארגנטינה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "ארגנטינה",
+        "shortName": "ארגנטינה",
+        "colorPrimary": "#6cace4",
+        "colorOn": "#161616",
+        "crestLabel": "א",
+        "colorSecondary": "#ffffff",
+        "crestPath": "/assets/images/flags/ar.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#6cace4",
+        "secondary": "#ffffff",
+        "surface": "#142437",
+        "accentReason": "Argentina national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.au.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "אוסטרליה",
+        "נבחרת אוסטרליה",
+        "australia"
+      ],
+      "label": "אוסטרליה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "אוסטרליה",
+        "shortName": "אוסטרליה",
+        "colorPrimary": "#00247d",
+        "colorOn": "#ffffff",
+        "crestLabel": "א",
+        "colorSecondary": "#e4002b",
+        "crestPath": "/assets/images/flags/au.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#00247d",
+        "secondary": "#e4002b",
+        "surface": "#142437",
+        "accentReason": "Australia national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.at.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "אוסטריה",
+        "נבחרת אוסטריה",
+        "austria"
+      ],
+      "label": "אוסטריה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "אוסטריה",
+        "shortName": "אוסטריה",
+        "colorPrimary": "#ed2939",
+        "colorOn": "#ffffff",
+        "crestLabel": "א",
+        "colorSecondary": "#ffffff",
+        "crestPath": "/assets/images/flags/at.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#ed2939",
+        "secondary": "#ffffff",
+        "surface": "#142437",
+        "accentReason": "Austria national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.be.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "בלגיה",
+        "נבחרת בלגיה",
+        "belgium"
+      ],
+      "label": "בלגיה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "בלגיה",
+        "shortName": "בלגיה",
+        "colorPrimary": "#fdda24",
+        "colorOn": "#161616",
+        "crestLabel": "ב",
+        "colorSecondary": "#ef3340",
+        "crestPath": "/assets/images/flags/be.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#fdda24",
+        "secondary": "#ef3340",
+        "surface": "#142437",
+        "accentReason": "Belgium national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.ba.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "בוסניה",
+        "נבחרת בוסניה",
+        "bosnia and herzegovina"
+      ],
+      "label": "בוסניה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "בוסניה",
+        "shortName": "בוסניה",
+        "colorPrimary": "#002395",
+        "colorOn": "#ffffff",
+        "crestLabel": "ב",
+        "colorSecondary": "#fecb00",
+        "crestPath": "/assets/images/flags/ba.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#002395",
+        "secondary": "#fecb00",
+        "surface": "#142437",
+        "accentReason": "Bosnia and Herzegovina national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.br.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "ברזיל",
+        "נבחרת ברזיל",
+        "brazil"
+      ],
+      "label": "ברזיל",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "ברזיל",
+        "shortName": "ברזיל",
+        "colorPrimary": "#009739",
+        "colorOn": "#ffffff",
+        "crestLabel": "ב",
+        "colorSecondary": "#fedf00",
+        "crestPath": "/assets/images/flags/br.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#009739",
+        "secondary": "#fedf00",
+        "surface": "#142437",
+        "accentReason": "Brazil national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.ca.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "קנדה",
+        "נבחרת קנדה",
+        "canada"
+      ],
+      "label": "קנדה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "קנדה",
+        "shortName": "קנדה",
+        "colorPrimary": "#d52b1e",
+        "colorOn": "#ffffff",
+        "crestLabel": "ק",
+        "colorSecondary": "#ffffff",
+        "crestPath": "/assets/images/flags/ca.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#d52b1e",
+        "secondary": "#ffffff",
+        "surface": "#142437",
+        "accentReason": "Canada national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.cv.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "קייפ ורדה",
+        "נבחרת קייפ ורדה",
+        "cape verde"
+      ],
+      "label": "קייפ ורדה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "קייפ ורדה",
+        "shortName": "קייפ ורדה",
+        "colorPrimary": "#003893",
+        "colorOn": "#ffffff",
+        "crestLabel": "ק",
+        "colorSecondary": "#cf2027",
+        "crestPath": "/assets/images/flags/cv.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#003893",
+        "secondary": "#cf2027",
+        "surface": "#142437",
+        "accentReason": "Cape Verde national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.co.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "קולומביה",
+        "נבחרת קולומביה",
+        "colombia"
+      ],
+      "label": "קולומביה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "קולומביה",
+        "shortName": "קולומביה",
+        "colorPrimary": "#fcd116",
+        "colorOn": "#161616",
+        "crestLabel": "ק",
+        "colorSecondary": "#003893",
+        "crestPath": "/assets/images/flags/co.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#fcd116",
+        "secondary": "#003893",
+        "surface": "#142437",
+        "accentReason": "Colombia national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.cr.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "קוסטה ריקה",
+        "נבחרת קוסטה ריקה",
+        "costa rica"
+      ],
+      "label": "קוסטה ריקה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "קוסטה ריקה",
+        "shortName": "קוסטה ריקה",
+        "colorPrimary": "#002b7f",
+        "colorOn": "#ffffff",
+        "crestLabel": "ק",
+        "colorSecondary": "#ce1126",
+        "crestPath": "/assets/images/flags/cr.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#002b7f",
+        "secondary": "#ce1126",
+        "surface": "#142437",
+        "accentReason": "Costa Rica national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.hr.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "קרואטיה",
+        "נבחרת קרואטיה",
+        "croatia"
+      ],
+      "label": "קרואטיה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "קרואטיה",
+        "shortName": "קרואטיה",
+        "colorPrimary": "#d52b1e",
+        "colorOn": "#ffffff",
+        "crestLabel": "ק",
+        "colorSecondary": "#171796",
+        "crestPath": "/assets/images/flags/hr.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#d52b1e",
+        "secondary": "#171796",
+        "surface": "#142437",
+        "accentReason": "Croatia national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.cw.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "קוראסאו",
+        "נבחרת קוראסאו",
+        "curacao"
+      ],
+      "label": "קוראסאו",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "קוראסאו",
+        "shortName": "קוראסאו",
+        "colorPrimary": "#002b7f",
+        "colorOn": "#ffffff",
+        "crestLabel": "ק",
+        "colorSecondary": "#f9e814",
+        "crestPath": "/assets/images/flags/cw.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#002b7f",
+        "secondary": "#f9e814",
+        "surface": "#142437",
+        "accentReason": "Curacao national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.cz.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "צ׳כיה",
+        "נבחרת צ׳כיה",
+        "czechia"
+      ],
+      "label": "צ׳כיה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "צ׳כיה",
+        "shortName": "צ׳כיה",
+        "colorPrimary": "#11457e",
+        "colorOn": "#ffffff",
+        "crestLabel": "צ",
+        "colorSecondary": "#d7141a",
+        "crestPath": "/assets/images/flags/cz.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#11457e",
+        "secondary": "#d7141a",
+        "surface": "#142437",
+        "accentReason": "Czechia national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.cd.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "קונגו הדמוקרטית",
+        "נבחרת קונגו הדמוקרטית",
+        "dr congo"
+      ],
+      "label": "קונגו הדמוקרטית",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "קונגו הדמוקרטית",
+        "shortName": "קונגו הדמוקרטית",
+        "colorPrimary": "#007fff",
+        "colorOn": "#ffffff",
+        "crestLabel": "ק",
+        "colorSecondary": "#f7d618",
+        "crestPath": "/assets/images/flags/cd.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#007fff",
+        "secondary": "#f7d618",
+        "surface": "#142437",
+        "accentReason": "DR Congo national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.ec.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "אקוודור",
+        "נבחרת אקוודור",
+        "ecuador"
+      ],
+      "label": "אקוודור",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "אקוודור",
+        "shortName": "אקוודור",
+        "colorPrimary": "#ffdd00",
+        "colorOn": "#161616",
+        "crestLabel": "א",
+        "colorSecondary": "#034ea2",
+        "crestPath": "/assets/images/flags/ec.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#ffdd00",
+        "secondary": "#034ea2",
+        "surface": "#142437",
+        "accentReason": "Ecuador national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.eg.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "מצרים",
+        "נבחרת מצרים",
+        "egypt"
+      ],
+      "label": "מצרים",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "מצרים",
+        "shortName": "מצרים",
+        "colorPrimary": "#ce1126",
+        "colorOn": "#ffffff",
+        "crestLabel": "מ",
+        "colorSecondary": "#000000",
+        "crestPath": "/assets/images/flags/eg.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#ce1126",
+        "secondary": "#000000",
+        "surface": "#142437",
+        "accentReason": "Egypt national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.gb-eng.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "אנגליה",
+        "נבחרת אנגליה",
+        "england"
+      ],
+      "label": "אנגליה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "אנגליה",
+        "shortName": "אנגליה",
+        "colorPrimary": "#ce1124",
+        "colorOn": "#ffffff",
+        "crestLabel": "א",
+        "colorSecondary": "#ffffff",
+        "crestPath": "/assets/images/flags/gb-eng.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#ce1124",
+        "secondary": "#ffffff",
+        "surface": "#142437",
+        "accentReason": "England national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.fr.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "צרפת",
+        "נבחרת צרפת",
+        "france"
+      ],
+      "label": "צרפת",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "צרפת",
+        "shortName": "צרפת",
+        "colorPrimary": "#0055a4",
+        "colorOn": "#ffffff",
+        "crestLabel": "צ",
+        "colorSecondary": "#ef4135",
+        "crestPath": "/assets/images/flags/fr.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#0055a4",
+        "secondary": "#ef4135",
+        "surface": "#142437",
+        "accentReason": "France national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.de.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "גרמניה",
+        "נבחרת גרמניה",
+        "germany"
+      ],
+      "label": "גרמניה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "גרמניה",
+        "shortName": "גרמניה",
+        "colorPrimary": "#dd0000",
+        "colorOn": "#ffffff",
+        "crestLabel": "ג",
+        "colorSecondary": "#ffce00",
+        "crestPath": "/assets/images/flags/de.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#dd0000",
+        "secondary": "#ffce00",
+        "surface": "#142437",
+        "accentReason": "Germany national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.gh.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "גאנה",
+        "נבחרת גאנה",
+        "ghana"
+      ],
+      "label": "גאנה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "גאנה",
+        "shortName": "גאנה",
+        "colorPrimary": "#006b3f",
+        "colorOn": "#ffffff",
+        "crestLabel": "ג",
+        "colorSecondary": "#fcd116",
+        "crestPath": "/assets/images/flags/gh.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#006b3f",
+        "secondary": "#fcd116",
+        "surface": "#142437",
+        "accentReason": "Ghana national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.ht.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "האיטי",
+        "נבחרת האיטי",
+        "haiti"
+      ],
+      "label": "האיטי",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "האיטי",
+        "shortName": "האיטי",
+        "colorPrimary": "#00209f",
+        "colorOn": "#ffffff",
+        "crestLabel": "ה",
+        "colorSecondary": "#d21034",
+        "crestPath": "/assets/images/flags/ht.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#00209f",
+        "secondary": "#d21034",
+        "surface": "#142437",
+        "accentReason": "Haiti national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.ir.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "איראן",
+        "נבחרת איראן",
+        "iran"
+      ],
+      "label": "איראן",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "איראן",
+        "shortName": "איראן",
+        "colorPrimary": "#239f40",
+        "colorOn": "#ffffff",
+        "crestLabel": "א",
+        "colorSecondary": "#da0000",
+        "crestPath": "/assets/images/flags/ir.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#239f40",
+        "secondary": "#da0000",
+        "surface": "#142437",
+        "accentReason": "Iran national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.iq.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "עיראק",
+        "נבחרת עיראק",
+        "iraq"
+      ],
+      "label": "עיראק",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "עיראק",
+        "shortName": "עיראק",
+        "colorPrimary": "#ce1126",
+        "colorOn": "#ffffff",
+        "crestLabel": "ע",
+        "colorSecondary": "#000000",
+        "crestPath": "/assets/images/flags/iq.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#ce1126",
+        "secondary": "#000000",
+        "surface": "#142437",
+        "accentReason": "Iraq national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.il.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "ישראל",
+        "נבחרת ישראל",
+        "israel"
+      ],
+      "label": "ישראל",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "ישראל",
+        "shortName": "ישראל",
+        "colorPrimary": "#0038b8",
+        "colorOn": "#ffffff",
+        "crestLabel": "י",
+        "colorSecondary": "#ffffff",
+        "crestPath": "/assets/images/flags/il.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#0038b8",
+        "secondary": "#ffffff",
+        "surface": "#142437",
+        "accentReason": "Israel national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.xk.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "קוסובו",
+        "נבחרת קוסובו",
+        "kosovo"
+      ],
+      "label": "קוסובו",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "קוסובו",
+        "shortName": "קוסובו",
+        "colorPrimary": "#244aa5",
+        "colorOn": "#ffffff",
+        "crestLabel": "ק",
+        "colorSecondary": "#d0a650",
+        "crestPath": "/assets/images/flags/xk.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#244aa5",
+        "secondary": "#d0a650",
+        "surface": "#142437",
+        "accentReason": "Kosovo national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.ci.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "חוף השנהב",
+        "נבחרת חוף השנהב",
+        "ivory coast"
+      ],
+      "label": "חוף השנהב",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "חוף השנהב",
+        "shortName": "חוף השנהב",
+        "colorPrimary": "#f77f00",
+        "colorOn": "#ffffff",
+        "crestLabel": "ח",
+        "colorSecondary": "#009e60",
+        "crestPath": "/assets/images/flags/ci.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#f77f00",
+        "secondary": "#009e60",
+        "surface": "#142437",
+        "accentReason": "Ivory Coast national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.jp.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "יפן",
+        "נבחרת יפן",
+        "japan"
+      ],
+      "label": "יפן",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "יפן",
+        "shortName": "יפן",
+        "colorPrimary": "#bc002d",
+        "colorOn": "#ffffff",
+        "crestLabel": "י",
+        "colorSecondary": "#ffffff",
+        "crestPath": "/assets/images/flags/jp.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#bc002d",
+        "secondary": "#ffffff",
+        "surface": "#142437",
+        "accentReason": "Japan national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.jo.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "ירדן",
+        "נבחרת ירדן",
+        "jordan"
+      ],
+      "label": "ירדן",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "ירדן",
+        "shortName": "ירדן",
+        "colorPrimary": "#007a3d",
+        "colorOn": "#ffffff",
+        "crestLabel": "י",
+        "colorSecondary": "#ce1126",
+        "crestPath": "/assets/images/flags/jo.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#007a3d",
+        "secondary": "#ce1126",
+        "surface": "#142437",
+        "accentReason": "Jordan national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.mx.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "מקסיקו",
+        "נבחרת מקסיקו",
+        "mexico"
+      ],
+      "label": "מקסיקו",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "מקסיקו",
+        "shortName": "מקסיקו",
+        "colorPrimary": "#006847",
+        "colorOn": "#ffffff",
+        "crestLabel": "מ",
+        "colorSecondary": "#ce1126",
+        "crestPath": "/assets/images/flags/mx.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#006847",
+        "secondary": "#ce1126",
+        "surface": "#142437",
+        "accentReason": "Mexico national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.ma.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "מרוקו",
+        "נבחרת מרוקו",
+        "morocco"
+      ],
+      "label": "מרוקו",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "מרוקו",
+        "shortName": "מרוקו",
+        "colorPrimary": "#c1272d",
+        "colorOn": "#ffffff",
+        "crestLabel": "מ",
+        "colorSecondary": "#006233",
+        "crestPath": "/assets/images/flags/ma.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#c1272d",
+        "secondary": "#006233",
+        "surface": "#142437",
+        "accentReason": "Morocco national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.nl.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "הולנד",
+        "נבחרת הולנד",
+        "netherlands"
+      ],
+      "label": "הולנד",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "הולנד",
+        "shortName": "הולנד",
+        "colorPrimary": "#ff6c00",
+        "colorOn": "#ffffff",
+        "crestLabel": "ה",
+        "colorSecondary": "#21468b",
+        "crestPath": "/assets/images/flags/nl.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#ff6c00",
+        "secondary": "#21468b",
+        "surface": "#142437",
+        "accentReason": "Netherlands national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.nz.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "ניו זילנד",
+        "נבחרת ניו זילנד",
+        "new zealand"
+      ],
+      "label": "ניו זילנד",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "ניו זילנד",
+        "shortName": "ניו זילנד",
+        "colorPrimary": "#00247d",
+        "colorOn": "#ffffff",
+        "crestLabel": "נ",
+        "colorSecondary": "#cc142b",
+        "crestPath": "/assets/images/flags/nz.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#00247d",
+        "secondary": "#cc142b",
+        "surface": "#142437",
+        "accentReason": "New Zealand national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.ng.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "ניגריה",
+        "נבחרת ניגריה",
+        "nigeria"
+      ],
+      "label": "ניגריה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "ניגריה",
+        "shortName": "ניגריה",
+        "colorPrimary": "#008751",
+        "colorOn": "#ffffff",
+        "crestLabel": "נ",
+        "colorSecondary": "#ffffff",
+        "crestPath": "/assets/images/flags/ng.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#008751",
+        "secondary": "#ffffff",
+        "surface": "#142437",
+        "accentReason": "Nigeria national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.no.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "נורווגיה",
+        "נבחרת נורווגיה",
+        "norway"
+      ],
+      "label": "נורווגיה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "נורווגיה",
+        "shortName": "נורווגיה",
+        "colorPrimary": "#ba0c2f",
+        "colorOn": "#ffffff",
+        "crestLabel": "נ",
+        "colorSecondary": "#00205b",
+        "crestPath": "/assets/images/flags/no.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#ba0c2f",
+        "secondary": "#00205b",
+        "surface": "#142437",
+        "accentReason": "Norway national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.pa.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "פנמה",
+        "נבחרת פנמה",
+        "panama"
+      ],
+      "label": "פנמה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "פנמה",
+        "shortName": "פנמה",
+        "colorPrimary": "#005293",
+        "colorOn": "#ffffff",
+        "crestLabel": "פ",
+        "colorSecondary": "#d21034",
+        "crestPath": "/assets/images/flags/pa.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#005293",
+        "secondary": "#d21034",
+        "surface": "#142437",
+        "accentReason": "Panama national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.py.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "פרגוואי",
+        "נבחרת פרגוואי",
+        "paraguay"
+      ],
+      "label": "פרגוואי",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "פרגוואי",
+        "shortName": "פרגוואי",
+        "colorPrimary": "#d52b1e",
+        "colorOn": "#ffffff",
+        "crestLabel": "פ",
+        "colorSecondary": "#0038a8",
+        "crestPath": "/assets/images/flags/py.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#d52b1e",
+        "secondary": "#0038a8",
+        "surface": "#142437",
+        "accentReason": "Paraguay national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.pt.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "פורטוגל",
+        "נבחרת פורטוגל",
+        "portugal"
+      ],
+      "label": "פורטוגל",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "פורטוגל",
+        "shortName": "פורטוגל",
+        "colorPrimary": "#da291c",
+        "colorOn": "#ffffff",
+        "crestLabel": "פ",
+        "colorSecondary": "#006600",
+        "crestPath": "/assets/images/flags/pt.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#da291c",
+        "secondary": "#006600",
+        "surface": "#142437",
+        "accentReason": "Portugal national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.qa.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "קטאר",
+        "נבחרת קטאר",
+        "qatar"
+      ],
+      "label": "קטאר",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "קטאר",
+        "shortName": "קטאר",
+        "colorPrimary": "#8a1538",
+        "colorOn": "#ffffff",
+        "crestLabel": "ק",
+        "colorSecondary": "#ffffff",
+        "crestPath": "/assets/images/flags/qa.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#8a1538",
+        "secondary": "#ffffff",
+        "surface": "#142437",
+        "accentReason": "Qatar national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.sa.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "ערב הסעודית",
+        "נבחרת ערב הסעודית",
+        "saudi arabia"
+      ],
+      "label": "ערב הסעודית",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "ערב הסעודית",
+        "shortName": "ערב הסעודית",
+        "colorPrimary": "#006c35",
+        "colorOn": "#ffffff",
+        "crestLabel": "ע",
+        "colorSecondary": "#ffffff",
+        "crestPath": "/assets/images/flags/sa.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#006c35",
+        "secondary": "#ffffff",
+        "surface": "#142437",
+        "accentReason": "Saudi Arabia national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.gb-sct.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "סקוטלנד",
+        "נבחרת סקוטלנד",
+        "scotland"
+      ],
+      "label": "סקוטלנד",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "סקוטלנד",
+        "shortName": "סקוטלנד",
+        "colorPrimary": "#0065bf",
+        "colorOn": "#ffffff",
+        "crestLabel": "ס",
+        "colorSecondary": "#ffffff",
+        "crestPath": "/assets/images/flags/gb-sct.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#0065bf",
+        "secondary": "#ffffff",
+        "surface": "#142437",
+        "accentReason": "Scotland national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.sn.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "סנגל",
+        "נבחרת סנגל",
+        "senegal"
+      ],
+      "label": "סנגל",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "סנגל",
+        "shortName": "סנגל",
+        "colorPrimary": "#00853f",
+        "colorOn": "#ffffff",
+        "crestLabel": "ס",
+        "colorSecondary": "#fdef42",
+        "crestPath": "/assets/images/flags/sn.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#00853f",
+        "secondary": "#fdef42",
+        "surface": "#142437",
+        "accentReason": "Senegal national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.za.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "דרום אפריקה",
+        "נבחרת דרום אפריקה",
+        "south africa"
+      ],
+      "label": "דרום אפריקה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "דרום אפריקה",
+        "shortName": "דרום אפריקה",
+        "colorPrimary": "#007749",
+        "colorOn": "#ffffff",
+        "crestLabel": "ד",
+        "colorSecondary": "#de3831",
+        "crestPath": "/assets/images/flags/za.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#007749",
+        "secondary": "#de3831",
+        "surface": "#142437",
+        "accentReason": "South Africa national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.kr.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "דרום קוריאה",
+        "נבחרת דרום קוריאה",
+        "south korea"
+      ],
+      "label": "דרום קוריאה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "דרום קוריאה",
+        "shortName": "דרום קוריאה",
+        "colorPrimary": "#cd2e3a",
+        "colorOn": "#ffffff",
+        "crestLabel": "ד",
+        "colorSecondary": "#0047a0",
+        "crestPath": "/assets/images/flags/kr.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#cd2e3a",
+        "secondary": "#0047a0",
+        "surface": "#142437",
+        "accentReason": "South Korea national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.es.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "ספרד",
+        "נבחרת ספרד",
+        "spain"
+      ],
+      "label": "ספרד",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "ספרד",
+        "shortName": "ספרד",
+        "colorPrimary": "#c60b1e",
+        "colorOn": "#ffffff",
+        "crestLabel": "ס",
+        "colorSecondary": "#ffc400",
+        "crestPath": "/assets/images/flags/es.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#c60b1e",
+        "secondary": "#ffc400",
+        "surface": "#142437",
+        "accentReason": "Spain national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.se.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "שוודיה",
+        "נבחרת שוודיה",
+        "sweden"
+      ],
+      "label": "שוודיה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "שוודיה",
+        "shortName": "שוודיה",
+        "colorPrimary": "#006aa7",
+        "colorOn": "#ffffff",
+        "crestLabel": "ש",
+        "colorSecondary": "#fecc02",
+        "crestPath": "/assets/images/flags/se.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#006aa7",
+        "secondary": "#fecc02",
+        "surface": "#142437",
+        "accentReason": "Sweden national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.ch.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "שווייץ",
+        "שוויץ",
+        "נבחרת שווייץ",
+        "נבחרת שוויץ",
+        "switzerland"
+      ],
+      "label": "שווייץ",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "שווייץ",
+        "shortName": "שווייץ",
+        "colorPrimary": "#d52b1e",
+        "colorOn": "#ffffff",
+        "crestLabel": "ש",
+        "colorSecondary": "#ffffff",
+        "crestPath": "/assets/images/flags/ch.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#d52b1e",
+        "secondary": "#ffffff",
+        "surface": "#142437",
+        "accentReason": "Switzerland national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.tn.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "תוניסיה",
+        "נבחרת תוניסיה",
+        "tunisia"
+      ],
+      "label": "תוניסיה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "תוניסיה",
+        "shortName": "תוניסיה",
+        "colorPrimary": "#e70013",
+        "colorOn": "#ffffff",
+        "crestLabel": "ת",
+        "colorSecondary": "#ffffff",
+        "crestPath": "/assets/images/flags/tn.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#e70013",
+        "secondary": "#ffffff",
+        "surface": "#142437",
+        "accentReason": "Tunisia national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.tr.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "טורקיה",
+        "נבחרת טורקיה",
+        "turkey"
+      ],
+      "label": "טורקיה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "טורקיה",
+        "shortName": "טורקיה",
+        "colorPrimary": "#e30a17",
+        "colorOn": "#ffffff",
+        "crestLabel": "ט",
+        "colorSecondary": "#ffffff",
+        "crestPath": "/assets/images/flags/tr.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#e30a17",
+        "secondary": "#ffffff",
+        "surface": "#142437",
+        "accentReason": "Turkey national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.us.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "ארצות הברית",
+        "נבחרת ארצות הברית",
+        "united states"
+      ],
+      "label": "ארצות הברית",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "ארצות הברית",
+        "shortName": "ארצות הברית",
+        "colorPrimary": "#0a3161",
+        "colorOn": "#ffffff",
+        "crestLabel": "א",
+        "colorSecondary": "#b31942",
+        "crestPath": "/assets/images/flags/us.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#0a3161",
+        "secondary": "#b31942",
+        "surface": "#142437",
+        "accentReason": "United States national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.uy.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "אורוגוואי",
+        "נבחרת אורוגוואי",
+        "uruguay"
+      ],
+      "label": "אורוגוואי",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "אורוגוואי",
+        "shortName": "אורוגוואי",
+        "colorPrimary": "#0038a8",
+        "colorOn": "#ffffff",
+        "crestLabel": "א",
+        "colorSecondary": "#ffd100",
+        "crestPath": "/assets/images/flags/uy.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#0038a8",
+        "secondary": "#ffd100",
+        "surface": "#142437",
+        "accentReason": "Uruguay national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.nation.uz.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "אוזבקיסטן",
+        "נבחרת אוזבקיסטן",
+        "uzbekistan"
+      ],
+      "label": "אוזבקיסטן",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "אוזבקיסטן",
+        "shortName": "אוזבקיסטן",
+        "colorPrimary": "#0099b5",
+        "colorOn": "#ffffff",
+        "crestLabel": "א",
+        "colorSecondary": "#1eb53a",
+        "crestPath": "/assets/images/flags/uz.svg"
+      },
+      "rights": {
+        "status": "approved-third-party",
+        "publicUse": "allowed",
+        "owner": "Panayiotis Lipiridis / flag-icons",
+        "sourceUrl": "https://github.com/lipis/flag-icons",
+        "notes": [
+          "MIT licensed flags; full notice in licenses/flag-icons-LICENSE.txt."
+        ]
+      },
+      "theme": {
+        "primary": "#0099b5",
+        "secondary": "#1eb53a",
+        "surface": "#142437",
+        "accentReason": "Uzbekistan national-team flag",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.euroleague.anadolu-efes.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "אנדולו אפס",
+        "anadolu efes"
+      ],
+      "label": "אנדולו אפס",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "אנדולו אפס",
+        "shortName": "אנדולו אפס",
+        "colorPrimary": "#213557",
+        "colorOn": "#ffffff",
+        "crestLabel": "א",
+        "colorSecondary": "#00A4D2",
+        "crestPath": "/assets/images/sports/basketball/euroleague/anadolu-efes.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#213557",
+        "secondary": "#00A4D2",
+        "surface": "#142437",
+        "accentReason": "Anadolu Efes basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.euroleague.olimpia-milano.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "אולימפיה מילאנו",
+        "olimpia milano"
+      ],
+      "label": "אולימפיה מילאנו",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "אולימפיה מילאנו",
+        "shortName": "אולימפיה מילאנו",
+        "colorPrimary": "#E2231A",
+        "colorOn": "#ffffff",
+        "crestLabel": "א",
+        "colorSecondary": "#FFFFFF",
+        "crestPath": "/assets/images/sports/basketball/euroleague/olimpia-milano.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#E2231A",
+        "secondary": "#FFFFFF",
+        "surface": "#142437",
+        "accentReason": "Olimpia Milano basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.euroleague.fc-barcelona.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "ברצלונה",
+        "fc barcelona"
+      ],
+      "label": "ברצלונה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "ברצלונה",
+        "shortName": "ברצלונה",
+        "colorPrimary": "#004D98",
+        "colorOn": "#ffffff",
+        "crestLabel": "ב",
+        "colorSecondary": "#A50044",
+        "crestPath": "/assets/images/sports/basketball/euroleague/fc-barcelona.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#004D98",
+        "secondary": "#A50044",
+        "surface": "#142437",
+        "accentReason": "FC Barcelona basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.euroleague.fc-bayern-munich.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "באיירן מינכן",
+        "bayern munich"
+      ],
+      "label": "באיירן מינכן",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "באיירן מינכן",
+        "shortName": "באיירן מינכן",
+        "colorPrimary": "#DC052D",
+        "colorOn": "#ffffff",
+        "crestLabel": "ב",
+        "colorSecondary": "#0066B2",
+        "crestPath": "/assets/images/sports/basketball/euroleague/fc-bayern-munich.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#DC052D",
+        "secondary": "#0066B2",
+        "surface": "#142437",
+        "accentReason": "Bayern Munich basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.euroleague.fenerbahce.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "פנרבחצה",
+        "fenerbahce"
+      ],
+      "label": "פנרבחצה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "פנרבחצה",
+        "shortName": "פנרבחצה",
+        "colorPrimary": "#FFED00",
+        "colorOn": "#161616",
+        "crestLabel": "פ",
+        "colorSecondary": "#2EAA47",
+        "crestPath": "/assets/images/sports/basketball/euroleague/fenerbahce.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#FFED00",
+        "secondary": "#2EAA47",
+        "surface": "#142437",
+        "accentReason": "Fenerbahce basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.euroleague.hapoel-ibi-tel-aviv.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "הפועל תל אביב",
+        "הפועל ת״א",
+        "הפועל איביאי",
+        "hapoel tel aviv",
+        "hapoel ta"
+      ],
+      "label": "הפועל איביאי ת״א",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "הפועל איביאי ת״א",
+        "shortName": "הפועל איביאי ת״א",
+        "colorPrimary": "#E2231A",
+        "colorOn": "#ffffff",
+        "crestLabel": "ה",
+        "colorSecondary": "#FFFFFF",
+        "crestPath": "/assets/images/sports/basketball/euroleague/hapoel-ibi-tel-aviv.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#E2231A",
+        "secondary": "#FFFFFF",
+        "surface": "#142437",
+        "accentReason": "Hapoel IBI Tel Aviv basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.euroleague.baskonia.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "באסקוניה",
+        "baskonia"
+      ],
+      "label": "באסקוניה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "באסקוניה",
+        "shortName": "באסקוניה",
+        "colorPrimary": "#CF152D",
+        "colorOn": "#ffffff",
+        "crestLabel": "ב",
+        "colorSecondary": "#0B2240",
+        "crestPath": "/assets/images/sports/basketball/euroleague/baskonia.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#CF152D",
+        "secondary": "#0B2240",
+        "surface": "#142437",
+        "accentReason": "Baskonia basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.euroleague.maccabi-tel-aviv.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "מכבי תל אביב",
+        "מכבי ת״א",
+        "maccabi tel aviv",
+        "maccabi ta"
+      ],
+      "label": "מכבי ת״א",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "מכבי ת״א",
+        "shortName": "מכבי ת״א",
+        "colorPrimary": "#FFF100",
+        "colorOn": "#161616",
+        "crestLabel": "מ",
+        "colorSecondary": "#2371B5",
+        "crestPath": "/assets/images/sports/basketball/euroleague/maccabi-tel-aviv.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#FFF100",
+        "secondary": "#2371B5",
+        "surface": "#142437",
+        "accentReason": "Maccabi Tel Aviv basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.euroleague.olympiacos.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "אולימפיאקוס",
+        "olympiacos"
+      ],
+      "label": "אולימפיאקוס",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "אולימפיאקוס",
+        "shortName": "אולימפיאקוס",
+        "colorPrimary": "#D0061F",
+        "colorOn": "#ffffff",
+        "crestLabel": "א",
+        "colorSecondary": "#FFFFFF",
+        "crestPath": "/assets/images/sports/basketball/euroleague/olympiacos.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#D0061F",
+        "secondary": "#FFFFFF",
+        "surface": "#142437",
+        "accentReason": "Olympiacos basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.euroleague.panathinaikos.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "פנאתינאיקוס",
+        "panathinaikos"
+      ],
+      "label": "פנאתינאיקוס",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "פנאתינאיקוס",
+        "shortName": "פנאתינאיקוס",
+        "colorPrimary": "#007841",
+        "colorOn": "#ffffff",
+        "crestLabel": "פ",
+        "colorSecondary": "#F6921E",
+        "crestPath": "/assets/images/sports/basketball/euroleague/panathinaikos.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#007841",
+        "secondary": "#F6921E",
+        "surface": "#142437",
+        "accentReason": "Panathinaikos basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.euroleague.real-madrid.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "ריאל מדריד",
+        "real madrid"
+      ],
+      "label": "ריאל מדריד",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "ריאל מדריד",
+        "shortName": "ריאל מדריד",
+        "colorPrimary": "#FEBE10",
+        "colorOn": "#161616",
+        "crestLabel": "ר",
+        "colorSecondary": "#00529F",
+        "crestPath": "/assets/images/sports/basketball/euroleague/real-madrid.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#FEBE10",
+        "secondary": "#00529F",
+        "surface": "#142437",
+        "accentReason": "Real Madrid basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.euroleague.zalgiris.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "צלגיריס",
+        "zalgiris"
+      ],
+      "label": "צלגיריס",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "צלגיריס",
+        "shortName": "צלגיריס",
+        "colorPrimary": "#146734",
+        "colorOn": "#ffffff",
+        "crestLabel": "צ",
+        "colorSecondary": "#ED6723",
+        "crestPath": "/assets/images/sports/basketball/euroleague/zalgiris.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#146734",
+        "secondary": "#ED6723",
+        "surface": "#142437",
+        "accentReason": "Zalgiris basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.euroleague.as-monaco.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "מונאקו",
+        "as monaco"
+      ],
+      "label": "מונאקו",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "מונאקו",
+        "shortName": "מונאקו",
+        "colorPrimary": "#C20E1A",
+        "colorOn": "#ffffff",
+        "crestLabel": "מ",
+        "colorSecondary": "#000000",
+        "crestPath": "/assets/images/sports/basketball/euroleague/as-monaco.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#C20E1A",
+        "secondary": "#000000",
+        "surface": "#142437",
+        "accentReason": "AS Monaco basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.euroleague.crvena-zvezda.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "צרבנה זבזדה",
+        "crvena zvezda"
+      ],
+      "label": "צרבנה זבזדה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "צרבנה זבזדה",
+        "shortName": "צרבנה זבזדה",
+        "colorPrimary": "#EB1926",
+        "colorOn": "#ffffff",
+        "crestLabel": "צ",
+        "colorSecondary": "#FFFFFF",
+        "crestPath": "/assets/images/sports/basketball/euroleague/crvena-zvezda.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#EB1926",
+        "secondary": "#FFFFFF",
+        "surface": "#142437",
+        "accentReason": "Crvena Zvezda basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.euroleague.dubai-basketball.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "דובאי",
+        "dubai basketball"
+      ],
+      "label": "דובאי",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "דובאי",
+        "shortName": "דובאי",
+        "colorPrimary": "#1A1A1A",
+        "colorOn": "#ffffff",
+        "crestLabel": "ד",
+        "colorSecondary": "#FFFFFF",
+        "crestPath": "/assets/images/sports/basketball/euroleague/dubai-basketball.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#1A1A1A",
+        "secondary": "#FFFFFF",
+        "surface": "#142437",
+        "accentReason": "Dubai Basketball basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.euroleague.asvel.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "אסוול",
+        "asvel"
+      ],
+      "label": "אסוול",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "אסוול",
+        "shortName": "אסוול",
+        "colorPrimary": "#626262",
+        "colorOn": "#ffffff",
+        "crestLabel": "א",
+        "colorSecondary": "#000000",
+        "crestPath": "/assets/images/sports/basketball/euroleague/asvel.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#626262",
+        "secondary": "#000000",
+        "surface": "#142437",
+        "accentReason": "ASVEL basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.euroleague.paris-basketball.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "פריז",
+        "paris basketball"
+      ],
+      "label": "פריז",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "פריז",
+        "shortName": "פריז",
+        "colorPrimary": "#1A1A1A",
+        "colorOn": "#ffffff",
+        "crestLabel": "פ",
+        "colorSecondary": "#FFFFFF",
+        "crestPath": "/assets/images/sports/basketball/euroleague/paris-basketball.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#1A1A1A",
+        "secondary": "#FFFFFF",
+        "surface": "#142437",
+        "accentReason": "Paris Basketball basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.euroleague.partizan.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "פרטיזן",
+        "partizan"
+      ],
+      "label": "פרטיזן",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "פרטיזן",
+        "shortName": "פרטיזן",
+        "colorPrimary": "#000000",
+        "colorOn": "#ffffff",
+        "crestLabel": "פ",
+        "colorSecondary": "#FFFFFF",
+        "crestPath": "/assets/images/sports/basketball/euroleague/partizan.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#000000",
+        "secondary": "#FFFFFF",
+        "surface": "#142437",
+        "accentReason": "Partizan basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.euroleague.valencia-basket.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "ולנסיה",
+        "valencia basket"
+      ],
+      "label": "ולנסיה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "ולנסיה",
+        "shortName": "ולנסיה",
+        "colorPrimary": "#009FE3",
+        "colorOn": "#ffffff",
+        "crestLabel": "ו",
+        "colorSecondary": "#EB0029",
+        "crestPath": "/assets/images/sports/basketball/euroleague/valencia-basket.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#009FE3",
+        "secondary": "#EB0029",
+        "surface": "#142437",
+        "accentReason": "Valencia Basket basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.euroleague.virtus-bologna.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "וירטוס בולוניה",
+        "virtus bologna"
+      ],
+      "label": "וירטוס בולוניה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "וירטוס בולוניה",
+        "shortName": "וירטוס בולוניה",
+        "colorPrimary": "#FFE700",
+        "colorOn": "#161616",
+        "crestLabel": "ו",
+        "colorSecondary": "#000000",
+        "crestPath": "/assets/images/sports/basketball/euroleague/virtus-bologna.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#FFE700",
+        "secondary": "#000000",
+        "surface": "#142437",
+        "accentReason": "Virtus Bologna basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.nba.atlanta-hawks.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "אטלנטה הוקס",
+        "atlanta hawks"
+      ],
+      "label": "אטלנטה הוקס",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "אטלנטה הוקס",
+        "shortName": "אטלנטה הוקס",
+        "colorPrimary": "#E03A3E",
+        "colorOn": "#ffffff",
+        "crestLabel": "א",
+        "colorSecondary": "#C1D32F",
+        "crestPath": "/assets/images/sports/basketball/nba/atlanta-hawks.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#E03A3E",
+        "secondary": "#C1D32F",
+        "surface": "#142437",
+        "accentReason": "Atlanta Hawks basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.nba.boston-celtics.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "בוסטון סלטיקס",
+        "boston celtics"
+      ],
+      "label": "בוסטון סלטיקס",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "בוסטון סלטיקס",
+        "shortName": "בוסטון סלטיקס",
+        "colorPrimary": "#007A33",
+        "colorOn": "#ffffff",
+        "crestLabel": "ב",
+        "colorSecondary": "#BA9653",
+        "crestPath": "/assets/images/sports/basketball/nba/boston-celtics.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#007A33",
+        "secondary": "#BA9653",
+        "surface": "#142437",
+        "accentReason": "Boston Celtics basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.nba.brooklyn-nets.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "ברוקלין נטס",
+        "brooklyn nets"
+      ],
+      "label": "ברוקלין נטס",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "ברוקלין נטס",
+        "shortName": "ברוקלין נטס",
+        "colorPrimary": "#000000",
+        "colorOn": "#ffffff",
+        "crestLabel": "ב",
+        "colorSecondary": "#FFFFFF",
+        "crestPath": "/assets/images/sports/basketball/nba/brooklyn-nets.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#000000",
+        "secondary": "#FFFFFF",
+        "surface": "#142437",
+        "accentReason": "Brooklyn Nets basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.nba.charlotte-hornets.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "שרלוט הורנטס",
+        "charlotte hornets"
+      ],
+      "label": "שרלוט הורנטס",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "שרלוט הורנטס",
+        "shortName": "שרלוט הורנטס",
+        "colorPrimary": "#1D1160",
+        "colorOn": "#ffffff",
+        "crestLabel": "ש",
+        "colorSecondary": "#00788C",
+        "crestPath": "/assets/images/sports/basketball/nba/charlotte-hornets.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#1D1160",
+        "secondary": "#00788C",
+        "surface": "#142437",
+        "accentReason": "Charlotte Hornets basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.nba.chicago-bulls.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "שיקגו בולס",
+        "chicago bulls"
+      ],
+      "label": "שיקגו בולס",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "שיקגו בולס",
+        "shortName": "שיקגו בולס",
+        "colorPrimary": "#CE1141",
+        "colorOn": "#ffffff",
+        "crestLabel": "ש",
+        "colorSecondary": "#000000",
+        "crestPath": "/assets/images/sports/basketball/nba/chicago-bulls.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#CE1141",
+        "secondary": "#000000",
+        "surface": "#142437",
+        "accentReason": "Chicago Bulls basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.nba.cleveland-cavaliers.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "קליבלנד",
+        "cleveland cavaliers"
+      ],
+      "label": "קליבלנד",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "קליבלנד",
+        "shortName": "קליבלנד",
+        "colorPrimary": "#860038",
+        "colorOn": "#ffffff",
+        "crestLabel": "ק",
+        "colorSecondary": "#FDBB30",
+        "crestPath": "/assets/images/sports/basketball/nba/cleveland-cavaliers.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#860038",
+        "secondary": "#FDBB30",
+        "surface": "#142437",
+        "accentReason": "Cleveland Cavaliers basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.nba.dallas-mavericks.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "דאלאס",
+        "dallas mavericks"
+      ],
+      "label": "דאלאס",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "דאלאס",
+        "shortName": "דאלאס",
+        "colorPrimary": "#00538C",
+        "colorOn": "#ffffff",
+        "crestLabel": "ד",
+        "colorSecondary": "#B8C4CA",
+        "crestPath": "/assets/images/sports/basketball/nba/dallas-mavericks.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#00538C",
+        "secondary": "#B8C4CA",
+        "surface": "#142437",
+        "accentReason": "Dallas Mavericks basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.nba.denver-nuggets.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "דנבר נאגטס",
+        "denver nuggets"
+      ],
+      "label": "דנבר נאגטס",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "דנבר נאגטס",
+        "shortName": "דנבר נאגטס",
+        "colorPrimary": "#0E2240",
+        "colorOn": "#ffffff",
+        "crestLabel": "ד",
+        "colorSecondary": "#FEC524",
+        "crestPath": "/assets/images/sports/basketball/nba/denver-nuggets.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#0E2240",
+        "secondary": "#FEC524",
+        "surface": "#142437",
+        "accentReason": "Denver Nuggets basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.nba.detroit-pistons.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "דטרויט",
+        "detroit pistons"
+      ],
+      "label": "דטרויט",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "דטרויט",
+        "shortName": "דטרויט",
+        "colorPrimary": "#C8102E",
+        "colorOn": "#ffffff",
+        "crestLabel": "ד",
+        "colorSecondary": "#1D42BA",
+        "crestPath": "/assets/images/sports/basketball/nba/detroit-pistons.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#C8102E",
+        "secondary": "#1D42BA",
+        "surface": "#142437",
+        "accentReason": "Detroit Pistons basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.nba.golden-state-warriors.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "גולדן סטייט",
+        "golden state warriors"
+      ],
+      "label": "גולדן סטייט",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "גולדן סטייט",
+        "shortName": "גולדן סטייט",
+        "colorPrimary": "#1D428A",
+        "colorOn": "#ffffff",
+        "crestLabel": "ג",
+        "colorSecondary": "#FFC72C",
+        "crestPath": "/assets/images/sports/basketball/nba/golden-state-warriors.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#1D428A",
+        "secondary": "#FFC72C",
+        "surface": "#142437",
+        "accentReason": "Golden State Warriors basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.nba.houston-rockets.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "יוסטון רוקטס",
+        "houston rockets"
+      ],
+      "label": "יוסטון רוקטס",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "יוסטון רוקטס",
+        "shortName": "יוסטון רוקטס",
+        "colorPrimary": "#CE1141",
+        "colorOn": "#ffffff",
+        "crestLabel": "י",
+        "colorSecondary": "#C4CED4",
+        "crestPath": "/assets/images/sports/basketball/nba/houston-rockets.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#CE1141",
+        "secondary": "#C4CED4",
+        "surface": "#142437",
+        "accentReason": "Houston Rockets basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.nba.indiana-pacers.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "אינדיאנה פייסרס",
+        "indiana pacers"
+      ],
+      "label": "אינדיאנה פייסרס",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "אינדיאנה פייסרס",
+        "shortName": "אינדיאנה פייסרס",
+        "colorPrimary": "#002D62",
+        "colorOn": "#ffffff",
+        "crestLabel": "א",
+        "colorSecondary": "#FDBB30",
+        "crestPath": "/assets/images/sports/basketball/nba/indiana-pacers.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#002D62",
+        "secondary": "#FDBB30",
+        "surface": "#142437",
+        "accentReason": "Indiana Pacers basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.nba.los-angeles-clippers.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "קליפרס",
+        "la clippers"
+      ],
+      "label": "קליפרס",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "קליפרס",
+        "shortName": "קליפרס",
+        "colorPrimary": "#C8102E",
+        "colorOn": "#ffffff",
+        "crestLabel": "ק",
+        "colorSecondary": "#1D428A",
+        "crestPath": "/assets/images/sports/basketball/nba/los-angeles-clippers.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#C8102E",
+        "secondary": "#1D428A",
+        "surface": "#142437",
+        "accentReason": "LA Clippers basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.nba.los-angeles-lakers.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "לייקרס",
+        "la lakers"
+      ],
+      "label": "לייקרס",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "לייקרס",
+        "shortName": "לייקרס",
+        "colorPrimary": "#552583",
+        "colorOn": "#ffffff",
+        "crestLabel": "ל",
+        "colorSecondary": "#FDB927",
+        "crestPath": "/assets/images/sports/basketball/nba/los-angeles-lakers.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#552583",
+        "secondary": "#FDB927",
+        "surface": "#142437",
+        "accentReason": "LA Lakers basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.nba.memphis-grizzlies.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "ממפיס",
+        "memphis grizzlies"
+      ],
+      "label": "ממפיס",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "ממפיס",
+        "shortName": "ממפיס",
+        "colorPrimary": "#5D76A9",
+        "colorOn": "#ffffff",
+        "crestLabel": "מ",
+        "colorSecondary": "#F5B112",
+        "crestPath": "/assets/images/sports/basketball/nba/memphis-grizzlies.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#5D76A9",
+        "secondary": "#F5B112",
+        "surface": "#142437",
+        "accentReason": "Memphis Grizzlies basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.nba.miami-heat.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "מיאמי היט",
+        "miami heat"
+      ],
+      "label": "מיאמי היט",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "מיאמי היט",
+        "shortName": "מיאמי היט",
+        "colorPrimary": "#98002E",
+        "colorOn": "#ffffff",
+        "crestLabel": "מ",
+        "colorSecondary": "#F9A01B",
+        "crestPath": "/assets/images/sports/basketball/nba/miami-heat.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#98002E",
+        "secondary": "#F9A01B",
+        "surface": "#142437",
+        "accentReason": "Miami Heat basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.nba.milwaukee-bucks.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "מילווקי באקס",
+        "milwaukee bucks"
+      ],
+      "label": "מילווקי באקס",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "מילווקי באקס",
+        "shortName": "מילווקי באקס",
+        "colorPrimary": "#00471B",
+        "colorOn": "#ffffff",
+        "crestLabel": "מ",
+        "colorSecondary": "#EEE1C6",
+        "crestPath": "/assets/images/sports/basketball/nba/milwaukee-bucks.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#00471B",
+        "secondary": "#EEE1C6",
+        "surface": "#142437",
+        "accentReason": "Milwaukee Bucks basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.nba.minnesota-timberwolves.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "מינסוטה",
+        "minnesota timberwolves"
+      ],
+      "label": "מינסוטה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "מינסוטה",
+        "shortName": "מינסוטה",
+        "colorPrimary": "#0C2340",
+        "colorOn": "#ffffff",
+        "crestLabel": "מ",
+        "colorSecondary": "#78BE20",
+        "crestPath": "/assets/images/sports/basketball/nba/minnesota-timberwolves.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#0C2340",
+        "secondary": "#78BE20",
+        "surface": "#142437",
+        "accentReason": "Minnesota Timberwolves basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.nba.new-orleans-pelicans.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "ניו אורלינס",
+        "new orleans pelicans"
+      ],
+      "label": "ניו אורלינס",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "ניו אורלינס",
+        "shortName": "ניו אורלינס",
+        "colorPrimary": "#0C2340",
+        "colorOn": "#ffffff",
+        "crestLabel": "נ",
+        "colorSecondary": "#C8102E",
+        "crestPath": "/assets/images/sports/basketball/nba/new-orleans-pelicans.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#0C2340",
+        "secondary": "#C8102E",
+        "surface": "#142437",
+        "accentReason": "New Orleans Pelicans basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.nba.new-york-knicks.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "ניקס",
+        "new york knicks"
+      ],
+      "label": "ניקס",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "ניקס",
+        "shortName": "ניקס",
+        "colorPrimary": "#006BB6",
+        "colorOn": "#ffffff",
+        "crestLabel": "נ",
+        "colorSecondary": "#F58426",
+        "crestPath": "/assets/images/sports/basketball/nba/new-york-knicks.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#006BB6",
+        "secondary": "#F58426",
+        "surface": "#142437",
+        "accentReason": "New York Knicks basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.nba.oklahoma-city-thunder.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "אוקלהומה",
+        "okc thunder"
+      ],
+      "label": "אוקלהומה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "אוקלהומה",
+        "shortName": "אוקלהומה",
+        "colorPrimary": "#007AC1",
+        "colorOn": "#ffffff",
+        "crestLabel": "א",
+        "colorSecondary": "#EF3B24",
+        "crestPath": "/assets/images/sports/basketball/nba/oklahoma-city-thunder.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#007AC1",
+        "secondary": "#EF3B24",
+        "surface": "#142437",
+        "accentReason": "OKC Thunder basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.nba.orlando-magic.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "אורלנדו מאג׳יק",
+        "orlando magic"
+      ],
+      "label": "אורלנדו מאג׳יק",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "אורלנדו מאג׳יק",
+        "shortName": "אורלנדו מאג׳יק",
+        "colorPrimary": "#0077C0",
+        "colorOn": "#ffffff",
+        "crestLabel": "א",
+        "colorSecondary": "#C4CED4",
+        "crestPath": "/assets/images/sports/basketball/nba/orlando-magic.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#0077C0",
+        "secondary": "#C4CED4",
+        "surface": "#142437",
+        "accentReason": "Orlando Magic basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.nba.philadelphia-76ers.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "פילדלפיה",
+        "philadelphia 76ers"
+      ],
+      "label": "פילדלפיה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "פילדלפיה",
+        "shortName": "פילדלפיה",
+        "colorPrimary": "#006BB6",
+        "colorOn": "#ffffff",
+        "crestLabel": "פ",
+        "colorSecondary": "#ED174C",
+        "crestPath": "/assets/images/sports/basketball/nba/philadelphia-76ers.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#006BB6",
+        "secondary": "#ED174C",
+        "surface": "#142437",
+        "accentReason": "Philadelphia 76ers basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.nba.phoenix-suns.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "פיניקס סאנס",
+        "phoenix suns"
+      ],
+      "label": "פיניקס סאנס",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "פיניקס סאנס",
+        "shortName": "פיניקס סאנס",
+        "colorPrimary": "#1D1160",
+        "colorOn": "#ffffff",
+        "crestLabel": "פ",
+        "colorSecondary": "#E56020",
+        "crestPath": "/assets/images/sports/basketball/nba/phoenix-suns.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#1D1160",
+        "secondary": "#E56020",
+        "surface": "#142437",
+        "accentReason": "Phoenix Suns basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.nba.portland-trail-blazers.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "פורטלנד",
+        "portland trail blazers"
+      ],
+      "label": "פורטלנד",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "פורטלנד",
+        "shortName": "פורטלנד",
+        "colorPrimary": "#E03A3E",
+        "colorOn": "#ffffff",
+        "crestLabel": "פ",
+        "colorSecondary": "#000000",
+        "crestPath": "/assets/images/sports/basketball/nba/portland-trail-blazers.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#E03A3E",
+        "secondary": "#000000",
+        "surface": "#142437",
+        "accentReason": "Portland Trail Blazers basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.nba.sacramento-kings.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "סקרמנטו",
+        "sacramento kings"
+      ],
+      "label": "סקרמנטו",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "סקרמנטו",
+        "shortName": "סקרמנטו",
+        "colorPrimary": "#5A2D81",
+        "colorOn": "#ffffff",
+        "crestLabel": "ס",
+        "colorSecondary": "#63727A",
+        "crestPath": "/assets/images/sports/basketball/nba/sacramento-kings.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#5A2D81",
+        "secondary": "#63727A",
+        "surface": "#142437",
+        "accentReason": "Sacramento Kings basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.nba.san-antonio-spurs.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "סן אנטוניו",
+        "san antonio spurs"
+      ],
+      "label": "סן אנטוניו",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "סן אנטוניו",
+        "shortName": "סן אנטוניו",
+        "colorPrimary": "#C4CED4",
+        "colorOn": "#161616",
+        "crestLabel": "ס",
+        "colorSecondary": "#000000",
+        "crestPath": "/assets/images/sports/basketball/nba/san-antonio-spurs.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#C4CED4",
+        "secondary": "#000000",
+        "surface": "#142437",
+        "accentReason": "San Antonio Spurs basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.nba.toronto-raptors.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "טורונטו ראפטורס",
+        "toronto raptors"
+      ],
+      "label": "טורונטו ראפטורס",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "טורונטו ראפטורס",
+        "shortName": "טורונטו ראפטורס",
+        "colorPrimary": "#CE1141",
+        "colorOn": "#ffffff",
+        "crestLabel": "ט",
+        "colorSecondary": "#000000",
+        "crestPath": "/assets/images/sports/basketball/nba/toronto-raptors.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#CE1141",
+        "secondary": "#000000",
+        "surface": "#142437",
+        "accentReason": "Toronto Raptors basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.nba.utah-jazz.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "יוטה ג׳אז",
+        "utah jazz"
+      ],
+      "label": "יוטה ג׳אז",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "יוטה ג׳אז",
+        "shortName": "יוטה ג׳אז",
+        "colorPrimary": "#002B5C",
+        "colorOn": "#ffffff",
+        "crestLabel": "י",
+        "colorSecondary": "#F9A01B",
+        "crestPath": "/assets/images/sports/basketball/nba/utah-jazz.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#002B5C",
+        "secondary": "#F9A01B",
+        "surface": "#142437",
+        "accentReason": "Utah Jazz basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.nba.washington-wizards.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "וושינגטון",
+        "washington wizards"
+      ],
+      "label": "וושינגטון",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "וושינגטון",
+        "shortName": "וושינגטון",
+        "colorPrimary": "#002B5C",
+        "colorOn": "#ffffff",
+        "crestLabel": "ו",
+        "colorSecondary": "#E31837",
+        "crestPath": "/assets/images/sports/basketball/nba/washington-wizards.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#002B5C",
+        "secondary": "#E31837",
+        "surface": "#142437",
+        "accentReason": "Washington Wizards basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.il-winner-league.maccabi-tel-aviv.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "מכבי תל אביב",
+        "מכבי ת״א",
+        "maccabi tel aviv",
+        "maccabi ta"
+      ],
+      "label": "מכבי ת״א",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "מכבי ת״א",
+        "shortName": "מכבי ת״א",
+        "colorPrimary": "#FFF100",
+        "colorOn": "#161616",
+        "crestLabel": "מ",
+        "colorSecondary": "#2371B5",
+        "crestPath": "/assets/images/sports/basketball/il-winner-league/maccabi-tel-aviv.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#FFF100",
+        "secondary": "#2371B5",
+        "surface": "#142437",
+        "accentReason": "Maccabi Tel Aviv basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.il-winner-league.hapoel-tel-aviv.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "הפועל תל אביב",
+        "הפועל ת״א",
+        "hapoel tel aviv",
+        "hapoel ta"
+      ],
+      "label": "הפועל ת״א",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "הפועל ת״א",
+        "shortName": "הפועל ת״א",
+        "colorPrimary": "#E2231A",
+        "colorOn": "#ffffff",
+        "crestLabel": "ה",
+        "colorSecondary": "#FFFFFF",
+        "crestPath": "/assets/images/sports/basketball/il-winner-league/hapoel-tel-aviv.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#E2231A",
+        "secondary": "#FFFFFF",
+        "surface": "#142437",
+        "accentReason": "Hapoel Tel Aviv basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.il-winner-league.hapoel-jerusalem.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "הפועל ירושלים",
+        "הפועל י-ם",
+        "hapoel jerusalem"
+      ],
+      "label": "הפועל ירושלים",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "הפועל ירושלים",
+        "shortName": "הפועל ירושלים",
+        "colorPrimary": "#E2231A",
+        "colorOn": "#ffffff",
+        "crestLabel": "ה",
+        "colorSecondary": "#000000",
+        "crestPath": "/assets/images/sports/basketball/il-winner-league/hapoel-jerusalem.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#E2231A",
+        "secondary": "#000000",
+        "surface": "#142437",
+        "accentReason": "Hapoel Jerusalem basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.il-winner-league.hapoel-holon.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "הפועל חולון",
+        "hapoel holon"
+      ],
+      "label": "הפועל חולון",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "הפועל חולון",
+        "shortName": "הפועל חולון",
+        "colorPrimary": "#552583",
+        "colorOn": "#ffffff",
+        "crestLabel": "ה",
+        "colorSecondary": "#FDB927",
+        "crestPath": "/assets/images/sports/basketball/il-winner-league/hapoel-holon.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#552583",
+        "secondary": "#FDB927",
+        "surface": "#142437",
+        "accentReason": "Hapoel Holon basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.il-winner-league.hapoel-beer-sheva.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "הפועל באר שבע",
+        "הפועל ב״ש",
+        "hapoel beer sheva",
+        "hapoel beersheva"
+      ],
+      "label": "הפועל ב״ש",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "הפועל ב״ש",
+        "shortName": "הפועל ב״ש",
+        "colorPrimary": "#E2231A",
+        "colorOn": "#ffffff",
+        "crestLabel": "ה",
+        "colorSecondary": "#FFFFFF",
+        "crestPath": "/assets/images/sports/basketball/il-winner-league/hapoel-beer-sheva.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#E2231A",
+        "secondary": "#FFFFFF",
+        "surface": "#142437",
+        "accentReason": "Hapoel Beer Sheva basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.il-winner-league.hapoel-galil-elyon.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "הפועל גליל עליון",
+        "hapoel galil elyon"
+      ],
+      "label": "הפועל גליל עליון",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "הפועל גליל עליון",
+        "shortName": "הפועל גליל עליון",
+        "colorPrimary": "#E2231A",
+        "colorOn": "#ffffff",
+        "crestLabel": "ה",
+        "colorSecondary": "#FFFFFF",
+        "crestPath": "/assets/images/sports/basketball/il-winner-league/hapoel-galil-elyon.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#E2231A",
+        "secondary": "#FFFFFF",
+        "surface": "#142437",
+        "accentReason": "Hapoel Galil Elyon basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.il-winner-league.hapoel-haemek.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "הפועל העמק",
+        "hapoel haemek"
+      ],
+      "label": "הפועל העמק",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "הפועל העמק",
+        "shortName": "הפועל העמק",
+        "colorPrimary": "#E2231A",
+        "colorOn": "#ffffff",
+        "crestLabel": "ה",
+        "colorSecondary": "#002868",
+        "crestPath": "/assets/images/sports/basketball/il-winner-league/hapoel-haemek.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#E2231A",
+        "secondary": "#002868",
+        "surface": "#142437",
+        "accentReason": "Hapoel HaEmek basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.il-winner-league.bnei-herzliya.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "בני הרצליה",
+        "bnei herzliya"
+      ],
+      "label": "בני הרצליה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "בני הרצליה",
+        "shortName": "בני הרצליה",
+        "colorPrimary": "#003DA5",
+        "colorOn": "#ffffff",
+        "crestLabel": "ב",
+        "colorSecondary": "#FFFFFF",
+        "crestPath": "/assets/images/sports/basketball/il-winner-league/bnei-herzliya.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#003DA5",
+        "secondary": "#FFFFFF",
+        "surface": "#142437",
+        "accentReason": "Bnei Herzliya basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.il-winner-league.elitzur-netanya.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "אליצור נתניה",
+        "elitzur netanya"
+      ],
+      "label": "אליצור נתניה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "אליצור נתניה",
+        "shortName": "אליצור נתניה",
+        "colorPrimary": "#FFD700",
+        "colorOn": "#161616",
+        "crestLabel": "א",
+        "colorSecondary": "#000000",
+        "crestPath": "/assets/images/sports/basketball/il-winner-league/elitzur-netanya.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#FFD700",
+        "secondary": "#000000",
+        "surface": "#142437",
+        "accentReason": "Elitzur Netanya basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.il-winner-league.ironi-kiryat-ata.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "עירוני קריית אתא",
+        "ironi kiryat ata"
+      ],
+      "label": "עירוני קריית אתא",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "עירוני קריית אתא",
+        "shortName": "עירוני קריית אתא",
+        "colorPrimary": "#003DA5",
+        "colorOn": "#ffffff",
+        "crestLabel": "ע",
+        "colorSecondary": "#FFFFFF",
+        "crestPath": "/assets/images/sports/basketball/il-winner-league/ironi-kiryat-ata.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#003DA5",
+        "secondary": "#FFFFFF",
+        "surface": "#142437",
+        "accentReason": "Ironi Kiryat Ata basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.il-winner-league.ironi-ness-ziona.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "עירוני נס ציונה",
+        "ironi ness ziona"
+      ],
+      "label": "עירוני נס ציונה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "עירוני נס ציונה",
+        "shortName": "עירוני נס ציונה",
+        "colorPrimary": "#FF6600",
+        "colorOn": "#ffffff",
+        "crestLabel": "ע",
+        "colorSecondary": "#002868",
+        "crestPath": "/assets/images/sports/basketball/il-winner-league/ironi-ness-ziona.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#FF6600",
+        "secondary": "#002868",
+        "surface": "#142437",
+        "accentReason": "Ironi Ness Ziona basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.il-winner-league.maccabi-ramat-gan.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "מכבי רמת גן",
+        "maccabi ramat gan"
+      ],
+      "label": "מכבי רמת גן",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "מכבי רמת גן",
+        "shortName": "מכבי רמת גן",
+        "colorPrimary": "#00338D",
+        "colorOn": "#ffffff",
+        "crestLabel": "מ",
+        "colorSecondary": "#FFFFFF",
+        "crestPath": "/assets/images/sports/basketball/il-winner-league/maccabi-ramat-gan.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#00338D",
+        "secondary": "#FFFFFF",
+        "surface": "#142437",
+        "accentReason": "Maccabi Ramat Gan basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.il-winner-league.maccabi-rishon-lezion.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "מכבי ראשל״צ",
+        "maccabi rishon lezion"
+      ],
+      "label": "מכבי ראשל״צ",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "מכבי ראשל״צ",
+        "shortName": "מכבי ראשל״צ",
+        "colorPrimary": "#FF6600",
+        "colorOn": "#ffffff",
+        "crestLabel": "מ",
+        "colorSecondary": "#FFFFFF",
+        "crestPath": "/assets/images/sports/basketball/il-winner-league/maccabi-rishon-lezion.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#FF6600",
+        "secondary": "#FFFFFF",
+        "surface": "#142437",
+        "accentReason": "Maccabi Rishon LeZion basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.bball.il-winner-league.maccabi-raanana.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "מכבי רעננה",
+        "maccabi raanana"
+      ],
+      "label": "מכבי רעננה",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "team": {
+        "displayName": "מכבי רעננה",
+        "shortName": "מכבי רעננה",
+        "colorPrimary": "#003DA5",
+        "colorOn": "#ffffff",
+        "crestLabel": "מ",
+        "colorSecondary": "#FFFFFF",
+        "crestPath": "/assets/images/sports/basketball/il-winner-league/maccabi-raanana.svg",
+        "sport": "basketball"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#003DA5",
+        "secondary": "#FFFFFF",
+        "surface": "#142437",
+        "accentReason": "Maccabi Raanana basketball club identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.tennis.player.arthur-fery.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "ארתור פרי",
+        "פרי",
+        "arthur fery",
+        "fery"
+      ],
+      "label": "ארתור פרי",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "photoPath": "/assets/images/market-photos/tennis-stars/arthur-fery.webp",
+      "team": {
+        "displayName": "ארתור פרי",
+        "shortName": "פרי",
+        "colorPrimary": "#0f5aa7",
+        "colorOn": "#ffffff",
+        "crestLabel": "פ",
+        "colorSecondary": "#ffffff",
+        "crestPath": "/assets/images/market-photos/tennis-stars/arthur-fery.webp",
+        "sport": "tennis"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#0f5aa7",
+        "secondary": "#ffffff",
+        "surface": "#142437",
+        "accentReason": "tennis player side identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.tennis.player.alexander-zverev.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "אלכסנדר זברב",
+        "זברב",
+        "alexander zverev",
+        "zverev"
+      ],
+      "label": "אלכסנדר זברב",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "photoPath": "/assets/images/market-photos/tennis-stars/alexander-zverev.webp",
+      "team": {
+        "displayName": "אלכסנדר זברב",
+        "shortName": "זברב",
+        "colorPrimary": "#111827",
+        "colorOn": "#ffffff",
+        "crestLabel": "ז",
+        "colorSecondary": "#f2c94c",
+        "crestPath": "/assets/images/market-photos/tennis-stars/alexander-zverev.webp",
+        "sport": "tennis"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#111827",
+        "secondary": "#f2c94c",
+        "surface": "#142437",
+        "accentReason": "tennis player side identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.tennis.player.jannik-sinner.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "יאניק סינר",
+        "סינר",
+        "jannik sinner",
+        "sinner"
+      ],
+      "label": "יאניק סינר",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "photoPath": "/assets/images/market-photos/tennis-stars/jannik-sinner.webp",
+      "team": {
+        "displayName": "יאניק סינר",
+        "shortName": "סינר",
+        "colorPrimary": "#f28c28",
+        "colorOn": "#111827",
+        "crestLabel": "ס",
+        "colorSecondary": "#1f2937",
+        "crestPath": "/assets/images/market-photos/tennis-stars/jannik-sinner.webp",
+        "sport": "tennis"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#f28c28",
+        "secondary": "#1f2937",
+        "surface": "#142437",
+        "accentReason": "tennis player side identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.tennis.player.novak-djokovic.v1",
+      "kind": "entity",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "נובאק ג׳וקוביץ׳",
+        "ג׳וקוביץ׳",
+        "נובאק ג'וקוביץ'",
+        "ג'וקוביץ'",
+        "novak djokovic",
+        "djokovic"
+      ],
+      "label": "נובאק ג׳וקוביץ׳",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "photoPath": "/assets/images/market-photos/tennis-stars/novak-djokovic.webp",
+      "team": {
+        "displayName": "נובאק ג׳וקוביץ׳",
+        "shortName": "ג׳וקוביץ׳",
+        "colorPrimary": "#1f4ed8",
+        "colorOn": "#ffffff",
+        "crestLabel": "ג",
+        "colorSecondary": "#ef233c",
+        "crestPath": "/assets/images/market-photos/tennis-stars/novak-djokovic.webp",
+        "sport": "tennis"
+      },
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#1f4ed8",
+        "secondary": "#ef233c",
+        "surface": "#142437",
+        "accentReason": "tennis player side identity",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "event.wimbledon-2026-men.parent.v1",
+      "kind": "event",
+      "canonicalCategory": "sports",
+      "frontendKey": "sports",
+      "aliases": [
+        "מי יזכה בווימבלדון 2026 לגברים",
+        "wimbledon 2026 men winner",
+        "wimbledon men 2026"
+      ],
+      "label": "מי יזכה בווימבלדון 2026 לגברים",
+      "path": "/assets/images/market-buckets/sports.svg",
+      "photoPath": "/assets/images/market-photos/tennis-stars/wimbledon-racket-ball.svg",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#d9f342",
+        "secondary": "#315f2d",
+        "surface": "#111722",
+        "accentReason": "grass-court tennis event visual",
+        "source": "event"
+      }
+    },
+    {
+      "assetId": "event.gta-6-before-israel.parent.v1",
+      "kind": "event",
+      "canonicalCategory": "entertainment",
+      "frontendKey": "entertainment",
+      "aliases": [
+        "what will happen in israel before gta 6",
+        "מה יקרה בישראל לפני GTA 6",
+        "gta 6 before israel"
+      ],
+      "label": "מה יקרה בישראל לפני GTA 6",
+      "path": "/assets/images/market-buckets/entertainment.svg",
+      "photoPath": "/assets/images/market-photos/gta-6-before-israel/what-will-happen.webp",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#6ee7b7",
+        "secondary": "#f7c66a",
+        "surface": "#142437",
+        "accentReason": "cross-category GTA 6 event pack",
+        "source": "event"
+      }
+    },
+    {
+      "assetId": "event.gta-6-before-israel.iran-conflict.v1",
+      "kind": "event",
+      "canonicalCategory": "security",
+      "frontendKey": "security",
+      "aliases": [
+        "עימות צבאי נוסף בין ישראל ואיראן",
+        "ישראל ואיראן",
+        "iran israel conflict"
+      ],
+      "label": "עימות צבאי נוסף בין ישראל ואיראן",
+      "path": "/assets/images/market-buckets/security.svg",
+      "photoPath": "/assets/images/market-photos/gta-6-before-israel/iran-vs-israel.webp",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#6ee7b7",
+        "secondary": "#f7c66a",
+        "surface": "#17212d",
+        "accentReason": "security child market visual",
+        "source": "event"
+      }
+    },
+    {
+      "assetId": "event.gta-6-before-israel.knesset-election.v1",
+      "kind": "event",
+      "canonicalCategory": "politics",
+      "frontendKey": "politics",
+      "aliases": [
+        "בחירות לכנסת",
+        "knesset election"
+      ],
+      "label": "בחירות לכנסת",
+      "path": "/assets/images/market-buckets/politics.svg",
+      "photoPath": "/assets/images/market-photos/gta-6-before-israel/election.webp",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#f7c66a",
+        "secondary": "#e7edf4",
+        "surface": "#1a2330",
+        "accentReason": "election child market visual",
+        "source": "event"
+      }
+    },
+    {
+      "assetId": "event.gta-6-before-israel.kupa-rashit.v1",
+      "kind": "event",
+      "canonicalCategory": "entertainment",
+      "frontendKey": "entertainment",
+      "aliases": [
+        "עונה נוספת של קופה ראשית",
+        "קופה ראשית",
+        "kupa rashit"
+      ],
+      "label": "עונה נוספת של קופה ראשית",
+      "path": "/assets/images/market-buckets/entertainment.svg",
+      "photoPath": "/assets/images/market-photos/gta-6-before-israel/kupa-rashit.webp",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#f7c66a",
+        "secondary": "#e7edf4",
+        "surface": "#1b2030",
+        "accentReason": "television child market visual",
+        "source": "event"
+      }
+    },
+    {
+      "assetId": "event.gta-6-before-israel.media-mention.v1",
+      "kind": "event",
+      "canonicalCategory": "social",
+      "frontendKey": "social",
+      "aliases": [
+        "אזכור תקשורתי מרכזי של החוזה",
+        "כלי תקשורת מרכזי בישראל יזכיר את החוזה",
+        "media mention hachozeh"
+      ],
+      "label": "אזכור תקשורתי מרכזי של החוזה",
+      "path": "/assets/images/market-buckets/social.svg",
+      "photoPath": "/assets/images/market-photos/gta-6-before-israel/microphone.webp",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#6ee7b7",
+        "secondary": "#f7c66a",
+        "surface": "#182131",
+        "accentReason": "media mention child market visual",
+        "source": "event"
+      }
+    },
+    {
+      "assetId": "event.gta-6-before-israel.global-pandemic.v1",
+      "kind": "event",
+      "canonicalCategory": "health",
+      "frontendKey": "health",
+      "aliases": [
+        "מגיפה עולמית",
+        "מגפה עולמית",
+        "global pandemic"
+      ],
+      "label": "מגיפה עולמית",
+      "path": "/assets/images/market-buckets/health.svg",
+      "photoPath": "/assets/images/market-photos/gta-6-before-israel/plague.webp",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#6ee7b7",
+        "secondary": "#f7c66a",
+        "surface": "#14252f",
+        "accentReason": "health child market visual",
+        "source": "event"
+      }
+    },
+    {
+      "assetId": "event.gta-6-before-israel.usd-ils-below-275.v1",
+      "kind": "event",
+      "canonicalCategory": "fx",
+      "frontendKey": "fx",
+      "aliases": [
+        "הדולר מתחת ל-2.75",
+        "דולר שקל",
+        "usd ils below 2.75"
+      ],
+      "label": "הדולר מתחת ל-2.75 ש\"ח",
+      "path": "/assets/images/market-buckets/fx.svg",
+      "photoPath": "/assets/images/market-photos/gta-6-before-israel/currency-down.webp",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#6ee7b7",
+        "secondary": "#e7edf4",
+        "surface": "#172330",
+        "accentReason": "currency child market visual",
+        "source": "event"
+      }
+    },
+    {
+      "assetId": "event.gta-6-before-israel.airline-base.v1",
+      "kind": "event",
+      "canonicalCategory": "travel",
+      "frontendKey": "travel",
+      "aliases": [
+        "בסיס פעילות חדש בנתב\"ג",
+        "בסיס פעילות בנתבג",
+        "airline base bga"
+      ],
+      "label": "בסיס פעילות חדש בנתב\"ג",
+      "path": "/assets/images/market-buckets/travel.svg",
+      "photoPath": "/assets/images/market-photos/gta-6-before-israel/airport.webp",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#f7c66a",
+        "secondary": "#6ee7b7",
+        "surface": "#132536",
+        "accentReason": "airport child market visual",
+        "source": "event"
+      }
+    },
+    {
+      "assetId": "event.gta-6-before-israel.transport-service.v1",
+      "kind": "event",
+      "canonicalCategory": "transportation",
+      "frontendKey": "transportation",
+      "aliases": [
+        "שירות תחבורה חדש יתחיל לפעול בארץ",
+        "שירות נסיעות בינלאומי חדש",
+        "transport service israel"
+      ],
+      "label": "שירות תחבורה חדש יתחיל לפעול בארץ",
+      "path": "/assets/images/market-buckets/transportation.svg",
+      "photoPath": "/assets/images/market-photos/gta-6-before-israel/transport.webp",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#f7c66a",
+        "secondary": "#6ee7b7",
+        "surface": "#152232",
+        "accentReason": "transport child market visual",
+        "source": "event"
+      }
+    },
+    {
+      "assetId": "event.the-voice-israel-season-6.parent.v1",
+      "kind": "event",
+      "canonicalCategory": "entertainment",
+      "frontendKey": "entertainment",
+      "aliases": [
+        "דה וויס ישראל עונה 6",
+        "The Voice Israel season 6",
+        "the voice israel",
+        "דה וויס"
+      ],
+      "label": "דה וויס ישראל עונה 6",
+      "path": "/assets/images/market-buckets/entertainment.svg",
+      "photoPath": "/assets/images/market-photos/the-voice-israel-season-6/the-voice-stage.svg",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#f7c66a",
+        "secondary": "#62d6ff",
+        "surface": "#111827",
+        "accentReason": "music-stage event visual",
+        "source": "event"
+      }
+    },
+    {
+      "assetId": "entity.mentor.idan-raichel.v1",
+      "kind": "entity",
+      "canonicalCategory": "entertainment",
+      "frontendKey": "entertainment",
+      "aliases": [
+        "עידן רייכל",
+        "idan raichel",
+        "נבחרת עידן רייכל"
+      ],
+      "label": "עידן רייכל",
+      "path": "/assets/images/market-buckets/entertainment.svg",
+      "photoPath": "/assets/images/market-photos/israeli-entertainment-stars/idan-raichel.jpg",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#f7c66a",
+        "secondary": "#6ee7b7",
+        "surface": "#182536",
+        "accentReason": "mentor child market visual",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.mentor.eden-ben-zaken.v1",
+      "kind": "entity",
+      "canonicalCategory": "entertainment",
+      "frontendKey": "entertainment",
+      "aliases": [
+        "עדן בן זקן",
+        "eden ben zaken",
+        "נבחרת עדן בן זקן"
+      ],
+      "label": "עדן בן זקן",
+      "path": "/assets/images/market-buckets/entertainment.svg",
+      "photoPath": "/assets/images/market-photos/israeli-entertainment-stars/eden-ben-zaken.jpg",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#ff6f91",
+        "secondary": "#f7c66a",
+        "surface": "#241a2d",
+        "accentReason": "mentor child market visual",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.mentor.noa-kirel.v1",
+      "kind": "entity",
+      "canonicalCategory": "entertainment",
+      "frontendKey": "entertainment",
+      "aliases": [
+        "נועה קירל",
+        "noa kirel",
+        "נבחרת נועה קירל"
+      ],
+      "label": "נועה קירל",
+      "path": "/assets/images/market-buckets/entertainment.svg",
+      "photoPath": "/assets/images/market-photos/israeli-entertainment-stars/noa-kirel.jpg",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#62d6ff",
+        "secondary": "#ff6f91",
+        "surface": "#151d34",
+        "accentReason": "mentor child market visual",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.mentor.static.v1",
+      "kind": "entity",
+      "canonicalCategory": "entertainment",
+      "frontendKey": "entertainment",
+      "aliases": [
+        "סטטיק",
+        "static",
+        "לירז רוסו",
+        "נבחרת סטטיק"
+      ],
+      "label": "סטטיק",
+      "path": "/assets/images/market-buckets/entertainment.svg",
+      "photoPath": "/assets/images/market-photos/israeli-entertainment-stars/static.jpg",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#f7c66a",
+        "secondary": "#62d6ff",
+        "surface": "#18202f",
+        "accentReason": "mentor child market visual",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "event.power-couple-israel-2026.parent.v1",
+      "kind": "event",
+      "canonicalCategory": "entertainment",
+      "frontendKey": "entertainment",
+      "aliases": [
+        "פאוור קאפל",
+        "Power Couple Israel 2026",
+        "מי יהיה הפאוור קאפל של ישראל"
+      ],
+      "label": "פאוור קאפל ישראל 2026",
+      "path": "/assets/images/market-buckets/entertainment.svg",
+      "photoPath": "/assets/images/market-photos/power-couple-israel-2026/power-couple-show.webp",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#ff4fc3",
+        "secondary": "#52d7ff",
+        "surface": "#141724",
+        "accentReason": "Power Couple official neon show visual",
+        "source": "event"
+      }
+    },
+    {
+      "assetId": "entity.power-couple.odeya-pinto-elior-sofer.v1",
+      "kind": "entity",
+      "canonicalCategory": "entertainment",
+      "frontendKey": "entertainment",
+      "aliases": [
+        "אודיה פינטו ואליאור סופר",
+        "אודיה ואליאור",
+        "odeya pinto elior sofer"
+      ],
+      "label": "אודיה פינטו ואליאור סופר",
+      "path": "/assets/images/market-buckets/entertainment.svg",
+      "photoPath": "/assets/images/market-photos/power-couple-israel-2026/odeya-pinto-elior-sofer.webp",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#ff4fc3",
+        "secondary": "#52d7ff",
+        "surface": "#1a1424",
+        "accentReason": "Power Couple active couple official contestant visual",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.power-couple.uri-anna-banai.v1",
+      "kind": "entity",
+      "canonicalCategory": "entertainment",
+      "frontendKey": "entertainment",
+      "aliases": [
+        "אורי ואנה בנאי",
+        "אורי ואנה",
+        "uri anna banai"
+      ],
+      "label": "אורי ואנה בנאי",
+      "path": "/assets/images/market-buckets/entertainment.svg",
+      "photoPath": "/assets/images/market-photos/power-couple-israel-2026/uri-anna-banai.webp",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#52d7ff",
+        "secondary": "#f7c66a",
+        "surface": "#151d2f",
+        "accentReason": "Power Couple active couple official contestant visual",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.power-couple.asi-adi-buzaglo.v1",
+      "kind": "entity",
+      "canonicalCategory": "entertainment",
+      "frontendKey": "entertainment",
+      "aliases": [
+        "אסי ועדי בוזגלו",
+        "אסי ועדי",
+        "asi adi buzaglo"
+      ],
+      "label": "אסי ועדי בוזגלו",
+      "path": "/assets/images/market-buckets/entertainment.svg",
+      "photoPath": "/assets/images/market-photos/power-couple-israel-2026/asi-adi-buzaglo.webp",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#f7c66a",
+        "secondary": "#ff4fc3",
+        "surface": "#1b1a2a",
+        "accentReason": "Power Couple active couple official contestant visual",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.power-couple.hanny-nahmias-yehuda-elias.v1",
+      "kind": "entity",
+      "canonicalCategory": "entertainment",
+      "frontendKey": "entertainment",
+      "aliases": [
+        "חני נחמיאס ויהודה אליאס",
+        "חני ויהודה",
+        "hanny nahmias yehuda elias"
+      ],
+      "label": "חני נחמיאס ויהודה אליאס",
+      "path": "/assets/images/market-buckets/entertainment.svg",
+      "photoPath": "/assets/images/market-photos/power-couple-israel-2026/hanny-nahmias-yehuda-elias.webp",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#f7c66a",
+        "secondary": "#e7edf4",
+        "surface": "#1c2030",
+        "accentReason": "Power Couple active couple official contestant visual",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.power-couple.omri-dorin-kanada.v1",
+      "kind": "entity",
+      "canonicalCategory": "entertainment",
+      "frontendKey": "entertainment",
+      "aliases": [
+        "עומרי ודורין קנדה",
+        "עומרי ודורין",
+        "omri dorin kanada"
+      ],
+      "label": "עומרי ודורין קנדה",
+      "path": "/assets/images/market-buckets/entertainment.svg",
+      "photoPath": "/assets/images/market-photos/power-couple-israel-2026/omri-dorin-kanada.webp",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#52d7ff",
+        "secondary": "#ff4fc3",
+        "surface": "#141c2b",
+        "accentReason": "Power Couple active couple official contestant visual",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.power-couple.shir-taran-elad-turgeman.v1",
+      "kind": "entity",
+      "canonicalCategory": "entertainment",
+      "frontendKey": "entertainment",
+      "aliases": [
+        "שיר טרן ואלעד תורג'מן",
+        "שיר ואלעד",
+        "shir taran elad turgeman"
+      ],
+      "label": "שיר טרן ואלעד תורג'מן",
+      "path": "/assets/images/market-buckets/entertainment.svg",
+      "photoPath": "/assets/images/market-photos/power-couple-israel-2026/shir-taran-elad-turgeman.webp",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#ff4fc3",
+        "secondary": "#f7c66a",
+        "surface": "#1d1628",
+        "accentReason": "Power Couple active couple official contestant visual",
+        "source": "entity"
+      }
+    },
+    {
+      "assetId": "entity.power-couple.sharon-haziz-ronen-nof.v1",
+      "kind": "entity",
+      "canonicalCategory": "entertainment",
+      "frontendKey": "entertainment",
+      "aliases": [
+        "שרון חזיז ורונן נוף",
+        "שרון ורונן",
+        "sharon haziz ronen nof"
+      ],
+      "label": "שרון חזיז ורונן נוף",
+      "path": "/assets/images/market-buckets/entertainment.svg",
+      "photoPath": "/assets/images/market-photos/power-couple-israel-2026/sharon-haziz-ronen-nof.webp",
+      "rights": {
+        "status": "hachozeh-owned",
+        "publicUse": "allowed",
+        "owner": "Hachozeh",
+        "notes": [
+          "Portfolio copy uses generic project category artwork, not the named person, show, or official team mark."
+        ]
+      },
+      "theme": {
+        "primary": "#52d7ff",
+        "secondary": "#e7edf4",
+        "surface": "#151b27",
+        "accentReason": "Power Couple active couple official contestant visual",
+        "source": "entity"
+      }
+    }
+  ]
+}

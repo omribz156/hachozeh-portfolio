@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="sports market image">
+  <defs>
+    <linearGradient id="g" x1="58" y1="50" x2="460" y2="466" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#233d32"/>
+      <stop offset=".55" stop-color="#142437"/>
+      <stop offset="1" stop-color="#0b111b"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#g)"/>
+  <circle cx="256" cy="256" r="142" fill="none" stroke="#e7edf4" stroke-width="28"/>
+  <path d="M144 212c68 18 154 18 224 0M144 300c68-18 154-18 224 0M256 114c-42 86-42 198 0 284M256 114c42 86 42 198 0 284" fill="none" stroke="#f7c66a" stroke-width="18" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="world and geopolitics market image">
+  <defs>
+    <linearGradient id="g" x1="58" y1="52" x2="456" y2="466" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1b3d4a"/>
+      <stop offset=".56" stop-color="#162233"/>
+      <stop offset="1" stop-color="#0b111b"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#g)"/>
+  <circle cx="256" cy="256" r="124" fill="none" stroke="#e7edf4" stroke-width="24"/>
+  <path d="M132 256h248M256 132c44 50 44 198 0 248M256 132c-44 50-44 198 0 248" fill="none" stroke="#6ee7b7" stroke-width="18" stroke-linecap="round"/>
+  <path d="M170 194c48 20 124 20 172 0M170 318c48-20 124-20 172 0" fill="none" stroke="#f7c66a" stroke-width="18" stroke-linecap="round"/>
+</svg>

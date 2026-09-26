@@ -1,0 +1,191 @@
+---
+// Help Center article page (/help/[topic]/[article]). Renders one markdown article
+// + an on-page TOC built from its h2 headings, with scroll-spy. PRERENDERED via the
+// shell-less HelpLayout — getStaticPaths emits one static page per article; unknown
+// slugs aren't built (404).
+export const prerender = true;
+import HelpLayout from '../../../layouts/HelpLayout.astro';
+import HelpSearch from '../../../components/help/HelpSearch.astro';
+import { getCollection, render } from 'astro:content';
+import {
+  getTopic,
+  helpTopicPath,
+  helpArticlePath,
+  articleSlugFromId,
+  buildSearchIndex,
+  HELP_CONTACT_EMAIL,
+  visibleHelpEntries,
+} from '../../../lib/help-content.js';
+import { buildArticleJsonLd, buildBreadcrumbJsonLd, buildCanonicalUrl } from '../../../lib/seo.js';
+import '../../../styles/pages/help-center.css';
+
+export async function getStaticPaths() {
+  const entries = visibleHelpEntries((await getCollection('help')) as any[]);
+  return entries.map((e) => ({
+    params: { topic: e.data.topic, article: articleSlugFromId(e.id) },
+  }));
+}
+
+const { topic: topicSlug, article: articleSlug } = Astro.params;
+const entries = visibleHelpEntries((await getCollection('help')) as any[]);
+const entry = entries.find(
+  (e) => e.data.topic === topicSlug && articleSlugFromId(e.id) === articleSlug
+);
+if (!entry) return Astro.redirect('/help');
+
+const searchIndex = buildSearchIndex(entries);
+const topic = getTopic(entry.data.topic);
+const { Content, headings } = await render(entry);
+const toc = headings.filter((h) => h.depth === 2);
+
+const updated = new Intl.DateTimeFormat('he-IL', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+}).format(entry.data.updatedDate);
+
+// Editorial schema: Article (not FAQPage — see buildArticleJsonLd) + a BreadcrumbList
+// that mirrors the visible crumb. Both are built from server-rendered article truth.
+const articleCanonicalPath = helpArticlePath(entry.data.topic, articleSlugFromId(entry.id));
+const structuredData = [
+  buildArticleJsonLd({
+    title: entry.data.title,
+    description: entry.data.lede,
+    canonicalUrl: buildCanonicalUrl(articleCanonicalPath),
+    imageUrl: '/share/pages/help.png',
+    dateModified: entry.data.updatedDate,
+    section: topic?.title,
+    keywords: entry.data.keywords,
+  }),
+  buildBreadcrumbJsonLd({
+    items: [
+      { name: 'מרכז עזרה', href: '/help' },
+      ...(topic ? [{ name: topic.title, href: helpTopicPath(entry.data.topic) }] : []),
+      { name: entry.data.title, href: articleCanonicalPath },
+    ],
+  }),
+];
+---
+
+<HelpLayout
+  title={`${entry.data.title} · מרכז עזרה · החוזה`}
+  description={entry.data.lede}
+  canonicalPath={articleCanonicalPath}
+  robots={entry.data.reviewStatus === 'published' ? 'index, follow' : 'noindex, nofollow'}
+  structuredData={structuredData}
+>
+  <div class="hz-help">
+    <div class="hz-help__search-band">
+      <div class="hz-help__container">
+        <HelpSearch articles={searchIndex} />
+      </div>
+    </div>
+
+    <div class="hz-help__container">
+      <div class="hz-help__grid">
+        <div class="hz-help-article">
+          <div class="hz-help-article__header">
+            <div class="hz-help-crumb">
+              <a href="/help">מרכז עזרה</a>
+              <span class="hz-help-crumb__sep">/</span>
+              <a href={helpTopicPath(entry.data.topic)}>{topic?.title}</a>
+              <span class="hz-help-crumb__sep">/</span>
+              <span class="hz-help-crumb__current">{entry.data.title}</span>
+            </div>
+            <h1>{entry.data.title}</h1>
+            <p class="hz-help-article__lede">{entry.data.lede}</p>
+            <div class="hz-help-article__date">עודכן · {updated}</div>
+          </div>
+
+          <article class="hz-help-prose">
+            <Content />
+          </article>
+
+          <div class="hz-help-nav">
+            <strong>השאלה לא נענתה?</strong>
+            <span>כתבו לנו —</span>
+            <a href={`mailto:${HELP_CONTACT_EMAIL}`}>{HELP_CONTACT_EMAIL}</a>
+          </div>
+        </div>
+
+        {toc.length > 0 && (
+          <aside class="hz-help-toc">
+            <div class="hz-help-toc__label">בעמוד זה</div>
+            <ul class="hz-help-toc__list">
+              {toc.map((h, i) => (
+                <li><a href={`#${h.slug}`} class={i === 0 ? 'is-active' : undefined}>{h.text}</a></li>
+              ))}
+            </ul>
+          </aside>
+        )}
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // TOC scroll-spy — highlight the section whose heading has slid under the
+    // sticky shell header. Activation line + click offset both derive from the
+    // live shell height so they stay in sync (and track the mobile breakpoint).
+    (function () {
+      // Re-init on every ClientRouter soft-nav: each article is new TOC links + headings,
+      // so a one-shot binding went dead on the re-entered article. State lives in these
+      // outer vars; the window scroll/resize listeners are bound ONCE and read the live
+      // state that initTOC() refreshes per article — so they never go stale or accumulate.
+      let links = [];
+      let pairs = [];
+      let shell = null;
+      let raf = 0;
+
+      const setActive = (a) => links.forEach((l) => l.classList.toggle('is-active', l === a));
+      // Activation line = bottom of the sticky shell header, measured live so it
+      // tracks the 7.5rem↔9rem breakpoint. A section goes active exactly when its
+      // heading slides under the header — the same offset the click handler scrolls
+      // to, so the highlight and the scroll position stay in sync.
+      const offset = () => (shell ? shell.getBoundingClientRect().height : 120) + 12;
+      const update = () => {
+        raf = 0;
+        if (!pairs.length) return;
+        let current = pairs[0];
+        const line = offset();
+        for (const p of pairs) {
+          if (p.t.getBoundingClientRect().top - line <= 0) current = p;
+          else break;
+        }
+        setActive(current.a);
+      };
+      const onScroll = () => { if (!raf) raf = requestAnimationFrame(update); };
+
+      function initTOC() {
+        links = Array.from(document.querySelectorAll('.hz-help-toc__list a'));
+        pairs = links
+          .map((a) => {
+            const t = document.getElementById(a.getAttribute('href').slice(1));
+            return t ? { a, t } : null;
+          })
+          .filter(Boolean);
+        shell = document.querySelector('.hz-docs-bar');
+        if (!pairs.length) return;
+        links.forEach((a) => {
+          if (a.__hzTocWired) return;
+          a.__hzTocWired = true;
+          a.addEventListener('click', (e) => {
+            const t = document.getElementById(a.getAttribute('href').slice(1));
+            if (!t) return;
+            e.preventDefault();
+            const y = t.getBoundingClientRect().top + window.scrollY - offset();
+            window.scrollTo({ top: y, behavior: 'smooth' });
+          });
+        });
+        update();
+      }
+
+      if (!window['__hzTocBound']) {
+        window['__hzTocBound'] = true;
+        window.addEventListener('scroll', onScroll, { passive: true });
+        window.addEventListener('resize', onScroll);
+        document.addEventListener('astro:page-load', initTOC);
+      }
+      initTOC();
+    })();
+  </script>
+</HelpLayout>

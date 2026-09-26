@@ -1,0 +1,28 @@
+/*
+ * Tailwind CLI input.
+ *
+ * Layer plan (Option B from workspace/docs/engineering-decisions.md
+ * 2026-05-30 Tailwind migration entry):
+ *   - Tailwind's emitted CSS (preflight + components + utilities) lives
+ *     inside @layer hz.tailwind, declared FIRST in base.css so it sits
+ *     below the rest of the platform floor.
+ *   - hz.tokens / hz.reset / hz.primitives / hz.compat layers run above
+ *     Tailwind, so token defaults and platform reset win over preflight.
+ *   - patterns/ and pages/ CSS stay UN-layered for now, so they continue
+ *     to beat all layered rules by source order. Promoting them into
+ *     named layers is a separate task (Option C); see the same decision
+ *     entry for rationale.
+ *
+ * The cascade end-to-end becomes:
+ *   layered: hz.tailwind < hz.tokens < hz.reset < hz.primitives < hz.compat
+ *   unlayered (above all layered): patterns/*, pages/*, inline styles
+ *
+ * This removes the previous "patterns must stay unlayered because CDN
+ * preflight is unlayered" workaround — we now own where Tailwind lands.
+ */
+
+@layer hz.tailwind {
+  @tailwind base;
+  @tailwind components;
+  @tailwind utilities;
+}

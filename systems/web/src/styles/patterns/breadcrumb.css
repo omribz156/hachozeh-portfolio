@@ -1,0 +1,40 @@
+/* ──────────────────────────────────────────────────────────────
+   patterns/breadcrumb.css
+   Inline trail like  שווקים › כלכלה › … — quiet contextual cue
+   that sits above (or alongside) a page title. Stays compact at
+   max-content width so it never stretches across a wide column.
+   BEM:
+     .hz-breadcrumb         — the trail container
+     .hz-breadcrumb__link   — each tappable segment
+   The material-symbols glyph between segments is styled via a
+   descendant selector — the icon system stays generic.
+   ────────────────────────────────────────────────────────────── */
+
+
+  .hz-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 0.28rem;
+    max-width: max-content;
+    margin-bottom: 0.36rem;
+    color: var(--hz-text-faint);
+    font-size: 0.72rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+
+  .hz-breadcrumb .material-symbols-outlined {
+    color: var(--hz-text-faint);
+    font-size: 0.86rem;
+  }
+
+  .hz-breadcrumb__link {
+    color: var(--hz-text-muted);
+    transition: color var(--hz-motion);
+  }
+
+  @media (hover: hover) {
+    .hz-breadcrumb__link:hover {
+      color: var(--hz-text-soft);
+    }
+  }

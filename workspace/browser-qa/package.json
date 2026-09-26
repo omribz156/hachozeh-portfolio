@@ -1,0 +1,38 @@
+{
+  "name": "navi-browser-qa",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "e2e:portfolio": "playwright test tests/e2e/portfolio.spec.mjs",
+    "e2e:portfolio-empty": "playwright test tests/e2e/portfolio-empty.spec.mjs",
+    "e2e:profile": "playwright test tests/e2e/profile.spec.mjs",
+    "e2e:market-detail": "playwright test tests/e2e/market-detail.spec.mjs",
+    "e2e:settings": "playwright test tests/e2e/settings.spec.mjs",
+    "e2e:discovery": "playwright test tests/e2e/discovery.spec.mjs",
+    "e2e:market-detail-guest": "playwright test tests/e2e/market-detail-guest.spec.mjs",
+    "e2e:help": "playwright test tests/e2e/help.spec.mjs",
+    "e2e:legal": "playwright test tests/e2e/legal.spec.mjs",
+    "e2e:transparency": "playwright test tests/e2e/transparency.spec.mjs",
+    "e2e:public-profile": "playwright test tests/e2e/public-profile.spec.mjs",
+    "e2e:community": "playwright test tests/e2e/community.spec.mjs",
+    "e2e:achievements": "playwright test tests/e2e/achievements.spec.mjs",
+    "e2e:auth-overlay": "playwright test tests/e2e/auth-overlay.spec.mjs",
+    "e2e:idea-overlay": "playwright test tests/e2e/idea-overlay.spec.mjs",
+    "e2e:how-it-works": "playwright test tests/e2e/how-it-works.spec.mjs",
+    "e2e:daily-streak": "playwright test tests/e2e/daily-streak.spec.mjs",
+    "e2e:infra": "playwright test tests/e2e/infra.spec.mjs",
+    "e2e:edge": "playwright test tests/e2e/edge.spec.mjs",
+    "test:all": "playwright test tests/e2e",
+    "astro:auth": "playwright test tests/astro-auth-overlay.spec.mjs",
+    "astro:header": "playwright test tests/astro-header-auth.spec.mjs",
+    "astro:market-detail": "playwright test tests/astro-market-detail-personal.spec.mjs",
+    "astro:product-loop": "playwright test tests/astro-product-loop.spec.mjs",
+    "astro:mobile": "playwright test tests/astro-mobile.spec.mjs",
+    "astro:ux-perf": "playwright test tests/astro-ux-perf.spec.mjs",
+    "astro:a11y": "playwright test tests/astro-a11y.spec.mjs"
+  },
+  "devDependencies": {
+    "@axe-core/playwright": "^4.11.1",
+    "@playwright/test": "^1.55.0"
+  }
+}

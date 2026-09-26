@@ -1,0 +1,281 @@
+/* settings.css — /settings (הגדרות), Ledger direction.
+   Ported from systems/design/to integrate/settings/dist/settings.css.
+   Kept: shared controls (st-) + Ledger composition (lg-).
+   Dropped from source: the Console direction (cs-) and the standalone
+   shell/footer stubs (.st-shell / .st-brand / .st-stub) — the real
+   SiteHeader/SiteFooter from Layout.astro replace them. The root no longer
+   owns a full-frame height/overflow; it sits in the document flow inside
+   <main> and the page scrolls normally (footer rides below). */
+
+/* ─────────────── app frame (adapted: in-flow, fills <main>) ─────────────── */
+/* min-height is viewport-relative, not "100%" of <main> (which has no defined
+   height during a brief pre-hydration/loading moment) — same footer-riding-up
+   guard as pages/portfolio.css .pf-loading / pages/achievements.css
+   .hz-cabinet--state, so a short-lived empty/loading frame here keeps the
+   site-shell footer below the fold instead of riding up under it. */
+.st-root {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: calc(100dvh - 12rem);
+  color: var(--hz-text);
+  font-family: var(--hz-font-ui);
+}
+
+/* ─────────────── avatar ─────────────── */
+.st-avatar { border-radius: var(--hz-radius-pill); background: var(--hz-brand-soft); color: var(--hz-brand-strong); display: grid; place-items: center; overflow: hidden; font-family: var(--hz-font-mono); font-weight: 800; }
+.st-avatar--sm { width: 34px; height: 34px; font-size: 12px; }
+.st-avatar--lg { width: 68px; height: 68px; font-size: 22px; border: 1px solid var(--hz-border-soft); }
+.st-avatar--xl { width: 92px; height: 92px; font-size: 30px; border: 1px solid var(--hz-border-soft); }
+.st-avatar__img { width: 100%; height: 100%; border-radius: inherit; object-fit: cover; display: block; }
+.st-avatar__img[data-settings-default-avatar] { object-fit: contain; }
+
+/* hover-pen editable avatar */
+.st-avatar-edit { position: relative; padding: 0; border: 0; background: none; cursor: pointer; border-radius: 50%; display: inline-flex; }
+.st-avatar-edit:focus-visible { outline: none; box-shadow: var(--hz-focus-ring); }
+.st-avatar-edit.is-busy { pointer-events: none; opacity: 0.72; }
+.st-avatar-scrim { position: absolute; inset: 0; border-radius: 50%; background: rgba(10,11,16,0.5); color: #fff; display: grid; place-items: center; opacity: 0; transition: opacity var(--hz-motion); }
+.st-avatar-edit:focus-visible .st-avatar-scrim { opacity: 1; }
+@media (hover: hover) {
+  .st-avatar-edit:hover .st-avatar-scrim { opacity: 1; }
+}
+.st-avatar-scrim .material-symbols-outlined { font-size: 23px; }
+.st-avatar-input { display: none; }
+
+/* overlay (confirm modal — used by log-out-all this slice) */
+.st-overlay { position: fixed; inset: 0; z-index: 80; display: grid; place-items: center; padding: 22px; background: rgba(8,9,13,0.62); backdrop-filter: blur(7px); }
+.st-overlay[hidden] { display: none; }
+.st-overlay__card { width: min(360px, 100%); background: var(--hz-bg-raised); border: 1px solid var(--hz-border-soft); border-radius: var(--hz-radius-lg); box-shadow: var(--hz-shadow-overlay); padding: 28px 24px 22px; text-align: center; }
+@media (prefers-reduced-motion: no-preference) {
+  .st-overlay__card { animation: st-overlay-pop 0.16s ease-out; }
+}
+@keyframes st-overlay-pop { from { transform: scale(0.965); } to { transform: scale(1); } }
+.st-overlay__title { font-size: 17px; font-weight: 800; margin: 0; }
+.st-overlay__sub { font-size: 12.5px; color: var(--hz-text-muted); margin: 5px 0 20px; line-height: 1.55; }
+.st-overlay__actions { display: flex; flex-direction: column; gap: 9px; }
+.st-overlay__cancel { margin-top: 3px; border: 0; background: none; color: var(--hz-text-muted); font-family: inherit; font-size: 13px; font-weight: 600; cursor: pointer; padding: 7px; border-radius: var(--hz-radius-sm); }
+@media (hover: hover) {
+  .st-overlay__cancel:hover { color: var(--hz-text); }
+}
+
+/* confirm modal */
+.st-overlay__card--confirm { width: min(380px, 100%); }
+.st-overlay__actions--row { justify-content: stretch; gap: 10px; margin-top: 4px; }
+.st-overlay__actions--row .st-btn { flex: 1 1 0; margin: 0; }
+.st-overlay__actions--row .st-overlay__cancel { flex: 1 1 0; margin: 0; border: 1px solid var(--hz-border-soft); padding: 11px; font-weight: 700; }
+@media (hover: hover) {
+  .st-overlay__actions--row .st-overlay__cancel:hover { background: var(--hz-surface-soft); }
+}
+.st-overlay__field { display: block; text-align: start; margin: 0 0 16px; }
+.st-overlay__label { display: block; margin-bottom: 6px; font-size: 12px; font-weight: 700; color: var(--hz-text-muted); }
+.st-overlay__textarea { min-height: 74px; font-size: 16px; } /* ≥16px: iOS no-zoom (see .st-input note below) */
+.st-confirm__ic { width: 46px; height: 46px; margin: 0 auto 14px; border-radius: 50%; display: grid; place-items: center; }
+.st-confirm__ic .material-symbols-outlined { font-size: 24px; }
+.st-confirm__ic--danger { background: var(--hz-action-sell-soft); color: var(--hz-action-sell-strong); }
+.st-confirm__ic--ok { background: var(--hz-action-buy-soft); color: var(--hz-action-buy); }
+.st-confirm__ic--default { background: var(--hz-surface-soft); color: var(--hz-text-soft); }
+
+/* callouts (danger banner + warn note) */
+.st-callout { display: flex; align-items: flex-start; gap: 10px; text-align: start; background: var(--hz-surface-soft); border: 1px solid var(--hz-border-faint); border-radius: var(--hz-radius-md); padding: 12px 13px; font-size: 12.5px; color: var(--hz-text-muted); line-height: 1.55; margin-bottom: 11px; }
+.st-callout .material-symbols-outlined { font-size: 19px; flex: 0 0 auto; color: var(--hz-text-faint); margin-top: 1px; }
+.st-callout strong { color: var(--hz-text); font-weight: 700; }
+.st-callout--warn { background: var(--hz-warning-soft); border-color: rgba(var(--hz-warning-rgb)/0.3); color: var(--hz-text-soft); }
+.st-callout--warn .material-symbols-outlined { color: var(--hz-warning); }
+
+/* social links */
+.lg-social { display: flex; flex-direction: column; gap: 2px; }
+.lg-social__row { display: flex; align-items: center; gap: 13px; padding: 11px 2px; }
+.lg-social__row + .lg-social__row { border-top: 1px solid var(--hz-border-faint); }
+.lg-social__mark { width: 36px; height: 36px; flex: 0 0 auto; display: grid; place-items: center; border-radius: var(--hz-radius-sm); color: #fff; }
+.lg-social__mark--x { background: #0a0a0a; }
+.lg-social__mark--telegram { background: #229ED9; }
+.lg-social__mark--instagram { background: linear-gradient(45deg, #f09433, #e6683c 30%, #dc2743 50%, #cc2366 70%, #bc1888); }
+.lg-social__mark--website { background: var(--hz-surface-3); color: var(--hz-text-muted); }
+.lg-social__mark .material-symbols-outlined { font-size: 20px; }
+.lg-social__main { flex: 1 1 auto; min-width: 0; }
+.lg-social__name { font-size: 14px; font-weight: 600; }
+.lg-social__handle { font-size: 12.5px; color: var(--hz-text-muted); margin-top: 2px; }
+.lg-social__handle--off { color: var(--hz-text-faint); }
+
+/* ─────────────── toggle ─────────────── */
+.st-toggle { position: relative; width: 42px; height: 24px; flex: 0 0 auto; border: 0; border-radius: var(--hz-radius-pill); background: var(--hz-surface-3); cursor: pointer; transition: background var(--hz-motion); padding: 0; }
+.st-toggle.is-on { background: var(--hz-action-buy); }
+.st-toggle__dot { position: absolute; top: 3px; left: 3px; right: auto; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: transform var(--hz-motion); box-shadow: 0 1px 3px rgba(0,0,0,0.3); }
+.st-toggle.is-on .st-toggle__dot { transform: translateX(18px); }
+.st-toggle:disabled { opacity: 0.4; cursor: default; pointer-events: none; }
+
+/* Touch tap-target floor (44px doctrine; phones/tablets only). The 42x24
+   pill + thumb-travel proportions are the whole point of a toggle switch, so
+   growing the visible control isn't an option — expand the invisible hit-area
+   via a centered ::before instead (same trick as the card bookmark / header
+   category pills). Already position: relative above, so no extra positioning
+   context needed. The pseudo-element paints with no content/background, so
+   it never visually covers the dot. */
+@media (hover: none) and (pointer: coarse) {
+  .st-toggle::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 44px;
+    height: 44px;
+  }
+}
+
+/* notifications matrix */
+.lg-notify__head, .lg-notify__row { display: grid; grid-template-columns: 1fr 92px 92px; align-items: center; }
+.lg-notify__head { padding-bottom: 14px; border-bottom: 1px solid var(--hz-border-faint); }
+.lg-notify__col { display: flex; flex-direction: column; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 700; color: var(--hz-text-muted); }
+.lg-notify__col .material-symbols-outlined { font-size: 19px; color: var(--hz-text-faint); }
+.lg-notify__row { padding: 20px 0; border-bottom: 1px solid var(--hz-border-faint); }
+.lg-notify__row:last-child { border-bottom: 0; }
+.lg-notify__main { min-width: 0; padding-inline-end: 16px; }
+.lg-notify__cell { display: flex; justify-content: center; }
+@media (max-width: 760px) {
+  .lg-notify__head, .lg-notify__row { grid-template-columns: 1fr 64px 64px; }
+  .lg-notify__col span { font-size: 10.5px; }
+}
+
+/* ─────────────── inputs ─────────────── */
+/* font-size:16px — iOS Safari auto-zooms focused inputs < 16px; the zoom/pan
+   offset persists after the settings overlay closes (page draggable past bounds
+   until reload). Same fix as .navi-overlay-input in patterns/auth-overlays.css.
+   Keep ≥16px; do not lock the viewport (a11y). */
+.st-input, .st-textarea { width: 100%; border: 1px solid var(--hz-border-soft); border-radius: var(--hz-radius-md); background: var(--hz-surface-soft); color: var(--hz-text); font-family: inherit; font-size: 16px; padding: 10px 13px; transition: border-color var(--hz-motion), box-shadow var(--hz-motion); }
+.st-input--inline { width: min(280px, 52vw); }
+.st-input:focus, .st-textarea:focus { outline: none; border-color: var(--hz-brand-dim); box-shadow: var(--hz-focus-ring); }
+.st-input::placeholder, .st-textarea::placeholder { color: var(--hz-text-faint); }
+.st-input:disabled, .st-textarea:disabled { opacity: 0.55; cursor: default; }
+.st-textarea { resize: none; line-height: 1.55; min-height: 78px; }
+.st-inputwrap { position: relative; display: flex; align-items: center; }
+.st-inputwrap .st-prefix { position: absolute; inset-inline-start: 13px; color: var(--hz-text-faint); font-family: var(--hz-font-mono); font-size: 14px; pointer-events: none; }
+.st-inputwrap .st-input { padding-inline-start: 28px; }
+
+/* ─────────────── buttons / badges ─────────────── */
+.st-btn { border: 1px solid var(--hz-border-soft); background: var(--hz-surface-soft); color: var(--hz-text-soft); font-family: inherit; font-size: 13px; font-weight: 700; padding: 8px 16px; border-radius: var(--hz-radius-pill); cursor: pointer; white-space: nowrap; transition: all var(--hz-motion); }
+@media (hover: hover) {
+  .st-btn:hover { border-color: var(--hz-border); color: var(--hz-text); background: var(--hz-surface-hover); }
+}
+.st-btn--warn { border-color: rgba(var(--hz-warning-rgb)/0.4); color: var(--hz-warning); background: transparent; }
+@media (hover: hover) {
+  .st-btn--warn:hover { background: var(--hz-warning-soft); color: var(--hz-warning); }
+}
+.st-btn--danger { border-color: rgba(var(--hz-action-sell-rgb)/0.45); color: var(--hz-action-sell-strong); background: transparent; }
+@media (hover: hover) {
+  .st-btn--danger:hover { background: var(--hz-action-sell-soft); }
+}
+.st-btn--primary { border-color: var(--hz-brand); background: var(--hz-brand); color: var(--hz-text-inverse); }
+@media (hover: hover) {
+  .st-btn--primary:hover { border-color: var(--hz-brand-strong); background: var(--hz-brand-strong); color: var(--hz-text-inverse); }
+}
+.st-btn--solid-danger { border-color: var(--hz-action-sell); background: var(--hz-action-sell); color: #fff; }
+@media (hover: hover) {
+  .st-btn--solid-danger:hover { border-color: var(--hz-action-sell-strong); background: var(--hz-action-sell-strong); color: #fff; }
+}
+.st-btn--sm { padding: 7px 15px; font-size: 12.5px; }
+.st-btn:disabled { opacity: 0.45; cursor: default; pointer-events: none; }
+.st-badge { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: var(--hz-radius-pill); background: var(--hz-action-buy-soft); color: var(--hz-action-buy); display: inline-flex; align-items: center; gap: 4px; }
+.st-badge .material-symbols-outlined { font-size: 13px; }
+
+/* "בקרוב" affordance — features whose backend isn't built yet
+   (see workspace/tasks/queued/finish-settings-integration.md). */
+.lg-soon { font-size: 11.5px; font-weight: 700; letter-spacing: 0; padding: 2px 8px; border-radius: var(--hz-radius-pill); background: var(--hz-surface-soft); color: var(--hz-text-faint); border: 1px solid var(--hz-border-faint); white-space: nowrap; }
+
+/* ─────────────── sessions ─────────────── */
+.st-sessions { display: flex; flex-direction: column; gap: 2px; }
+.st-session { display: flex; align-items: center; gap: 13px; padding: 11px 2px; }
+.st-session + .st-session { border-top: 1px solid var(--hz-border-faint); }
+.st-session__ic { width: 34px; height: 34px; flex: 0 0 auto; display: grid; place-items: center; border-radius: var(--hz-radius-sm); background: var(--hz-surface-soft); color: var(--hz-text-muted); }
+.st-session__ic .material-symbols-outlined { font-size: 19px; }
+.st-session__name { font-size: 14px; font-weight: 600; }
+.st-session__meta { font-size: 12px; color: var(--hz-text-faint); margin-top: 2px; }
+.st-session__now { color: var(--hz-action-buy); }
+.st-session__here { margin-inline-start: auto; font-size: 12px; color: var(--hz-text-faint); font-weight: 600; }
+.st-session .st-btn { margin-inline-start: auto; }
+
+/* ══════════════ LEDGER (deboxed, right rail) ══════════════ */
+/* Capped to the shared content frame (--hz-content-max + --hz-content-pad) so the
+   rail/content align to the same edges as the header and footer. */
+.lg-body { display: flex; flex: 1 1 auto; min-height: 0; width: 100%; max-width: var(--hz-content-max); margin-inline: auto; padding-inline: var(--hz-content-pad); }
+.lg-nav { flex: 0 0 248px; padding: 26px 16px; border-inline-end: 1px solid var(--hz-border-faint); display: flex; flex-direction: column; gap: 2px; align-self: flex-start; }
+.lg-nav__eyebrow { font-size: 12.5px; font-weight: 700; letter-spacing: 0; line-height: 1.35; color: var(--hz-text-faint); padding: 0 12px 12px; }
+.lg-navitem { position: relative; display: flex; align-items: center; gap: 12px; padding: 10px 12px; border: 0; background: transparent; border-radius: var(--hz-radius-md); font-family: inherit; font-size: 14px; font-weight: 600; color: var(--hz-text-muted); cursor: pointer; text-align: start; transition: color var(--hz-motion), background var(--hz-motion); }
+.lg-navitem .material-symbols-outlined { font-size: 21px; color: var(--hz-text-faint); transition: color var(--hz-motion); }
+@media (hover: hover) {
+  .lg-navitem:hover { color: var(--hz-text-soft); background: var(--hz-surface-soft); }
+}
+.lg-navitem.is-on { color: var(--hz-text); background: var(--hz-surface-soft); }
+.lg-navitem.is-on .material-symbols-outlined { color: var(--hz-brand); }
+.lg-navitem.is-on::before { content: ""; position: absolute; inset-inline-start: -16px; top: 50%; transform: translateY(-50%); width: 3px; height: 20px; border-radius: 0 3px 3px 0; background: var(--hz-brand); }
+.lg-navitem--danger.is-on .material-symbols-outlined { color: var(--hz-action-sell-strong); }
+@media (hover: hover) {
+  .lg-navitem--danger:hover { color: var(--hz-action-sell-strong); }
+}
+.lg-navitem--danger.is-on::before { background: var(--hz-action-sell); }
+
+.lg-content { flex: 1 1 auto; min-width: 0; padding: 34px clamp(22px, 4vw, 52px) 60px; }
+.lg-inner { max-width: 640px; margin: 0 auto; }
+.lg-head { margin-bottom: 8px; }
+.lg-head__title { font-size: 25px; font-weight: 800; letter-spacing: -0.4px; margin: 0; }
+.lg-head__sub { font-size: 13.5px; color: var(--hz-text-muted); margin: 7px 0 0; line-height: 1.5; }
+
+/* section panels — JS toggles .is-active; only the active one shows.
+   No-JS fallback: the server marks profile active, so guests-without-JS
+   still see a coherent first panel rather than all four stacked. */
+.lg-panel { display: none; }
+.lg-panel.is-active { display: block; }
+
+.lg-row { padding: 20px 0; border-bottom: 1px solid var(--hz-border-faint); }
+.lg-row:last-child { border-bottom: 0; }
+.lg-row--inline { display: flex; align-items: center; gap: 20px; }
+.lg-row--inline .lg-rowmain { flex: 1 1 auto; min-width: 0; }
+.lg-label { font-size: 14.5px; font-weight: 700; color: var(--hz-text); }
+.lg-hint { font-size: 12.5px; color: var(--hz-text-muted); margin-top: 4px; line-height: 1.5; }
+.lg-hint.is-error { color: var(--hz-action-sell-strong); }
+.lg-field { margin-top: 12px; }
+.lg-rowend { flex: 0 0 auto; display: flex; align-items: center; gap: 12px; }
+.lg-value { font-size: 14.5px; color: var(--hz-text-soft); white-space: nowrap; }
+.lg-labelrow { display: flex; align-items: center; gap: 10px; }
+.lg-pen { display: inline-grid; place-items: center; width: 32px; height: 32px; border: 0; background: none; color: var(--hz-text-muted); cursor: pointer; border-radius: var(--hz-radius-sm); transition: color var(--hz-motion), background var(--hz-motion); }
+.lg-pen .material-symbols-outlined { font-size: 18px; }
+@media (hover: hover) {
+  .lg-pen:hover { color: var(--hz-brand); background: var(--hz-surface-soft); }
+}
+.lg-pen:disabled { opacity: 0.4; cursor: default; pointer-events: none; }
+.lg-editactions { display: flex; gap: 8px; margin-top: 11px; }
+.lg-editactions[hidden] { display: none; }
+
+/* bio box + live counter */
+.lg-biowrap { position: relative; }
+.lg-bioarea { min-height: 0; overflow: hidden; padding-bottom: 28px; } /* 1 line; grows with content (JS) */
+.lg-biocount { position: absolute; left: 13px; bottom: 10px; font-family: var(--hz-font-mono); font-size: 11.5px; color: var(--hz-text-faint); pointer-events: none; transition: color var(--hz-motion); }
+.lg-biocount.is-full { color: var(--hz-brand); }
+
+/* account deletion state */
+.lg-delbanner { display: flex; align-items: center; gap: 13px; margin: 12px 0 0; }
+.lg-delbanner[hidden] { display: none; }
+.lg-delbanner__main { flex: 1 1 auto; min-width: 0; }
+.lg-delbanner .st-btn { flex: 0 0 auto; }
+.lg-delbanner .st-callout { width: 100%; margin-bottom: 0; }
+
+/* ─────────────── responsive (Ledger) ─────────────── */
+@media (max-width: 760px) {
+  .lg-body { flex-direction: column; padding-inline: 0; }
+  .lg-nav { flex: 0 0 auto; flex-direction: row; gap: 7px; padding: 12px 14px; overflow-x: auto; border-inline-end: 0; border-bottom: 1px solid var(--hz-border-faint); align-self: stretch; }
+  .lg-nav__eyebrow { display: none; }
+  .lg-navitem { flex: 0 0 auto; padding: 9px 14px; border-radius: var(--hz-radius-pill); background: var(--hz-surface-soft); font-size: 13px; }
+  .lg-navitem .material-symbols-outlined { font-size: 19px; }
+  .lg-navitem.is-on { background: var(--hz-brand-soft); }
+  .lg-navitem.is-on::before { display: none; }
+  .lg-content { padding: 24px 18px 56px; }
+  .lg-inner { max-width: 100%; }
+  .lg-head__title { font-size: 22px; }
+  .lg-row--inline { flex-wrap: wrap; gap: 12px; }
+  .lg-row--inline .lg-rowmain { flex: 1 1 100%; }
+}
+@media (max-width: 420px) {
+  .lg-navitem span:not(.material-symbols-outlined) { display: none; }
+  .lg-navitem { padding: 9px 13px; }
+  .lg-navitem .material-symbols-outlined { font-size: 22px; }
+}

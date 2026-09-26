@@ -1,0 +1,93 @@
+---
+// Help Center topic / collection page (/help/[topic]). Lists every article in one
+// topic. PRERENDERED via the shell-less HelpLayout — getStaticPaths emits one static
+// page per known topic; unknown slugs simply aren't built (404).
+export const prerender = true;
+import HelpLayout from '../../layouts/HelpLayout.astro';
+import HelpSearch from '../../components/help/HelpSearch.astro';
+import { getCollection } from 'astro:content';
+import {
+  HELP_TOPICS,
+  getTopic,
+  helpArticlePath,
+  articleSlugFromId,
+  articlesForTopic,
+  buildSearchIndex,
+  visibleHelpEntries,
+} from '../../lib/help-content.js';
+import { buildWebPageJsonLd, buildBreadcrumbJsonLd, buildCanonicalUrl } from '../../lib/seo.js';
+import '../../styles/pages/help-center.css';
+
+export function getStaticPaths() {
+  return HELP_TOPICS.map((t) => ({ params: { topic: t.slug } }));
+}
+
+const topic = getTopic(Astro.params.topic);
+if (!topic) return Astro.redirect('/help');
+
+const entries = visibleHelpEntries(await getCollection('help'));
+const searchIndex = buildSearchIndex(entries);
+const articles = articlesForTopic(entries, topic.slug).map((e) => ({
+  title: e.data.title,
+  href: helpArticlePath(topic.slug, articleSlugFromId(e.id)),
+}));
+const pad = (n) => String(n).padStart(2, '0');
+
+const topicCanonicalPath = `/help/${topic.slug}`;
+const structuredData = [
+  buildWebPageJsonLd({
+    title: `${topic.title} · מרכז עזרה · החוזה`,
+    description: topic.description,
+    canonicalUrl: buildCanonicalUrl(topicCanonicalPath),
+    type: 'CollectionPage',
+  }),
+  buildBreadcrumbJsonLd({
+    items: [
+      { name: 'מרכז עזרה', href: '/help' },
+      { name: topic.title, href: topicCanonicalPath },
+    ],
+  }),
+];
+---
+
+<HelpLayout
+  title={`${topic.title} · מרכז עזרה · החוזה`}
+  description={topic.description}
+  canonicalPath={topicCanonicalPath}
+  robots="index, follow"
+  structuredData={structuredData}
+>
+  <div class="hz-help">
+    <div class="hz-help__search-band">
+      <div class="hz-help__container">
+        <HelpSearch articles={searchIndex} />
+      </div>
+    </div>
+
+    <section class="hz-help-collection hz-help__container">
+      <div class="hz-help-crumb">
+        <a href="/help">מרכז עזרה</a>
+        <span class="hz-help-crumb__sep">/</span>
+        <span class="hz-help-crumb__current">{topic.title}</span>
+      </div>
+      <div class="hz-help-collection__marker">
+        <span class="hz-help-collection__dot">·</span><span>{topic.index} — {topic.title}</span>
+      </div>
+      <h1>{topic.title}</h1>
+      <p class="hz-help-collection__desc">{topic.description}</p>
+      <div class="hz-help-collection__count">{articles.length} מאמרים</div>
+    </section>
+
+    <div class="hz-help__container">
+      <div class="hz-help-article-list">
+        {articles.map((a, i) => (
+          <a href={a.href} class="hz-help-row">
+            <span class="hz-help-row__num">{pad(i + 1)}</span>
+            <span class="hz-help-row__title">{a.title}</span>
+            <svg class="hz-help-row__arrow" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+          </a>
+        ))}
+      </div>
+    </div>
+  </div>
+</HelpLayout>

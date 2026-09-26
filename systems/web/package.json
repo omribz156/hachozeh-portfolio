@@ -1,0 +1,37 @@
+{
+  "name": "@navi/web",
+  "version": "0.0.0",
+  "type": "module",
+  "private": true,
+  "description": "Hachozeh web app (Astro) — frontend migration target. Replaces systems/front progressively.",
+  "scripts": {
+    "dev": "node ./scripts/dev-build-serve.mjs",
+    "dev:hot": "astro dev --host 127.0.0.1 --port 6969",
+    "build": "astro build",
+    "rebuild:safe": "bash ../../workspace/scripts/rebuild-web-safe.sh",
+    "check": "astro check",
+    "preview": "astro preview --host 127.0.0.1 --port 6969",
+    "start": "HOST=127.0.0.1 PORT=4321 node ./dist/server/entry.mjs",
+    "status": "node ./scripts/status.mjs",
+    "seo:smoke": "node ./scripts/seo-smoke.mjs",
+    "audit:migration": "node ../../workspace/scripts/check-astro-migration.mjs",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@astrojs/node": "^11.1.6",
+    "@astrojs/preact": "^6.0.0",
+    "@sentry/astro": "^10.62.0",
+    "astro": "^7.3.5",
+    "preact": "^10.29.2",
+    "sharp": "^0.35.4"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.9",
+    "@tailwindcss/container-queries": "^0.1.1",
+    "@tailwindcss/forms": "^0.5.11",
+    "autoprefixer": "^10.5.2",
+    "postcss": "^8.5.28",
+    "tailwindcss": "^3.4.17",
+    "typescript": "^6.0.3"
+  }
+}

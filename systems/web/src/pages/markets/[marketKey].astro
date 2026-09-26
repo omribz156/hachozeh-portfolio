@@ -1,0 +1,1066 @@
+---
+// Phase 3.1a — market-detail dynamic route. Server-renders the public header
+// + probability hero from the (fully public) market-detail snapshot. Outcomes,
+// trust/rules, related (3.1b) and the chart/ticket/community islands (3.2–3.5)
+// land in later sub-phases; their mounts are stubbed below.
+import Layout from '../../layouts/Layout.astro';
+import TrustSection from '../../components/market-detail/TrustSection.astro';
+import ChartIsland from '../../components/market-detail/ChartIsland.astro';
+import TradeTicketIsland from '../../components/market-detail/TradeTicketIsland.astro';
+import OutcomeLadder from '../../components/market-detail/OutcomeLadder.astro';
+import ResolvedRail from '../../components/market-detail/ResolvedRail.astro';
+import ViewerPositionsIsland from '../../components/market-detail/ViewerPositionsIsland.astro';
+import CommunitySection from '../../components/market-detail/CommunitySection.astro';
+import EventLadder from '../../components/market-detail/EventLadder.astro';
+import EventChartIsland from '../../components/market-detail/EventChartIsland.astro';
+import RelatedMarkets from '../../components/market-detail/RelatedMarkets.astro';
+import { fetchMarketDetail, fetchMarketSavedState } from '../../lib/market-detail.js';
+import { fetchRelatedMarkets } from '../../lib/related-markets.js';
+import { fetchCommentPreview } from '../../lib/market-comments-preview.js';
+import { ctaOnColor, deriveBinaryOutcomes } from '../../lib/ticket-data.js';
+import { resolveSeedRange, fetchChartSeed, fetchEventChartSeed } from '../../lib/chart-seed.js';
+import { categoryBrowsePath } from '../../lib/category-hubs.js';
+import { getFamilyHub, familyHubPath } from '../../lib/family-hubs.js';
+import { shareMarketCardVersion } from '../../lib/share-market-card-rows.js';
+import { vshekelMoneyHtml } from '../../lib/vshekel';
+import {
+  buildAbsoluteUrl,
+  buildBreadcrumbJsonLd,
+  buildCanonicalUrl,
+  buildWebPageJsonLd,
+} from '../../lib/seo.js';
+import '../../styles/pages/market-detail.css';
+import '../../styles/pages/event-mode.css';
+import '../../styles/patterns/probability-hero.css';
+import '../../styles/patterns/breadcrumb.css';
+import '../../styles/patterns/icon-action.css';
+import '../../styles/patterns/avatar.css';
+import '../../styles/patterns/button-primary.css';
+import '../../styles/patterns/trust-fold.css';
+import '../../styles/patterns/rule-card.css';
+import '../../styles/patterns/timeline.css';
+import '../../styles/patterns/probability-chart.css';
+import '../../styles/patterns/market-detail-chart.css';
+import '../../styles/patterns/trade-ticket.css';
+import '../../styles/patterns/trade-button.css';
+import '../../styles/patterns/mobile-trade-launcher.css';
+import '../../styles/patterns/outcome-ladder.css';
+import '../../styles/patterns/viewer-positions.css';
+import '../../styles/patterns/position-pill.css';
+import '../../styles/patterns/comment-feed.css';
+
+const { marketKey } = Astro.params;
+
+// One parallel SSR wave on the hottest page: the market detail and the chart
+// history seed don't depend on each other, so fetch them together instead of
+// letting the child ChartIsland's frontmatter stack a second sequential
+// round-trip after this one. The seed never throws (degrades to null), so the
+// 404 handling below still keys only off fetchMarketDetail. (Pay-off is prod;
+// the dev edge is no-store.)
+const seedRange = resolveSeedRange(Astro.url.searchParams.get('range'));
+let record = null;
+let error = null;
+let chartSeed = null;
+let isSaved = false;
+let relatedData = { tags: [], panels: {} };
+let commentPreview = { count: 0, comments: [] };
+try {
+  const [rec, seed, saved, related, comments] = await Promise.all([
+    fetchMarketDetail(marketKey),
+    fetchChartSeed(marketKey, seedRange),
+    fetchMarketSavedState(marketKey, Astro.request.headers.get('cookie') || ''),
+    fetchRelatedMarkets(marketKey),
+    fetchCommentPreview(marketKey),
+  ]);
+  record = rec;
+  chartSeed = seed;
+  isSaved = saved;
+  relatedData = related;
+  commentPreview = comments;
+} catch (e) {
+  // Authored copy only — never surface the raw exception to users.
+  console.error('[market-detail] fetchMarketDetail failed', marketKey, e);
+  if (String(e.message).includes('HTTP 404')) {
+    Astro.response.status = 404;
+    error = 'השוק הזה לא קיים או שהוסר.';
+  } else {
+    error = 'לא הצלחנו לטעון את השוק. נסו שוב בעוד רגע.';
+  }
+}
+
+const ctx = record?.context || {};
+const snap = record?.snapshot || {};
+type MarketChainItem = {
+  href: string;
+  label: string;
+  temporalStatus?: 'past' | 'current' | 'future' | string | null;
+};
+const chainItems = (record?.chain || []) as MarketChainItem[];
+const showMarketChain = chainItems.length > 1;
+// If this market's recurring series has a curated hub, link the chain rail to it.
+const seriesHub = getFamilyHub((record as { marketFamilyKey?: string | null })?.marketFamilyKey);
+const pastChainItems = chainItems.filter((item) => item.temporalStatus === 'past');
+const activeChainItems = chainItems.filter((item) => item.temporalStatus !== 'past');
+const chainPillClass = (item: MarketChainItem, index: number) => [
+  'market-detail-chain-pill',
+  `market-detail-chain-pill--${item.temporalStatus || 'future'}`,
+  index >= 3 ? 'market-detail-chain-pill--hide-mobile' : '',
+  index >= 4 ? 'market-detail-chain-pill--hide-desktop' : '',
+].filter(Boolean).join(' ');
+const outcomes = snap.outcomes || [];
+const current = snap.current || {};
+const categoryKey = (() => {
+  const href = String(ctx.categoryHref || '');
+  const match = href.match(/[?&]category=([^&]+)/);
+  return match ? decodeURIComponent(match[1]) : null;
+})();
+const categoryHref = categoryKey ? categoryBrowsePath(categoryKey) : (ctx.categoryHref || '/');
+
+// Canonical (yes) outcome + opposing (no) outcome + prices. Shared derivation
+// (lib/ticket-data.js) so the hero/chart/ticket and the quick-buy endpoint agree.
+const { yes, noOutcome, yesPrice, noPrice } = deriveBinaryOutcomes(outcomes, current);
+const yesProb = yes ? Math.round((current[yes.id] ?? 0) * 100) : null;
+
+const title = ctx.marketLabel || snap.contract?.measurement || '';
+const brandSrc = ctx.brandPhotoUrl || ctx.brandImageUrl;
+const isBinary = outcomes.length === 2;
+// Named-opponent binary (team-vs-team, candidate duels): neither side is a yes/no
+// label, so the chart shows a line per side instead of collapsing to one canonical
+// line + area fill (which is right for yes/no propositions like weather).
+const yesNoLabelRe = /^(yes|no|כן|לא)$/i;
+const namedOpponents =
+  isBinary && !outcomes.some((o) => yesNoLabelRe.test(String(o.shortLabel || o.label || '').trim()));
+// Per-outcome identity colors (team kit colors) for the chart — same source the
+// trending matchup cards use. Empty until the backend surfaces `colorPrimary` on
+// the snapshot outcomes (handoff filed); the chart falls back to the palette.
+const outcomeColors = Object.fromEntries(
+  outcomes.filter((o) => o.colorPrimary).map((o) => [o.id, o.colorPrimary])
+);
+
+// ctaOnColor (kit-color → readable black/white CTA text) now lives in
+// lib/ticket-data.js, shared with the quick-buy endpoint.
+
+// Resolved-chart treatment: the renderer already paints ✓ on the winning line's
+// end-dot and ✗ on losers once it knows the market resolved + which outcome won
+// (market-detail-chart.js:436). Port regression — these never reached the chart,
+// so a resolved market's chart looked identical to an open one. (chief-of-staff
+// handoff 2026-06-16). `snap.winner` is `{ outcomeId, outcomeKey, label }`.
+const isResolved = snap.marketStatus === 'resolved';
+const winnerOutcomeId = snap.winner?.outcomeId || null;
+
+// (canonical/opposing outcome + yes/no prices are derived above via
+// deriveBinaryOutcomes — the no-price is the second outcome, sums to ~1.)
+
+// Versus hero (named-opponent binary, e.g. Brazil v Japan): a single "X% סיכוי"
+// is a yes/no affordance — for a symmetric match it's unattributed (52% of WHICH
+// team?) and hides the other side. So show BOTH sides, leader emphasized. yes/no
+// markets (weather etc.) keep the single % below. Leader-first so the DOM order
+// puts the bigger number on top.
+const sideLabelOf = (o) => String(o?.shortLabel || o?.label || '').trim();
+const noProb = noOutcome
+  ? Math.round((current[noOutcome.id] ?? (1 - yesPrice)) * 100)
+  : (yesProb != null ? 100 - yesProb : null);
+const heroSides = (namedOpponents && yes && noOutcome && yesProb != null && noProb != null)
+  ? [
+      { id: yes.id, label: sideLabelOf(yes), prob: yesProb, color: outcomeColors[yes.id] || null },
+      { id: noOutcome.id, label: sideLabelOf(noOutcome), prob: noProb, color: outcomeColors[noOutcome.id] || null },
+    ].sort((a, b) => b.prob - a.prob)
+  : null;
+
+// Event-mode: present when snapshot.event has multiple children.
+// `?focus` is the loop-breaker: any child URL renders the event ladder by
+// default, but with ?focus it renders THIS child as a focused single market
+// (its own chart + ticket), with a back-link to the event. This is how the
+// ladder's date/label drill-in works — every child is reachable both as the
+// event (bare URL) and as itself focused (?focus).
+const ev = snap.event || null;
+const eventChildren = snap.children || [];
+const isMultiChildEvent = !!ev && (ev.childCount || 0) > 1 && eventChildren.length > 1;
+const focusChild = Astro.url.searchParams.has('focus');
+const isEvent = isMultiChildEvent && !focusChild;
+const isFocusedChild = isMultiChildEvent && focusChild;
+const requestedEventChildKey =
+  Astro.url.searchParams.get('market') ||
+  Astro.url.searchParams.get('child') ||
+  null;
+// Event graph (operator-gated): one line per child. Seeded server-side only when
+// the event opted in — one extra fetch, off the hot path for every other market.
+const showEventGraph = isEvent && ev?.showGraph === true;
+const eventChartSeed = showEventGraph
+  ? await fetchEventChartSeed(marketKey, seedRange)
+  : null;
+const defaultChild =
+  eventChildren.find((c) => c.marketId === requestedEventChildKey) ||
+  eventChildren.find((c) => c.status !== 'resolved' && c.status !== 'voided') ||
+  eventChildren[0] ||
+  null;
+const dcYes = defaultChild?.outcomes?.find((o) => o.side === 'yes');
+const dcNo = defaultChild?.outcomes?.find((o) => o.side === 'no');
+const displayTitle = isEvent ? (ev.title || title) : (title || 'שוק');
+const displayBrandSrc = isEvent ? (ev.icon || brandSrc) : brandSrc;
+const displayBrandAlt = isEvent ? (ev.title || ctx.brandAlt || title) : (ctx.brandAlt || title);
+const eventResolutionSource = ev?.resolutionSource || null;
+const eventResolutionSourceLabel = eventResolutionSource?.label || 'מקורות לפי שוק';
+const eventResolutionSourceUrl = eventResolutionSource?.url || null;
+const eventTrustSnapshot = isEvent ? {
+  ...snap,
+  contract: {
+    ...(snap.contract || {}),
+    measurement: ev.title || title,
+    resolutionRule: ev.rulesLead || ev.description || 'האירוע מרכז כמה שווקים קשורים. כל שוק ברשימה נמדד ונפתר לפי הכללים שלו.',
+    delayPolicy: ev.delayPolicy || 'כל שוק בתוך האירוע מוכרע בנפרד לפי הכללים והמקורות שלו.',
+    resolutionSource: {
+      label: eventResolutionSourceLabel,
+      url: eventResolutionSourceUrl,
+    },
+  },
+  trust: {
+    ...(snap.trust || {}),
+    resolutionRules: ev.rulesLead || ev.description || null,
+    resolutionSource: eventResolutionSourceLabel,
+    resolutionSourceUrl: eventResolutionSourceUrl,
+    sourceUrl: eventResolutionSourceUrl,
+  },
+} : snap;
+const seoCanonicalPath = ctx.publicPath || `/markets/${marketKey}`;
+const canonicalShareUrl = buildCanonicalUrl(seoCanonicalPath);
+// A focused child shares ITSELF, not the parent event: target this child's own
+// key with ?focus so the link lands on the child and the card renders the child.
+// buildAbsoluteUrl (not buildCanonicalUrl) — the latter strips the query.
+const currentShareUrl = focusChild
+  ? buildAbsoluteUrl(`/markets/${marketKey}?focus`)
+  : canonicalShareUrl;
+const leadingProbability = (() => {
+  const values = outcomes
+    .map((outcome) => Number(current[outcome.id] ?? current[outcome.key]))
+    .filter((value) => Number.isFinite(value));
+  if (values.length) return Math.round(Math.max(...values) * 100);
+  if (dcYes?.price != null) return Math.round(Number(dcYes.price) * 100);
+  return yesProb;
+})();
+const seoProbabilityLabel = leadingProbability != null ? `${leadingProbability}% סיכוי` : '';
+// Date only in the share description — the hour is noise on an unfurl that a
+// crawler may cache for hours anyway. updatedLabel is "5 ביולי 2026 · 22:53".
+const updatedDateLabel = snap.updatedLabel ? String(snap.updatedLabel).split('·')[0].trim() : '';
+const updatedShareLabel = updatedDateLabel ? `נכון ל־${updatedDateLabel}` : 'בזמן אמת';
+// Isolate the mixed-script title (FSI…PDI) so an embedded Latin+number run like
+// "GTA 6?" stays one bidi unit in WhatsApp/Telegram instead of breaking apart.
+const isolatedTitle = `⁨${displayTitle}⁩`;
+const marketShareDescription = [
+  snap.volumeLabel ? `${snap.volumeLabel} נסחרו בשוק "${isolatedTitle}".` : '',
+  seoProbabilityLabel ? `מחיר מוביל: ${seoProbabilityLabel}.` : '',
+  `${updatedShareLabel}. צפו במחירי השוק והסתברויות בהחוזה.`,
+].filter(Boolean).join(' ');
+const seoDescription = error
+  ? 'שוק בהחוזה לא נטען כרגע. חזרו לפיד השווקים כדי להמשיך לעקוב אחרי תחזיות פעילות.'
+  : marketShareDescription;
+// What travels with a native share (WhatsApp text etc.) — shorter and more
+// personal than the SEO description: the live price plus an invitation to disagree.
+const marketShareText = leadingProbability != null
+  ? `"${isolatedTitle}" עומד עכשיו על ${leadingProbability}%. מה הקריאה שלך?`
+  : `מה הקריאה שלך? "${isolatedTitle}" בהחוזה.`;
+const robotsPolicy = error || focusChild ? 'noindex, follow' : 'index, follow';
+// Carry ?focus so the renderer draws this child, not the parent event. The state
+// fingerprint gives social crawlers a new image URL when any visible event child
+// changes price/status; Cloudflare intentionally caches each immutable version.
+const shareImageParams = new URLSearchParams({
+  v: shareMarketCardVersion(snap, isEvent),
+});
+if (focusChild) shareImageParams.set('focus', '1');
+const shareImagePath = `/share/markets/${marketKey}.png?${shareImageParams.toString()}`;
+const publicOutcomes = outcomes.map((outcome) => {
+  const value = Number(current[outcome.id] ?? current[outcome.key] ?? 0);
+  return {
+    id: outcome.id,
+    label: outcome.shortLabel || outcome.label || outcome.id,
+    probability: Number.isFinite(value) ? Math.max(0, Math.min(100, Math.round(value * 100))) : null,
+  };
+});
+const marketJsonLd = buildWebPageJsonLd({
+  title: `${displayTitle} · החוזה`,
+  description: seoDescription,
+  canonicalUrl: canonicalShareUrl,
+  imageUrl: buildAbsoluteUrl(shareImagePath),
+});
+const breadcrumbJsonLd = buildBreadcrumbJsonLd({
+  items: [
+    { name: 'החוזה', href: '/' },
+    { name: 'שווקים', href: '/' },
+    ...(ctx.categoryLabel ? [{ name: ctx.categoryLabel, href: categoryHref }] : []),
+    { name: displayTitle, href: canonicalShareUrl },
+  ],
+});
+const outcomeJsonLd = publicOutcomes.length ? {
+  '@context': 'https://schema.org',
+  '@type': 'ItemList',
+  name: `תוצאות אפשריות: ${displayTitle}`,
+  itemListElement: publicOutcomes.map((outcome, index) => ({
+    '@type': 'ListItem',
+    position: index + 1,
+    name: outcome.probability == null ? outcome.label : `${outcome.label} — ${outcome.probability}%`,
+  })),
+} : null;
+const structuredData = [marketJsonLd, breadcrumbJsonLd, outcomeJsonLd].filter(Boolean);
+---
+
+<Layout
+  title={`${displayTitle} · החוזה`}
+  description={seoDescription}
+  canonicalPath={seoCanonicalPath}
+  image={shareImagePath}
+  robots={robotsPolicy}
+  twitterCard="summary_large_image"
+  structuredData={structuredData}
+>
+  {error ? (
+    <div class="market-detail-page" data-market-key={marketKey}>
+      <div class="market-detail-stage-page-shell mx-auto w-full" style="padding: 3rem 1.4rem;">
+        <p style="color: var(--hz-text-muted);">{error}</p>
+        <a href="/" style="color: var(--hz-brand);">חזרה לשווקים</a>
+      </div>
+    </div>
+  ) : (
+    <div class="market-detail-page" data-market-key={marketKey} data-market-status={snap.marketStatus}>
+      <div class="market-detail-stage-page-shell mx-auto w-full">
+        <section class="market-detail-stage">
+          <div class="market-detail-stage-main">
+            <header class="market-detail-stage-head">
+              <div class="market-detail-stage-head-grid">
+                <div class="market-detail-topbar">
+                  <div class="market-detail-heading">
+                    <div class={`market-detail-brand-mark${(ctx.brandPhotoUrl || (isEvent && ev.icon)) ? ' market-detail-brand-mark--photo' : ''}`}>
+                      {/* Intrinsic dims (mobile-audit 2.2): the container box is already
+                          CSS-reserved (fixed/clamp width+height at every breakpoint,
+                          market-detail.css:377), so this is a square 1:1 hint on top of
+                          that, not the only thing holding the layout still. */}
+                      {displayBrandSrc && <img alt={displayBrandAlt} class="w-full h-full object-cover" src={displayBrandSrc} width="64" height="64" />}
+                    </div>
+                    <div class="market-detail-title-block">
+                      <div class="hz-breadcrumb">
+                        <span>{ctx.sectionLabel || 'שווקים'}</span>
+                        <span class="material-symbols-outlined text-sm">chevron_left</span>
+                        <a class="hz-breadcrumb__link" href={categoryHref}>{ctx.categoryLabel}</a>
+                        {isFocusedChild && (
+                          <Fragment>
+                            <span class="material-symbols-outlined text-sm">chevron_left</span>
+                            <a class="hz-breadcrumb__link" href={ctx.publicPath || `/markets/${marketKey}`}>{ev.title}</a>
+                          </Fragment>
+                        )}
+                      </div>
+                      <h1 class="market-detail-page-title">{isEvent ? (ev.title || title) : title}</h1>
+                    </div>
+                  </div>
+                </div>
+                <div class="market-detail-action-row">
+                  <button class={`hz-icon-action${isSaved ? ' hz-icon-action--active' : ''}`} type="button" title={isSaved ? 'נשמר' : 'שמירת דף'} aria-label="שמירת השוק" aria-pressed={isSaved ? 'true' : 'false'} data-market-save>
+                    <span class="material-symbols-outlined text-base">{isSaved ? 'bookmark' : 'bookmark_border'}</span>
+                  </button>
+                  <a class="hz-icon-action" href="#comments-section" title="תגובות">
+                    <span class="material-symbols-outlined text-base">chat</span>
+                  </a>
+                  <button
+                    class="hz-icon-action"
+                    type="button"
+                    title="שיתוף"
+                    aria-label="שיתוף השוק"
+                    data-market-share
+                    data-hz-share="market"
+                    data-share-kind="market"
+                    data-share-url={currentShareUrl}
+                    data-share-title={`${displayTitle} · החוזה`}
+                    data-share-text={marketShareText}
+                    data-share-image={shareImagePath}
+                  >
+                    <span class="material-symbols-outlined text-base">ios_share</span>
+                  </button>
+                </div>
+              </div>
+            </header>
+            {showMarketChain && (
+              <nav class="market-detail-chain-rail" aria-label="שווקים קשורים לפי תאריך">
+                <span class="market-detail-chain-rail__label">מועדים</span>
+                {pastChainItems.length > 0 && (
+                  <details class="market-detail-chain-past">
+                    <summary class="market-detail-chain-pill market-detail-chain-pill--past-toggle" aria-label="שווקי עבר">
+                      <span>עבר</span>
+                      <span class="material-symbols-outlined market-detail-chain-past__chevron" aria-hidden="true">expand_more</span>
+                    </summary>
+                    <div class="market-detail-chain-past__menu" role="list">
+                      {pastChainItems.map((item) => (
+                        <a class="market-detail-chain-past__item" href={item.href} role="listitem">
+                          <span class="material-symbols-outlined" aria-hidden="true">gavel</span>
+                          <span>{item.label}</span>
+                        </a>
+                      ))}
+                    </div>
+                  </details>
+                )}
+                <div class="market-detail-chain-rail__track">
+                  {activeChainItems.map((item, index) => (
+                    item.temporalStatus === 'current' ? (
+                      <span
+                        class={chainPillClass(item, index)}
+                        aria-current="page"
+                      >
+                        {item.label}
+                      </span>
+                    ) : (
+                      <a
+                        class={chainPillClass(item, index)}
+                        href={item.href}
+                      >
+                        {item.label}
+                      </a>
+                    )
+                  ))}
+                </div>
+                {seriesHub && (
+                  <a
+                    class="market-detail-chain-rail__all"
+                    href={familyHubPath(seriesHub.familyKey)}
+                    style="margin-inline-start:auto; align-self:center; font-size:0.8125rem; font-weight:600; color:var(--hz-text-soft); text-decoration:none; white-space:nowrap;"
+                  >כל המועדים ←</a>
+                )}
+              </nav>
+            )}
+
+            {isEvent ? (
+              <div class="market-detail-stage-hinge" data-market-detail-event>
+                {showEventGraph && (
+                  <EventChartIsland eventKey={marketKey} seed={eventChartSeed} volumeLabel={ev.volumeLabel} />
+                )}
+                <EventLadder children={eventChildren} selectedMarketId={defaultChild?.marketId} />
+              </div>
+            ) : (
+              <Fragment>
+                {isBinary && yesProb != null && (
+                  heroSides ? (
+                    <div class="market-detail-stage-hero">
+                      <div class="hz-probability-hero hz-probability-hero--versus">
+                        {heroSides.map((side, i) => (
+                          <div
+                            class={`hz-probability-hero__side hz-probability-hero__side--${i === 0 ? 'leader' : 'trailer'}`}
+                            style={side.color ? `--side-team: ${side.color}` : undefined}
+                          >
+                            <span class="hz-probability-hero__value" data-hz-hero-value data-hz-outcome={side.id}>{side.prob}%</span>
+                            <span class="hz-probability-hero__side-name">{side.label}</span>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  ) : (
+                    <div class="market-detail-stage-hero">
+                      <div class="hz-probability-hero">
+                        <div class="hz-probability-hero__primary">
+                          <span class="hz-probability-hero__value" data-hz-hero-value data-hz-outcome={yes?.id}>{yesProb}%</span>
+                          <span class="hz-probability-hero__qualifier">
+                            סיכוי
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  )
+                )}
+
+                <ChartIsland
+                  marketKey={marketKey}
+                  seed={chartSeed}
+                  canonicalOutcomeId={yes?.id}
+                  namedOpponents={namedOpponents}
+                  outcomeColors={outcomeColors}
+                  marketStatus={snap.marketStatus}
+                  isResolved={isResolved}
+                  winnerOutcomeId={winnerOutcomeId}
+                  volumeLabel={snap.volumeLabel}
+                  closeLabel={snap.closeLabel}
+                  openAt={snap.lifecycle?.openAt}
+                />
+                {isBinary && (
+                  <ViewerPositionsIsland
+                    marketKey={marketKey}
+                    canonicalOutcomeId={yes?.id}
+                    noOutcomeId={noOutcome?.id}
+                    yesLabel={yes?.label || 'כן'}
+                    noLabel={noOutcome?.label || 'לא'}
+                    yesPrice={yesPrice}
+                    noPrice={noPrice}
+                  />
+                )}
+                {!isBinary && (
+                  <div class="market-detail-stage-hinge" data-market-detail-outcomes>
+                    <OutcomeLadder
+                      marketKey={marketKey}
+                      outcomes={outcomes}
+                      current={current}
+                      outcomeVolumes={snap.outcomeVolumes || {}}
+                    />
+                  </div>
+                )}
+              </Fragment>
+            )}
+
+            <section class="market-detail-dossier">
+              <div class="market-detail-dossier-main">
+                <section class="market-detail-trust-shell">
+                  <TrustSection snapshot={eventTrustSnapshot} />
+                </section>
+                <RelatedMarkets data={relatedData} />
+                <CommunitySection
+                  marketKey={marketKey}
+                  outcomes={outcomes}
+                  marketStatus={snap.marketStatus}
+                  eventChildren={isEvent ? eventChildren.map((c) => ({ key: c.marketId, label: c.label, status: c.status })) : []}
+                  defaultChildKey={isEvent ? (defaultChild?.marketId || '') : ''}
+                  eventId={isEvent ? (ev?.id || '') : ''}
+                  commentPreview={commentPreview}
+                />
+              </div>
+            </section>
+          </div>
+
+          <div class="market-detail-stage-side">
+          <aside class="market-detail-stage-rail" data-market-detail-stage-rail aria-hidden="false">
+            <button
+              class="market-detail-stage-rail-backdrop"
+              data-market-detail-mobile-ticket-backdrop
+              type="button"
+              aria-label="סגור טופס מסחר"
+            ></button>
+            <div class="market-detail-stage-order-widget">
+              {isEvent ? (
+                <TradeTicketIsland
+                  marketKey={defaultChild?.marketId}
+                  canonicalOutcomeId={dcYes?.outcomeId}
+                  noOutcomeId={dcNo?.outcomeId}
+                  title={defaultChild?.label}
+                  yesLabel="כן"
+                  noLabel="לא"
+                  yesPrice={Number(dcYes?.price ?? 0)}
+                  noPrice={Number(dcNo?.price ?? 0)}
+                  marketCrest={brandSrc || null}
+                  marketStatus={defaultChild?.status === 'open' ? 'open' : 'closed'}
+                />
+              ) : isResolved ? (
+                <ResolvedRail winnerLabel={snap.winner?.label} />
+              ) : isBinary ? (
+                <TradeTicketIsland
+                  marketKey={marketKey}
+                  canonicalOutcomeId={yes?.id}
+                  noOutcomeId={noOutcome?.id}
+                  title={title}
+                  yesLabel={yes?.label || 'כן'}
+                  noLabel={noOutcome?.label || 'לא'}
+                  yesPrice={yesPrice}
+                  noPrice={noPrice}
+                  yesColor={yes?.colorPrimary || null}
+                  noColor={noOutcome?.colorPrimary || null}
+                  yesColorOn={ctaOnColor(yes?.colorPrimary)}
+                  noColorOn={ctaOnColor(noOutcome?.colorPrimary)}
+                  yesCrest={yes?.crestPath || null}
+                  noCrest={noOutcome?.crestPath || null}
+                  marketCrest={brandSrc || null}
+                  marketStatus={snap.marketStatus}
+                />
+              ) : (
+                <TradeTicketIsland
+                  mode="multi"
+                  marketKey={marketKey}
+                  title={title}
+                  outcomes={outcomes}
+                  current={current}
+                  marketCrest={brandSrc || null}
+                  marketStatus={snap.marketStatus}
+                />
+              )}
+            </div>
+          </aside>
+          </div>
+        </section>
+        {isBinary && !isEvent && !isResolved && (
+          <div class="hz-mobile-trade-launcher" data-market-detail-mobile-launcher>
+            <div class="hz-mobile-trade-launcher__row">
+              <button
+                class="hz-mobile-trade-launcher__pill hz-mobile-trade-launcher__pill--yes"
+                data-market-detail-mobile-ticket-open
+                data-mobile-launcher-side="yes"
+                type="button"
+                aria-haspopup="dialog"
+                aria-expanded="false"
+              >
+                <span class="hz-mobile-trade-launcher__pill-label">{yes?.label || 'כן'}</span>
+                <span class="hz-mobile-trade-launcher__pill-price" dir="ltr" data-hz-pill-value data-hz-outcome={yes?.id} set:html={vshekelMoneyHtml(Math.round((Number(yesPrice) || 0) * 100))}></span>
+              </button>
+              <button
+                class="hz-mobile-trade-launcher__pill hz-mobile-trade-launcher__pill--no"
+                data-market-detail-mobile-ticket-open
+                data-mobile-launcher-side="no"
+                type="button"
+                aria-haspopup="dialog"
+                aria-expanded="false"
+              >
+                <span class="hz-mobile-trade-launcher__pill-label">{noOutcome?.label || 'לא'}</span>
+                <span class="hz-mobile-trade-launcher__pill-price" dir="ltr" data-hz-pill-value data-hz-outcome={noOutcome?.id} set:html={vshekelMoneyHtml(Math.round((Number(noPrice) || 0) * 100))}></span>
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )}
+</Layout>
+
+<script>
+  // @ts-nocheck — live-fetch bridge: one public market SSE per market-detail
+  // page. Payloads are doorbells; canonical data still comes from existing
+  // /history, /positions, /trades, and /portfolio/snapshot reads.
+  (function () {
+    if (typeof window.EventSource !== 'function') return;
+    let source = null;
+    let activeKey = '';
+    let retryTimer = null;
+    const COMMENT_EVENTS = ['comment.new', 'comment.reply', 'comment.like', 'comment.edit', 'comment.delete'];
+
+    function liveBuffer() {
+      const existing = window.NaviMarketLiveEvents;
+      if (existing && typeof existing.push === 'function' && typeof existing.recent === 'function') {
+        return existing;
+      }
+      const items = [];
+      const api = {
+        push(item) {
+          items.push(item);
+          if (items.length > 100) items.splice(0, items.length - 100);
+        },
+        recent() {
+          return items.slice();
+        },
+      };
+      window.NaviMarketLiveEvents = api;
+      return api;
+    }
+
+    function currentKey() {
+      // Re-query LIVE: ClientRouter swaps the page DOM on soft-nav, so the market key must
+      // be read fresh each time, not captured once at module-eval (else A→B stays on A).
+      const live = document.querySelector('.market-detail-page');
+      if (!live) return '';
+      return document.querySelector('[data-hz-ticket]')?.dataset.marketKey || live.dataset.marketKey || '';
+    }
+
+    function close() {
+      window.clearTimeout(retryTimer);
+      if (source) source.close();
+      source = null;
+      activeKey = ''; // reset so a revisit to the SAME market reconnects after a close
+    }
+
+    function emit(type, event) {
+      let payload = null;
+      try {
+        payload = JSON.parse(event.data || '{}');
+      } catch {
+        payload = null;
+      }
+      const detail = {
+        type,
+        marketKey: activeKey,
+        payload,
+        eventId: event.lastEventId || payload?.eventId || null,
+      };
+      if (String(type).startsWith('comment.')) liveBuffer().push(detail);
+      window.dispatchEvent(new CustomEvent('hz:market-live-fetch', { detail }));
+    }
+
+    function connect(nextKey) {
+      const key = String(nextKey || '').trim();
+      if (!key || key === activeKey) return;
+      // Don't open a stream for a backgrounded tab — the visibilitychange handler
+      // below re-syncs (and reconnects) on return, where the fresh market.snapshot
+      // is the catch-up. Mobile lens: a hidden market page on a flaky connection was
+      // either burning data or sitting on a silently-dead socket until refresh.
+      if (document.hidden) return;
+      window.clearTimeout(retryTimer);
+      close();
+      activeKey = key;
+      source = new EventSource('/api/markets/' + encodeURIComponent(key) + '/stream');
+      source.addEventListener('market.snapshot', (event) => emit('market.snapshot', event));
+      source.addEventListener('market.trade', (event) => emit('market.trade', event));
+      source.addEventListener('market.lifecycle', (event) => emit('market.lifecycle', event));
+      COMMENT_EVENTS.forEach((eventName) => {
+        source.addEventListener(eventName, (event) => emit(eventName, event));
+      });
+      source.onerror = () => {
+        // EventSource reconnects by itself; this fallback handles browsers that
+        // close permanently after local dev restarts.
+        if (source?.readyState === EventSource.CLOSED) {
+          retryTimer = window.setTimeout(() => {
+            const retryKey = activeKey;
+            activeKey = '';
+            connect(retryKey);
+          }, 1500);
+        }
+      };
+    }
+
+    function sync() {
+      const key = currentKey();
+      if (!key) { close(); return; } // left market detail → close the stream (no leak)
+      connect(key);                  // on a market page → (re)connect to its market
+    }
+
+    // Event-ladder child retarget (in-page).
+    window.addEventListener('hz:market-live-target', (event) => connect(event.detail?.marketKey));
+    // Soft-nav lifecycle: close on leave, re-sync to the new market on enter — so exactly one
+    // market SSE is alive and it always matches the visible market (beforeunload = hard unload).
+    document.addEventListener('astro:before-swap', close);
+    document.addEventListener('astro:page-load', sync);
+    // Visibility pause: drop the market stream when the tab backgrounds, reconnect to
+    // the visible market on return. Bound once (the IIFE runs once; sync re-runs via
+    // astro:page-load), so no listener pile-up.
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) close();
+      else sync();
+    });
+    window.addEventListener('beforeunload', () => { window.clearTimeout(retryTimer); close(); });
+    sync();
+  })();
+
+  // ── hero % + mobile launcher pills ride the same snapshot push ──────────────
+  // The chart + outcome ladder already subscribe; the binary hero number and the
+  // mobile pills were the orphaned SSR-static bits. Update them on market.snapshot
+  // and pulse via HzLive only when the value actually moved.
+  (function () {
+    const pctOf = (p) => Math.max(0, Math.min(100, Math.round(Number(p || 0) * 100)));
+    let prev = {};
+    window.addEventListener('hz:market-live-fetch', (event) => {
+      const d = event.detail;
+      if (!d || d.type !== 'market.snapshot') return;
+      const prices = (d.payload && Array.isArray(d.payload.prices)) ? d.payload.prices : [];
+      if (!prices.length) return;
+      const byKey = {};
+      prices.forEach((p) => { byKey[String(p.outcomeKey || p.outcomeId || '')] = pctOf(p.price); });
+
+      // One value (yes/no single hero) or two (versus dual readout) — update each
+      // by its own outcome key. Leader/trailer order isn't re-sorted live; a mid-
+      // session lead change keeps the SSR order (acceptable for now).
+      document.querySelectorAll('[data-hz-hero-value]').forEach((hero) => {
+        const k = hero.getAttribute('data-hz-outcome');
+        if (k && k in byKey) {
+          const n = byKey[k];
+          if (window.HzLive) window.HzLive.set(hero, n + '%', prev['h:' + k], n);
+          else hero.textContent = n + '%';
+          prev['h:' + k] = n;
+        }
+      });
+      document.querySelectorAll('[data-hz-pill-value]').forEach((pill) => {
+        const k = pill.getAttribute('data-hz-outcome');
+        if (k && k in byKey) {
+          const n = byKey[k];
+          pill.innerHTML = window.HZCurrency?.moneyHtml?.(n) || ('V₪ ' + n);
+          window.HZCurrency?.upgrade?.(pill);
+          if (prev['p:' + k] !== undefined && prev['p:' + k] !== n) {
+            pill.classList.remove('hz-live-pulse');
+            void pill.offsetWidth;
+            pill.classList.add('hz-live-pulse');
+          }
+          prev['p:' + k] = n;
+        }
+      });
+    });
+    // reset the change-cache when navigating to another market (outcomes differ)
+    document.addEventListener('astro:before-swap', () => { prev = {}; });
+  })();
+
+  // ── lifecycle flip on auto-close / auto-resolve / auto-void ─────────────────
+  // Prices already snap live via market.snapshot, but the SSR-baked chrome (resolved
+  // banner, disabled trade ticket, winner badge, void notice) needs a real re-render. When
+  // the oracle bridge pushes market.lifecycle with a NEW status, reload to render the true
+  // state. Guarded: fires once per load, only on an actual status change (no reload loop
+  // after the reload renders the new status), and never while an input is focused (don't
+  // nuke a half-typed trade). Lifecycle transitions are rare + significant — a reload is the
+  // honest update, not manufactured motion.
+  (function () {
+    var TERMINAL = { closed: 1, resolved: 1, voided: 1 };
+    let flipped = false;
+    const renderedStatus = () => {
+      const el = document.querySelector('[data-market-status]');
+      return el ? el.getAttribute('data-market-status') : null;
+    };
+    window.addEventListener('hz:market-live-fetch', (event) => {
+      const d = event.detail;
+      if (!d || d.type !== 'market.lifecycle') return;
+      const action = d.payload && (d.payload.action || d.payload.status);
+      if (!TERMINAL[action]) return;
+      if (flipped || action === renderedStatus()) return;
+      const ae = document.activeElement;
+      if (ae && (ae.tagName === 'INPUT' || ae.tagName === 'TEXTAREA' || ae.isContentEditable)) return;
+      flipped = true;
+      window.location.reload();
+    });
+    document.addEventListener('astro:before-swap', () => { flipped = false; });
+  })();
+</script>
+
+<script>
+  // @ts-nocheck — untyped inline script; TODO(typecheck-tighten): annotate then remove
+  document.querySelectorAll('[data-market-share]').forEach((button) => {
+    button.addEventListener('click', async () => {
+      if (window.HachozehShare || button.hasAttribute('data-hz-share')) return;
+      const title = button.dataset.shareTitle || document.title;
+      const text = button.dataset.shareText || '';
+      const url = button.dataset.shareUrl || window.location.href;
+
+      try {
+        if (navigator.share) {
+          await navigator.share({ title, text, url });
+        } else if (navigator.clipboard?.writeText) {
+          await navigator.clipboard.writeText(url);
+          button.setAttribute('title', 'הקישור הועתק');
+        }
+      } catch (error) {
+        if (error?.name !== 'AbortError') {
+          button.setAttribute('title', 'לא הצלחנו לשתף');
+        }
+      }
+    });
+  });
+</script>
+
+<script>
+  // @ts-nocheck — untyped inline script; TODO(typecheck-tighten): annotate then remove
+  // Save (bookmark) a market. Optimistic toggle. Persists via
+  // POST/DELETE /api/markets/:key/save. Saving a market is how you subscribe
+  // to market notifications; the dedicated /saved page comes later.
+  // Delegated + guarded so it survives ClientRouter soft-nav (the button node is
+  // swapped on nav; document persists). aria-pressed is the source of truth.
+  if (!document.documentElement.dataset.hzMarketSaveBound) {
+    document.documentElement.dataset.hzMarketSaveBound = '1';
+    const setSaved = (button, on) => {
+      button.setAttribute('aria-pressed', String(on));
+      button.classList.toggle('hz-icon-action--active', on); // designed "saved" state
+      button.title = on ? 'נשמר' : 'שמירת דף';
+      const icon = button.querySelector('.material-symbols-outlined');
+      if (icon) icon.textContent = on ? 'bookmark' : 'bookmark_border';
+    };
+    // Open the signup overlay instantly (same client-side seam the sidebar uses),
+    // not a full ?overlay= navigation. Falls back to a nav if the island hasn't
+    // hydrated yet. Guests get signup (not login) — same ask as trade/comment.
+    const openSignup = () => {
+      if (window.NaviOverlays?.open) window.NaviOverlays.open('signup');
+      else window.location.assign('?overlay=signup');
+    };
+    document.addEventListener('click', async (event) => {
+      const button = event.target.closest('[data-market-save]');
+      if (!button) return;
+      // Saving requires a session — bounce guests to the signup overlay.
+      if (document.documentElement.dataset.authHint !== 'user') {
+        openSignup();
+        return;
+      }
+      const page = button.closest('[data-market-key]') || document.querySelector('[data-market-key]');
+      const key = page?.dataset.marketKey;
+      if (!key) return;
+      const was = button.getAttribute('aria-pressed') === 'true';
+      const next = !was;
+      setSaved(button, next); // optimistic
+      try {
+        const response = await fetch(`/api/markets/${encodeURIComponent(key)}/save`, {
+          method: next ? 'POST' : 'DELETE',
+          credentials: 'include',
+          headers: { accept: 'application/json' },
+        });
+        if (response.status === 401) { setSaved(button, was); openSignup(); return; }
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const payload = await response.json().catch(() => null);
+        if (payload && typeof payload.saved === 'boolean') setSaved(button, payload.saved);
+      } catch {
+        setSaved(button, was); // revert on a real failure
+      }
+    });
+  }
+</script>
+
+<script>
+  // @ts-nocheck — untyped inline script; TODO(typecheck-tighten): annotate then remove
+  const viewport = window.matchMedia('(max-width: 960px)');
+  // Query the page/rail LIVE each time — ClientRouter swaps the page DOM on soft-nav, so a
+  // captured reference goes stale on re-entry (header background lost → transparent, mobile
+  // ticket drawer dead). The window/document listeners below bind once but read live DOM.
+  const getPage = () => document.querySelector('.market-detail-page');
+  const getRail = () => document.querySelector('[data-market-detail-stage-rail]');
+
+  // Sticky-header backdrop: fade in the opaque stage-head background once the page scrolls,
+  // so content scrolls *under* the header instead of bleeding through it. Reads the live
+  // page so the CURRENT market's header gets `--has-moved`; re-applied on astro:page-load.
+  function applyScroll() {
+    const page = getPage();
+    if (!page) return;
+    const y = window.scrollY;
+    page.classList.toggle('market-detail-page--has-moved', y > 4);
+    // Header eyebrow fold with hysteresis: collapse once we're clearly scrolled
+    // (>64px), restore only near the top (<20px). The dead-zone stops the fold
+    // from toggling — and the page from shaking — when scrolling slowly across a
+    // single threshold. The brand mark keeps the header height fixed, so this is
+    // a pure in-header reflow (eyebrow only), never a page-level one.
+    if (y > 64) page.classList.add('market-detail-page--head-compact');
+    else if (y < 20) page.classList.remove('market-detail-page--head-compact');
+  }
+  window.addEventListener('scroll', applyScroll, { passive: true });
+
+  // ticketHeld: this script's own held/not-held bit for the shared scroll-lock
+  // counter (window.NaviScrollLock). setTicketOpen(true) can be called while
+  // already open (outcome-row tap while the sheet is up) and close paths are
+  // multiple (backdrop, Escape, swipe, viewport change, trade-complete) — this
+  // guard keeps every one of them idempotent instead of trusting call-site
+  // discipline. Resolved LIVE via window.NaviScrollLock (never imported/cached)
+  // per the ClientRouter rule: a captured module reference goes stale across a
+  // soft-nav swap, but this script instance itself persists across swaps (Astro
+  // hoists <script> once), so `ticketHeld` as a plain module-scope `let` is safe.
+  let ticketHeld = false;
+
+  function setTicketOpen(isOpen) {
+    const nextOpen = Boolean(isOpen && viewport.matches);
+    getPage()?.classList.toggle('market-detail-page--ticket-open', nextOpen);
+    // Lock body scroll the same way the auth overlays do
+    // (`body.overlay-open { overflow: hidden }`) so the page can't move behind
+    // the open mobile ticket. Routed through the shared refcounted lock so this
+    // owner can't clobber a lock some other overlay (login, quick-buy) is
+    // still holding, and can't be clobbered by them either.
+    if (nextOpen && !ticketHeld) {
+      ticketHeld = true;
+      window.NaviScrollLock?.lock();
+    } else if (!nextOpen && ticketHeld) {
+      ticketHeld = false;
+      window.NaviScrollLock?.unlock();
+    }
+    getRail()?.setAttribute('aria-hidden', String(!nextOpen && viewport.matches));
+    document.querySelectorAll('[data-market-detail-mobile-ticket-open]').forEach((button) => {
+      button.setAttribute('aria-expanded', String(nextOpen));
+    });
+    // On close of the mobile sheet, tell the ticket island to wipe its amount so it
+    // reopens blank. Gated on viewport so Escape on the desktop rail never clears it.
+    if (!nextOpen && viewport.matches) window.dispatchEvent(new CustomEvent('hz:trade-ticket-close'));
+  }
+
+  function openTicket(side) {
+    if (side) {
+      document.querySelector(`[data-binary-pill-side="${side}"]`)?.click();
+    }
+    setTicketOpen(true);
+  }
+
+  // All click handling via document delegation so it survives soft-nav DOM swaps — the
+  // launcher buttons were per-button bound (→ dead on re-entry); now delegated.
+  document.addEventListener('click', (event) => {
+    const launcher = event.target.closest('[data-market-detail-mobile-ticket-open]');
+    if (launcher) {
+      openTicket(launcher.dataset.mobileLauncherSide || '');
+      return;
+    }
+    if (event.target.closest('[data-market-detail-mobile-ticket-backdrop]')) {
+      setTicketOpen(false);
+      return;
+    }
+    if (viewport.matches && event.target.closest('[data-ticket-outcome-id]')) {
+      setTicketOpen(true);
+    }
+  });
+
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') setTicketOpen(false);
+  });
+
+  viewport.addEventListener?.('change', () => setTicketOpen(false));
+
+  // Close the mobile trade sheet after a successful trade. The celebration
+  // (confetti + "בוצעה" button flip, ~1250ms) plays first, THEN the sheet slides
+  // away so the user lands back on the market they just bet on. Desktop is a
+  // sticky rail, so setTicketOpen no-ops there (it's gated on viewport.matches).
+  document.addEventListener('hz:trade-complete', () => {
+    if (!viewport.matches) return;
+    window.setTimeout(() => setTicketOpen(false), 1300);
+  });
+
+  // ── Swipe-down-to-dismiss on the mobile sheet ────────────────────────────
+  // Engages only when the sheet is scrolled to its top and the drag is downward,
+  // so it never steals the ticket's own internal scroll. Tracks the finger 1:1
+  // (`is-dragging` kills the CSS transition), then closes past a threshold or
+  // snaps back. Delegated on document so it survives soft-nav DOM swaps.
+  let dragStartY = null;
+  let dragDelta = 0;
+  let dragWidget = null;
+  document.addEventListener(
+    'touchstart',
+    (event) => {
+      if (!viewport.matches) return;
+      if (!getPage()?.classList.contains('market-detail-page--ticket-open')) return;
+      // Keyboard is up (amount input focused, see TradeTicket.jsx) — never let a
+      // drag-to-close fire mid-typing.
+      if (document.body.dataset.kbOpen === 'true') return;
+      const widget = event.target.closest?.('.market-detail-stage-order-widget');
+      if (!widget || widget.scrollTop > 0) return;
+      dragWidget = widget;
+      dragStartY = event.touches[0].clientY;
+      dragDelta = 0;
+    },
+    { passive: true },
+  );
+  document.addEventListener(
+    'touchmove',
+    (event) => {
+      if (dragStartY === null || !dragWidget) return;
+      const dy = event.touches[0].clientY - dragStartY;
+      if (dy <= 0) {
+        // dragged back up — hand control back to normal scrolling
+        if (dragDelta > 0) {
+          dragWidget.classList.remove('is-dragging');
+          dragWidget.style.transform = '';
+        }
+        dragDelta = 0;
+        return;
+      }
+      event.preventDefault();
+      dragDelta = dy;
+      dragWidget.classList.add('is-dragging');
+      dragWidget.style.transform = `translateY(${dy}px)`;
+    },
+    { passive: false },
+  );
+  const endDrag = () => {
+    if (!dragWidget) return;
+    const widget = dragWidget;
+    const delta = dragDelta;
+    dragWidget = null;
+    dragStartY = null;
+    dragDelta = 0;
+    widget.classList.remove('is-dragging');
+    widget.style.transform = ''; // CSS class drives the snap (open=0 / closed=100%)
+    if (delta > 110) setTicketOpen(false);
+  };
+  document.addEventListener('touchend', endDrag, { passive: true });
+  document.addEventListener('touchcancel', endDrag, { passive: true });
+
+  // Initial state + re-apply on every market-page entry (soft-nav swaps the DOM, so the
+  // sticky-header background + rail aria must be re-set for the fresh page).
+  function syncPage() {
+    applyScroll();
+    getRail()?.setAttribute('aria-hidden', String(viewport.matches));
+  }
+  syncPage();
+  document.addEventListener('astro:page-load', syncPage);
+
+  // Soft-nav cleanup: force the sheet closed and drop this script's OWN scroll
+  // lock before ClientRouter swaps the document. Without this, navigating away
+  // with the mobile ticket open left `ticketHeld` stuck `true` in this
+  // (persisting) script instance while the shared counter itself gets zeroed by
+  // scroll-lock.js's own before-swap handler — the two would desync (this
+  // script would think it still holds a lock that's already gone, and skip a
+  // real unlock() call the next time it thinks it's closing). Also drops the
+  // page-local UI state (ticket-open class, rail aria) so the destination page
+  // never inherits "sheet was open" visuals for a beat before syncPage() reruns.
+  document.addEventListener('astro:before-swap', () => {
+    getPage()?.classList.remove('market-detail-page--ticket-open');
+    getRail()?.removeAttribute('aria-hidden');
+    ticketHeld = false;
+  });
+</script>

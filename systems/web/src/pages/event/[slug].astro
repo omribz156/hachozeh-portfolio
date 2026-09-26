@@ -1,0 +1,46 @@
+---
+import Layout from '../../layouts/Layout.astro';
+
+const { slug = '' } = Astro.params;
+let error = null;
+
+try {
+  const selectedMarket = (
+    Astro.url.searchParams.get('market') ||
+    Astro.url.searchParams.get('child') ||
+    ''
+  ).trim();
+  if (selectedMarket) {
+    const params = new URLSearchParams(Astro.url.searchParams);
+    params.delete('market');
+    params.delete('child');
+    params.set('focus', '1');
+    return Astro.rewrite(`/markets/${encodeURIComponent(selectedMarket)}?${params.toString()}`);
+  }
+
+  return Astro.rewrite(
+    `/markets/${encodeURIComponent(
+      (await (await import('../../lib/market-detail.js')).resolveEventMarket(slug)).marketKey
+    )}`
+  );
+} catch (e) {
+  const raw = e?.message || 'event not found';
+  console.error('[event/[slug]] resolve failed:', raw);
+  Astro.response.status = raw.includes('HTTP 404') ? 404 : 500;
+  error = raw.includes('HTTP 404')
+    ? 'השוק הזה לא קיים או שהוסר.'
+    : 'לא הצלחנו לטעון את השוק. נסו שוב בעוד רגע.';
+}
+---
+
+<Layout
+  title="שוק לא נמצא · החוזה"
+  description="לא מצאנו את השוק המבוקש."
+  canonicalPath={`/event/${slug}`}
+  robots="noindex, follow"
+>
+  <div class="mx-auto w-full max-w-3xl px-6 py-16" dir="rtl">
+    <p style="color: var(--hz-text-muted);">{error}</p>
+    <a href="/" style="color: var(--hz-brand);">חזרה לשווקים</a>
+  </div>
+</Layout>

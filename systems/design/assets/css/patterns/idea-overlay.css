@@ -1,0 +1,134 @@
+/* ============================================================================
+   idea-overlay.css  ·  "יש לך רעיון?" feedback overlay
+   ----------------------------------------------------------------------------
+   Ported from systems/design/to integrate/have-an-idea/dist/idea-overlay.css.
+   Inner-content styles only. The panel shell (backdrop blur, surface, border,
+   radius, shadow, enter animation) comes from `.navi-overlay-panel` in the
+   auth-overlays pattern — this file only adds the width modifier + the form's
+   own elements. All values pull from base/tokens.css; no new colors.
+   Loaded globally via Layout.astro (next to auth-overlays.css).
+   ========================================================================== */
+
+/* Panel sizing — kept close to How It Works (540px) so the two overlays read as
+   the same weight, not a "fat" outlier. */
+.navi-overlay-panel--idea {
+  width: min(100%, 540px);
+  max-width: calc(100vw - 16px);
+  /* the shared .navi-overlay-panel ships 40px 36px padding (for the auth panels);
+     this form supplies its own via .idea-pad, so zero it out here — otherwise the
+     two stack into a fat double-padding (and a dead gap above the headline now that
+     the close-X is gone). */
+  padding: 0;
+  /* Cap to the VISIBLE viewport — dvh, not the shared base's 100vh. On mobile
+     100vh is the *large* viewport (address bar excluded), so the tall form ran
+     past the screen and the CTA fell below the fold. dvh keeps the panel on
+     screen; it scrolls internally (overflow:auto from the .navi-overlay-panel base). */
+  max-height: calc(100dvh - 20px);
+}
+
+/* Comfortable, even gutters all around (16px) — matches the How It Works scrim so
+   the panel floats with breathing room instead of hugging the screen edges. The
+   shell padding is zeroed so the gutter is purely this root padding, not doubled.
+   Scoped to the idea overlay via the data-overlay stamp renderOverlay sets. */
+.navi-overlay-root[data-overlay="idea"] { padding: 16px; }
+.navi-overlay-root[data-overlay="idea"] .navi-overlay-shell { padding: 0; }
+
+/* trimmed all round — lighter inner padding (was 30px inline) so the form doesn't
+   read heavier than How It Works; tight top/bottom keeps header/footer compact. */
+.idea-pad { padding: 14px 22px 14px; }
+
+.idea-head { margin: 0 0 16px; }
+.idea-title { margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -0.4px; color: var(--hz-text); text-wrap: balance; }
+.idea-sub { margin: 8px 0 0; font-size: 14px; line-height: 1.55; color: var(--hz-text-muted); max-width: 44ch; }
+
+/* type cards */
+/* minmax(0,1fr) not 1fr: 1fr tracks keep a min-width:auto floor, so card content
+   wider than a third of the panel would force horizontal overflow. */
+.idea-typecards { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-bottom: 18px; }
+.idea-typecard {
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  border: 1px solid var(--hz-border-soft); border-radius: var(--hz-radius-md);
+  background: var(--hz-surface-soft); padding: 14px 8px 12px; cursor: pointer;
+  font-family: inherit; transition: border-color var(--hz-motion), background var(--hz-motion);
+}
+.idea-typecard:hover { border-color: var(--hz-border); }
+.idea-typecard.is-active { border-color: var(--hz-brand); background: var(--hz-brand-soft); }
+.idea-typecard .material-symbols-outlined { font-size: 24px; color: var(--hz-text-muted); transition: color var(--hz-motion); }
+.idea-typecard.is-active .material-symbols-outlined { color: var(--hz-brand); }
+.idea-typecard__label { font-size: 14px; font-weight: 700; color: var(--hz-text); }
+
+/* fields */
+.idea-stack { display: flex; flex-direction: column; gap: 6px; }
+.idea-flabel { font-size: 12.5px; font-weight: 700; color: var(--hz-text-soft); margin: 12px 0 0; display: flex; align-items: center; gap: 8px; }
+.idea-box {
+  width: 100%; border: 1px solid var(--hz-border-soft); border-radius: var(--hz-radius-md);
+  background: var(--hz-surface-soft); color: var(--hz-text); font-family: inherit; font-size: 15px;
+  padding: 11px 13px; transition: border-color var(--hz-motion), box-shadow var(--hz-motion);
+}
+.idea-box::placeholder { color: var(--hz-text-faint); }
+.idea-box:focus { outline: none; border-color: var(--hz-brand-dim); box-shadow: var(--hz-focus-ring); }
+/* Starts as a single line (rows="1"), matching the title box above it; an
+   auto-grow handler (wireIdeaTextarea in page-overlay.js) expands it to fit the
+   content as the user types. overflow:hidden keeps the growth scrollbar-free. */
+.idea-box.idea-area { resize: none; line-height: 1.55; overflow: hidden; }
+.idea-box.has-error { border-color: var(--hz-action-sell); box-shadow: 0 0 0 3px var(--hz-action-sell-soft); }
+.idea-error { font-size: 12px; color: var(--hz-action-sell-strong); margin: 6px 2px 0; display: none; }
+.idea-error.is-shown { display: block; }
+
+/* attach affordance — a clip INSIDE the details box (replaces the old image line).
+   The textarea reserves an inline-end strip so its text never runs under the clip;
+   the clip sits in the bottom corner and tints brand once a file is attached. */
+.idea-detail { position: relative; }
+.idea-detail .idea-area { padding-inline-end: 42px; }
+.idea-clip {
+  position: absolute; inset-block-end: 7px; inset-inline-end: 7px;
+  width: 30px; height: 30px; display: grid; place-items: center; padding: 0;
+  border: 0; background: transparent; cursor: pointer; color: var(--hz-text-faint);
+  border-radius: var(--hz-radius-md); transition: color var(--hz-motion), background var(--hz-motion);
+}
+.idea-clip:hover { color: var(--hz-text-soft); background: var(--hz-surface-soft); }
+.idea-clip.has-file { color: var(--hz-brand); }
+.idea-clip .material-symbols-outlined { font-size: 19px; }
+
+/* submit + identity */
+.idea-cta {
+  width: 100%; margin-top: 22px; border: 0; cursor: pointer; border-radius: var(--hz-radius-pill);
+  background: var(--hz-brand); color: var(--hz-text-inverse); font-family: inherit; font-size: 16px;
+  font-weight: 800; padding: 13px; transition: background var(--hz-motion), transform var(--hz-motion-fast);
+}
+.idea-cta:hover { background: var(--hz-brand-strong); }
+.idea-cta:active { transform: translateY(1px); }
+.idea-cta:disabled { opacity: 0.6; cursor: default; }
+
+/* No white-space:nowrap on the row — a long email used to force the whole panel
+   to scroll sideways. The avatar stays fixed; the text part shrinks + truncates. */
+.idea-sender { display: flex; align-items: center; gap: 8px; margin-top: 10px; font-size: 12px; color: var(--hz-text-faint); min-width: 0; }
+.idea-sender > span:last-child { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.idea-sender b { color: var(--hz-text-muted); font-weight: 700; }
+.idea-sender__av { flex-shrink: 0; width: 22px; height: 22px; display: grid; place-items: center; border-radius: var(--hz-radius-pill); background: var(--hz-brand-soft); color: var(--hz-brand-strong); font-size: 10px; font-weight: 800; font-family: var(--hz-font-mono); }
+
+/* thank-you state */
+.idea-sent { text-align: center; padding: 20px 6px 14px; }
+.idea-sent__mark { width: 66px; height: 66px; margin: 0 auto 18px; display: grid; place-items: center; border-radius: var(--hz-radius-pill); background: var(--hz-action-buy-soft); border: 1px solid rgba(var(--hz-action-buy-rgb) / 0.3); }
+.idea-sent__mark .material-symbols-outlined { font-size: 36px; color: var(--hz-action-buy); }
+.idea-sent__title { margin: 0; font-size: 23px; font-weight: 800; color: var(--hz-text); }
+.idea-sent__body { margin: 9px auto 24px; max-width: 36ch; font-size: 14px; line-height: 1.6; color: var(--hz-text-muted); }
+.idea-sent__actions { display: flex; gap: 10px; justify-content: center; }
+.idea-sent__again, .idea-sent__done { font-family: inherit; font-size: 14px; font-weight: 700; border-radius: var(--hz-radius-pill); padding: 10px 22px; cursor: pointer; transition: all var(--hz-motion); }
+.idea-sent__again { border: 1px solid var(--hz-border-soft); background: transparent; color: var(--hz-text-soft); }
+.idea-sent__again:hover { border-color: var(--hz-border); color: var(--hz-text); }
+.idea-sent__done { border: 0; background: var(--hz-brand); color: var(--hz-text-inverse); }
+.idea-sent__done:hover { background: var(--hz-brand-strong); }
+
+@media (max-width: 560px) {
+  /* tighten the vertical rhythm so the form fits a phone with minimal scroll */
+  .idea-pad { padding: 14px 16px 14px; }
+  .idea-head { margin: 2px 0 12px; }
+  .idea-title { font-size: 22px; }
+  .idea-sub { font-size: 13.5px; }
+  .idea-typecards { gap: 7px; margin-bottom: 14px; }
+  .idea-typecard { padding: 12px 6px 10px; }
+  .idea-flabel { margin-top: 9px; }
+  .idea-cta { margin-top: 14px; padding: 12px; }
+  .idea-sender { margin-top: 10px; }
+}

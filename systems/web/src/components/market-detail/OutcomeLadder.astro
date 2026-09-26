@@ -1,0 +1,12 @@
+---
+import OutcomeLadder from './OutcomeLadder.jsx';
+const { marketKey, outcomes = [], current = {}, outcomeVolumes = {} } = Astro.props;
+---
+
+<OutcomeLadder
+  client:load
+  marketKey={marketKey}
+  outcomes={outcomes}
+  current={current}
+  outcomeVolumes={outcomeVolumes}
+/>

@@ -1,0 +1,11 @@
+{
+  "name": "@navi/seer",
+  "private": true,
+  "version": "0.1.0",
+  "description": "Navi Seer market supply lane",
+  "dependencies": {
+    "@navi/cli": "0.1.0",
+    "commander": "^14.0.3",
+    "zod": "^4.4.3"
+  }
+}

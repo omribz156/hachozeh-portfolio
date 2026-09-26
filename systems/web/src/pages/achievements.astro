@@ -1,0 +1,26 @@
+---
+// /achievements — owner's achievements cabinet. Ships the real verification
+// tag-track (gray→gold→diamond ascent + live purchase); badges are a "בקרוב"
+// panel until the achievements backend lands (finish-achievements-integration.md).
+import Layout from '../layouts/Layout.astro';
+import AchievementsCabinet from '../components/achievements/AchievementsCabinet.jsx';
+import '../styles/pages/achievements.css';
+
+const auth = Astro.locals.auth;
+if (!auth?.authenticated) {
+  return Astro.redirect('/?overlay=login', 302);
+}
+const payload = auth.payload as any;
+const verification = payload?.currentUser?.reputation?.verification ?? null;
+---
+
+<Layout
+  title="ארון ההישגים · החוזה"
+  description="מסלול התגים, הדרגות וההישגים שלך בהחוזה."
+  canonicalPath="/achievements"
+  robots="noindex, nofollow"
+>
+  <div class="hz-cabinet-wrap" data-screen-label="הישגים">
+    <AchievementsCabinet client:load verification={verification} />
+  </div>
+</Layout>

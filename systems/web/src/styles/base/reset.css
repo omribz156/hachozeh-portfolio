@@ -1,0 +1,86 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  min-height: 100vh;
+  min-height: 100dvh; /* dynamic viewport: don't size past the visible area when the iOS bar is shown */
+  margin: 0;
+  background: var(--hz-bg);
+  color: var(--hz-text);
+  font-family: var(--hz-font-ui);
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+/* Kill the grey tap-flash on every tappable surface — not just <button>/<a>, but
+   also custom role=button elements, labels, summaries and form controls. The
+   satisfying press feedback is provided intentionally by the touch :active
+   convention in global.css instead. */
+button,
+a,
+label,
+summary,
+input,
+select,
+textarea,
+[role="button"],
+[tabindex] {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Remove the legacy 300ms tap delay and double-tap-zoom on genuine controls
+   (kept off generic [tabindex]/content so it can't disable pinch-zoom on text). */
+button,
+a,
+label,
+summary,
+[role="button"] {
+  touch-action: manipulation;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input[type="number"] {
+  appearance: textfield;
+  -moz-appearance: textfield;
+}
+
+::selection {
+  background: rgba(232, 178, 87, 0.32);
+  color: var(--hz-text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

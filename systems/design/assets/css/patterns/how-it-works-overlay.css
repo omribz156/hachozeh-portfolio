@@ -1,0 +1,185 @@
+/* ============================================================
+   HZ — How It Works overlay (component styles)
+   Ported from systems/design/to-integrate/how-it-works/dist/hz-how-it-works.css.
+   Token-driven (--hz-*). Self-mounting; everything scoped to .hzhiw*.
+   NON-BLOCKING overlay: no body scroll-lock, no inert on the page behind,
+   no scrim blur. The surface keeps living; the panel just floats above it.
+
+   z-index 99: above the shell chrome (site-shell tops out at 95) but BELOW the
+   auth overlay tier (auth-overlays.css = 100). The walkthrough tears down before
+   it hands off to the signup overlay, so they never truly coexist — but keeping
+   it under the auth tier means an auth overlay opened from the still-live header
+   correctly covers it (matches the drop's signup-above-hiw intent).
+   ============================================================ */
+
+.hzhiw-scrim,
+.hzhiw-scrim *,
+.hzhiw-scrim *::before,
+.hzhiw-scrim *::after { box-sizing: border-box; }
+
+/* full-viewport layer. Catches the outside-click that closes the overlay,
+   but does NOT blur or freeze the page; dim only. */
+.hzhiw-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  /* Flex (not grid place-items): a grid auto-track grows to the 540px panel, so
+     the panel's max-width:100% resolved against the track and never clamped to
+     the viewport (→ 540px panel on a 390px phone). In flex, max-width:100%
+     resolves against the container content box, so it clamps correctly. The
+     panel's margin:auto centers it AND lets it scroll when taller than the
+     viewport (auto margins beat align-items, no top-clip). */
+  display: flex;
+  overflow-y: auto;
+  padding: 30px;
+  background: radial-gradient(circle at 50% 45%, rgba(7, 8, 12, 0.18), rgba(7, 8, 12, 0.42));
+  font-family: var(--hz-font-ui);
+  color: var(--hz-text);
+}
+
+/* the panel */
+.hzhiw {
+  position: relative;
+  margin: auto;
+  width: 540px;
+  max-width: 100%;
+  /* match the auth/idea overlay panel exactly (was the lighter --hz-surface-2) */
+  background: rgba(19, 20, 26, 0.96);
+  backdrop-filter: blur(28px);
+  border: 1px solid var(--hz-border-soft);
+  border-radius: var(--hz-radius-2xl);
+  box-shadow: var(--hz-shadow-overlay);
+  padding: 18px 18px 22px;
+  text-align: start;
+}
+
+/* image placeholder — host swaps the inner for a real <img>/screenshot */
+.hzhiw__art {
+  position: relative;
+  height: 248px;
+  width: 100%;
+  border-radius: var(--hz-radius-lg);
+  background:
+    repeating-linear-gradient(135deg,
+      rgba(255, 248, 232, 0.045) 0 11px,
+      rgba(255, 248, 232, 0.012) 11px 22px),
+    var(--hz-bg-muted);
+  border: 1px solid var(--hz-border-soft);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.hzhiw__art > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.hzhiw__art-tag {
+  position: absolute;
+  inset-block-start: 11px;
+  inset-inline-start: 11px;
+  font-family: var(--hz-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--hz-text-faint);
+  padding: 3px 8px;
+  border-radius: var(--hz-radius-pill);
+  border: 1px solid var(--hz-border-faint);
+  background: rgba(0, 0, 0, 0.25);
+}
+.hzhiw__art-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.hzhiw__art-icon {
+  width: 34px;
+  height: 34px;
+  margin-bottom: 12px;
+  color: var(--hz-brand-dim, var(--hz-brand));
+  opacity: 0.9;
+}
+.hzhiw__art-label {
+  font-family: var(--hz-font-mono);
+  font-size: 12px;
+  color: var(--hz-text-muted);
+  text-align: center;
+  padding: 0 16px;
+  line-height: 1.5;
+}
+
+/* body */
+.hzhiw__body {
+  padding: 0 8px;
+  margin-top: 26px;
+  text-align: start;
+}
+.hzhiw__title {
+  font-family: var(--hz-font-ui);
+  font-size: 27px;
+  font-weight: 700;
+  line-height: 1.18;
+  letter-spacing: -0.01em;
+  margin: 0 0 12px;
+  color: var(--hz-text);
+  text-wrap: balance;
+}
+.hzhiw__text {
+  font-size: 15px;
+  line-height: 1.62;
+  color: var(--hz-text-soft);
+  margin: 0;
+  text-wrap: pretty;
+  text-align: start;
+}
+
+/* footer — single full-width CTA */
+.hzhiw__foot {
+  margin-top: 28px;
+  padding: 0 2px;
+}
+.hzhiw__cta {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--hz-font-ui);
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  border: 0;
+  border-radius: var(--hz-radius-pill);
+  padding-block: 14px;
+  background: var(--hz-brand);
+  color: var(--hz-text-inverse);
+  box-shadow: 0 10px 26px rgba(var(--hz-brand-rgb), 0.22);
+  transition: background var(--hz-motion);
+}
+.hzhiw__cta:hover { background: var(--hz-brand-strong); }
+.hzhiw__cta svg { width: 16px; height: 16px; }
+
+/* ── mobile (≤560px) ──────────────────────────────────────────
+   Tighten the frame: less scrim padding (more room for the panel), a shorter
+   art frame, and a smaller title so a step fits a phone without scrolling. */
+@media (max-width: 560px) {
+  .hzhiw-scrim { padding: 16px; }
+  .hzhiw { padding: 14px 14px 18px; border-radius: var(--hz-radius-xl); }
+  .hzhiw__art { height: 190px; }
+  .hzhiw__body { margin-top: 20px; padding: 0 4px; }
+  .hzhiw__title { font-size: 22px; }
+  .hzhiw__text { font-size: 14.5px; }
+  .hzhiw__foot { margin-top: 22px; }
+}
+
+/* entrance — base state is VISIBLE; animate only when allowed */
+@media (prefers-reduced-motion: no-preference) {
+  .hzhiw-scrim[data-anim] { animation: hzhiwScrimIn var(--hz-motion) ease; }
+  .hzhiw-scrim[data-anim] .hzhiw { animation: hzhiwPanelIn var(--hz-motion-slow) cubic-bezier(.2,.9,.25,1.05); }
+  /* per-step content swap */
+  .hzhiw__body[data-swap] { animation: hzhiwFade var(--hz-motion-slow); }
+}
+@keyframes hzhiwScrimIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes hzhiwPanelIn { from { opacity: 0; transform: translateY(10px) scale(0.99); } to { opacity: 1; transform: none; } }
+@keyframes hzhiwFade   { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }

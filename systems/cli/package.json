@@ -1,0 +1,20 @@
+{
+  "name": "@navi/cli",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "exports": {
+    "./commander-argv": {
+      "types": "./commander-argv.d.ts",
+      "require": "./commander-argv.js",
+      "default": "./commander-argv.js"
+    }
+  },
+  "typesVersions": {
+    "*": {
+      "commander-argv": [
+        "commander-argv.d.ts"
+      ]
+    }
+  }
+}

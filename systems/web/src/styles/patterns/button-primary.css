@@ -1,0 +1,52 @@
+/* ──────────────────────────────────────────────────────────────
+   patterns/button-primary.css
+   Generic primary call-to-action button. Two size modifiers cover
+   the main use cases: --small for inline form actions (post a
+   comment), --large for sticky CTAs (trade submit). Color is
+   action-buy / action-sell aware via the side-aware overrides
+   inside trade-ticket; this base file sets the neutral resting
+   look (info-blue) and shape.
+   BEM:
+     .hz-button-primary           — base button
+     .hz-button-primary--small    — compact inline
+     .hz-button-primary--large    — full-width sticky CTA
+   ────────────────────────────────────────────────────────────── */
+
+
+  .hz-button-primary {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: var(--hz-radius-md);
+    background: var(--hz-info);
+    color: var(--hz-text);
+    font-weight: 700;
+    transition: all var(--hz-motion);
+  }
+
+  @media (hover: hover) {
+    .hz-button-primary:hover {
+      background: var(--hz-info);
+      filter: brightness(1.05);
+    }
+  }
+
+  .hz-button-primary--small {
+    padding: 0.56rem 1rem;
+    border-radius: var(--hz-radius-pill);
+    background: var(--hz-info);
+    font-size: 0.74rem;
+    font-weight: 700;
+    box-shadow: none;
+  }
+
+  .hz-button-primary--large {
+    width: 100%;
+    margin-top: 0.5rem;
+    padding: 0.875rem 1rem;
+    border-radius: var(--hz-radius-lg);
+    font-size: 1rem;
+    font-weight: 900;
+    box-shadow: 0 12px 28px rgb(var(--hz-info-rgb) / 0.25);
+  }

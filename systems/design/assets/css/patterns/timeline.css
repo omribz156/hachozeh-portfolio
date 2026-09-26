@@ -1,0 +1,125 @@
+/* ──────────────────────────────────────────────────────────────
+   patterns/timeline.css
+   Three-step horizontal lifecycle bar — open → closed → payout —
+   with a progress fill driven by `data-stage` and an inline
+   `--timeline-progress-width` style hook. Currently used inside
+   the market-detail trust accordion; reusable anywhere a
+   short ordered lifecycle needs visual progress.
+   BEM:
+     .hz-timeline                — grid container, holds rail + steps
+     .hz-timeline__step          — each step (title + sub-label)
+     .hz-timeline__step.is-done    — past the dot
+     .hz-timeline__step.is-current — at the dot (glow halo)
+   Stops are children of the step: <b>title</b><span>sub</span>.
+   ────────────────────────────────────────────────────────────── */
+
+
+  .hz-timeline {
+    --timeline-rail-inset: 16.6667%;
+    --timeline-rail-width: 66.6666%;
+    position: relative;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0;
+    padding: 2.15rem 0 0.18rem;
+  }
+
+  .hz-timeline::before {
+    content: "";
+    position: absolute;
+    top: 0.96rem;
+    right: var(--timeline-rail-inset);
+    left: var(--timeline-rail-inset);
+    height: 2px;
+    background: var(--hz-border);
+  }
+
+  .hz-timeline::after {
+    content: "";
+    position: absolute;
+    top: 0.96rem;
+    right: var(--timeline-rail-inset);
+    width: var(--timeline-progress-width, 0);
+    max-width: var(--timeline-rail-width);
+    height: 2px;
+    background: linear-gradient(90deg, var(--hz-action-buy), var(--hz-info));
+  }
+
+  .hz-timeline[data-stage="closed"]::after {
+    width: var(--timeline-progress-width, 33.3333%);
+  }
+
+  .hz-timeline[data-stage="paid"]::after {
+    width: var(--timeline-progress-width, var(--timeline-rail-width));
+  }
+
+  .hz-timeline__step {
+    position: relative;
+    display: grid;
+    gap: 0.42rem;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .hz-timeline__step::before {
+    content: "";
+    position: absolute;
+    top: -1.62rem;
+    z-index: 1;
+    width: 0.78rem;
+    height: 0.78rem;
+    border: 2px solid var(--hz-border-strong);
+    border-radius: var(--hz-radius-pill);
+    background: var(--hz-bg);
+    box-shadow: 0 0 0 5px var(--hz-bg);
+  }
+
+  .hz-timeline__step.is-done::before,
+  .hz-timeline__step.is-current::before {
+    border-color: var(--hz-action-buy);
+    background: var(--hz-action-buy);
+  }
+
+  .hz-timeline__step.is-current::before {
+    box-shadow:
+      0 0 0 5px var(--hz-bg),
+      0 0 24px rgb(var(--hz-action-buy-rgb) / 0.34);
+  }
+
+  .hz-timeline__step b {
+    color: var(--hz-text);
+    font-size: 0.9rem;
+    font-weight: 900;
+  }
+
+  .hz-timeline__step span {
+    max-width: 11rem;
+    color: var(--hz-text-muted);
+    font-size: 0.75rem;
+    font-weight: 750;
+    line-height: 1.45;
+  }
+
+  @media (max-width: 767px) {
+    .hz-timeline {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 1.35rem;
+      padding: 0.2rem 0 0.1rem;
+    }
+
+    .hz-timeline::before,
+    .hz-timeline::after {
+      content: none;
+    }
+
+    .hz-timeline__step {
+      justify-items: start;
+      padding-right: 1.4rem;
+      text-align: right;
+    }
+
+    .hz-timeline__step::before {
+      top: 0.15rem;
+      right: 0;
+    }
+  }

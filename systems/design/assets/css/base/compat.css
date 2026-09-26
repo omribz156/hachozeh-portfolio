@@ -1,0 +1,6 @@
+/*
+  Temporary compatibility aliases only.
+
+  New or refactored product UI must use named product classes and `--hz-*`
+  tokens instead of adding more selectors here.
+*/

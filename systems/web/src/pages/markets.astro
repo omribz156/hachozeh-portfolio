@@ -1,0 +1,317 @@
+---
+// All-markets crawl BRIDGE (/markets). Sibling of /traders: its job is to give
+// crawlers a permanent, rotation-independent server-rendered <a href> to every
+// market/event hub. The homepage only surfaces a rotating slice; the sitemap
+// lists everything but carries no PageRank — this page is the durable internal
+// link path. Deliberately lean and SEO-native (no cards, no client filter, no
+// game box): status is expressed as document STRUCTURE (an "open" section and a
+// "resolved" section), which is exactly what crawlers read. A richer, filterable
+// product surface can replace/extend this at the same URL later.
+//
+// Rows dedupe by publicPath — the 118 catalog markets collapse to ~61 event
+// hubs (event children share one /event/{slug}); we want one anchor per
+// destination, not per child outcome.
+import Layout from '../layouts/Layout.astro';
+import { fetchPublicMarketCatalog } from '../lib/public-market-catalog.js';
+import { fetchPublicTagList } from '../lib/tag-page.js';
+import { getCategoryHub, categoryHubPath } from '../lib/category-hubs.js';
+import {
+  buildCanonicalUrl,
+  buildWebPageJsonLd,
+  buildBreadcrumbJsonLd,
+  buildMarketItemListJsonLd,
+} from '../lib/seo.js';
+
+const TITLE = 'כל השווקים · החוזה';
+const DESCRIPTION = 'כל שווקי התחזיות של החוזה במקום אחד — שווקים פתוחים למסחר ושווקים שכבר הוכרעו, עם התוצאה שנקבעה.';
+const CANONICAL = '/markets';
+
+// Hebrew short date (day + month) for close/resolve labels. SSR-only, so a plain
+// Date is fine here (unlike workflow scripts).
+function shortDate(iso) {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (Number.isNaN(d.getTime())) return '';
+  return d.toLocaleDateString('he-IL', { day: 'numeric', month: 'short', year: 'numeric' });
+}
+
+let openHubs = [];
+let resolvedHubs = [];
+let truncated = false;
+
+try {
+  const catalog = await fetchPublicMarketCatalog({ status: 'all', limit: 1000, sort: 'id_asc' });
+  const markets = Array.isArray(catalog?.markets) ? catalog.markets : [];
+
+  if (catalog?.pagination?.nextCursor) {
+    // Same posture as sitemaps/markets.xml: never silently truncate — surface it.
+    truncated = true;
+    console.error('[markets] catalog exceeded one page — hubs are being truncated', {
+      nextCursor: catalog.pagination.nextCursor,
+      pageSize: markets.length,
+    });
+  }
+
+  // Collapse child markets to one hub per publicPath.
+  const byPath = new Map();
+  for (const m of markets) {
+    const path = m?.publicPath;
+    if (!path) continue;
+    const vol = Number(m?.volume?.value) || 0;
+    const existing = byPath.get(path);
+    if (!existing) {
+      byPath.set(path, {
+        path,
+        title: m.title || 'שוק בהחוזה',
+        // A hub is "open" if ANY child is still open; resolved only when all are.
+        open: m.marketStatus === 'open',
+        closeAt: m.closeAt || null,
+        resolvedAt: m.resolvedAt || null,
+        winner: m.winner?.label || null,
+        volume: vol,
+      });
+    } else {
+      existing.volume += vol;
+      if (m.marketStatus === 'open') {
+        existing.open = true;
+        existing.closeAt = existing.closeAt || m.closeAt || null;
+      }
+      if (m.resolvedAt && (!existing.resolvedAt || m.resolvedAt > existing.resolvedAt)) {
+        existing.resolvedAt = m.resolvedAt;
+      }
+      if (!existing.winner && m.winner?.label) existing.winner = m.winner.label;
+    }
+  }
+
+  const hubs = [...byPath.values()];
+  openHubs = hubs
+    .filter((h) => h.open)
+    .sort((a, b) => b.volume - a.volume || (a.closeAt || '').localeCompare(b.closeAt || ''));
+  resolvedHubs = hubs
+    .filter((h) => !h.open)
+    .sort((a, b) => (b.resolvedAt || '').localeCompare(a.resolvedAt || ''));
+} catch (e) {
+  console.error('[markets] catalog fetch failed', e);
+}
+
+const totalHubs = openHubs.length + resolvedHubs.length;
+
+// Browse-by-topic chips — the internal-link path into the /t/ entity hubs (otherwise
+// sitemap-only). Category-key tags point at their /topics/ home; entity tags at /t/<slug>.
+// Gated to populated tags (>= 3) so a chip never links to a slug that redirects to /search.
+let topicChips = [];
+try {
+  topicChips = (await fetchPublicTagList())
+    .filter((t) => t?.slug && (t.count ?? 0) >= 3)
+    .map((t) => ({
+      label: t.label,
+      href: getCategoryHub(t.slug) ? categoryHubPath(t.slug) : `/t/${encodeURIComponent(t.slug)}`,
+    }));
+} catch (e) {
+  console.error('[markets] tag list fetch failed', e);
+}
+
+const structuredData = [
+  buildWebPageJsonLd({
+    title: TITLE,
+    description: DESCRIPTION,
+    canonicalUrl: buildCanonicalUrl(CANONICAL),
+    type: 'CollectionPage',
+  }),
+  buildBreadcrumbJsonLd({
+    items: [
+      { name: 'החוזה', href: '/' },
+      { name: 'כל השווקים', href: CANONICAL },
+    ],
+  }),
+  buildMarketItemListJsonLd({
+    name: 'כל השווקים בהחוזה',
+    items: [...openHubs, ...resolvedHubs].map((h) => ({
+      href: h.path,
+      title: h.title,
+      closeLabel: h.open ? shortDate(h.closeAt) : shortDate(h.resolvedAt),
+    })),
+  }),
+];
+---
+
+<Layout title={TITLE} description={DESCRIPTION} canonicalPath={CANONICAL} structuredData={structuredData}>
+  <main class="allmk" data-active="all">
+    <div class="allmk__inner">
+      <nav class="allmk__crumb" aria-label="breadcrumb">
+        <a href="/">החוזה</a><span class="allmk__crumb-sep">/</span><span>כל השווקים</span>
+      </nav>
+      <h1 class="allmk__title">כל השווקים</h1>
+      <p class="allmk__lede">כל שווקי התחזיות של החוזה במקום אחד — פתוחים למסחר ושכבר הוכרעו. לחצו על שוק כדי לראות את המחיר, הגרף וההיסטוריה.</p>
+
+      {topicChips.length > 0 && (
+        <nav class="allmk__topics" aria-label="עיון לפי נושא">
+          <span class="allmk__topics-label">עיון לפי נושא:</span>
+          {topicChips.map((t) => (
+            <a class="allmk__topic" href={t.href}>{t.label}</a>
+          ))}
+        </nav>
+      )}
+
+      {totalHubs > 0 && (
+        <div class="allmk__filters" role="group" aria-label="סינון לפי סטטוס">
+          <button type="button" class="allmk__filter is-active" data-filter="all" aria-pressed="true">הכל</button>
+          <button type="button" class="allmk__filter" data-filter="open" aria-pressed="false">פתוחים</button>
+          <button type="button" class="allmk__filter" data-filter="resolved" aria-pressed="false">הוכרעו</button>
+        </div>
+      )}
+
+      {totalHubs === 0 ? (
+        <p class="allmk__empty">אין כרגע שווקים להצגה.</p>
+      ) : (
+        <>
+          {openHubs.length > 0 && (
+            <section class="allmk__section allmk__section--open" aria-labelledby="allmk-open">
+              <h2 class="allmk__heading" id="allmk-open">פתוחים למסחר <span class="allmk__count">{openHubs.length}</span></h2>
+              <ul class="allmk__list">
+                {openHubs.map((h) => (
+                  <li class="allmk__item">
+                    <a class="allmk__link" href={h.path}>
+                      <span class="allmk__name">{h.title}</span>
+                      {shortDate(h.closeAt) && <span class="allmk__meta">ייסגר {shortDate(h.closeAt)}</span>}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+
+          {resolvedHubs.length > 0 && (
+            <section class="allmk__section allmk__section--resolved" aria-labelledby="allmk-resolved">
+              <h2 class="allmk__heading" id="allmk-resolved">הוכרעו <span class="allmk__count">{resolvedHubs.length}</span></h2>
+              <ul class="allmk__list">
+                {resolvedHubs.map((h) => (
+                  <li class="allmk__item">
+                    <a class="allmk__link allmk__link--resolved" href={h.path}>
+                      <span class="allmk__name">{h.title}</span>
+                      {h.winner && <span class="allmk__meta allmk__meta--winner">הוכרע: {h.winner}</span>}
+                    </a>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
+        </>
+      )}
+    </div>
+  </main>
+</Layout>
+
+<style>
+  .allmk { padding-block: clamp(1.5rem, 4vw, 3rem); }
+  .allmk__inner {
+    max-width: var(--hz-content-max, 1280px);
+    margin: 0 auto;
+    padding-inline: var(--hz-content-pad, 1.5rem);
+  }
+  .allmk__crumb {
+    display: flex; align-items: center; gap: 0.4rem;
+    font-size: 0.8rem; color: var(--hz-text-faint, #8a857b); margin-bottom: 0.75rem;
+  }
+  .allmk__crumb a { color: inherit; text-decoration: none; }
+  .allmk__crumb a:hover { color: var(--hz-text-soft, #b9b3a7); }
+  .allmk__crumb-sep { opacity: 0.6; }
+  .allmk__title { font-size: clamp(1.5rem, 4vw, 2rem); font-weight: 800; color: var(--hz-text, #f4f1ea); margin: 0 0 0.4rem; }
+  .allmk__lede { color: var(--hz-text-soft, #b9b3a7); margin: 0 0 1.5rem; max-width: 44rem; }
+  .allmk__empty { color: var(--hz-text-soft, #b9b3a7); }
+
+  .allmk__topics {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem;
+    margin: 0 0 1.5rem;
+  }
+  .allmk__topics-label { font-size: 0.8rem; color: var(--hz-text-faint, #8a857b); margin-inline-end: 0.15rem; }
+  .allmk__topic {
+    font-size: 0.82rem; font-weight: 600;
+    color: var(--hz-text-soft, #b9b3a7); text-decoration: none;
+    padding: 0.3rem 0.75rem;
+    border: 1px solid var(--hz-border-soft, rgba(255,255,255,0.1));
+    border-radius: var(--hz-radius-pill, 999px);
+    background: var(--hz-surface, rgba(255,255,255,0.03));
+    transition: border-color 120ms ease, color 120ms ease, background 120ms ease;
+  }
+  .allmk__topic:hover {
+    color: var(--hz-text, #f4f1ea);
+    border-color: var(--hz-border, rgba(255,255,255,0.2));
+    background: var(--hz-surface-soft, rgba(255,255,255,0.06));
+  }
+
+  .allmk__filters { display: flex; gap: 0.4rem; margin: 0 0 2rem; flex-wrap: wrap; }
+  .allmk__filter {
+    font: inherit; font-size: 0.85rem; font-weight: 600;
+    color: var(--hz-text-soft, #b9b3a7);
+    padding: 0.4rem 0.9rem;
+    border: 1px solid var(--hz-border-soft, rgba(255,255,255,0.1));
+    border-radius: var(--hz-radius-pill, 999px);
+    background: var(--hz-surface, rgba(255,255,255,0.03));
+    cursor: pointer;
+    transition: border-color 120ms ease, background 120ms ease, color 120ms ease;
+  }
+  .allmk__filter:hover { border-color: var(--hz-border, rgba(255,255,255,0.2)); color: var(--hz-text, #f4f1ea); }
+  .allmk__filter.is-active {
+    color: var(--hz-bg, #12100c);
+    background: var(--hz-text, #f4f1ea);
+    border-color: var(--hz-text, #f4f1ea);
+  }
+
+  /* Client-side visibility only — both sections are always in the SSR HTML so
+     crawlers (no JS) see every anchor regardless of the active chip. */
+  .allmk[data-active="open"] .allmk__section--resolved,
+  .allmk[data-active="resolved"] .allmk__section--open { display: none; }
+  .allmk__section { margin-bottom: 2.25rem; }
+  .allmk__heading {
+    display: flex; align-items: baseline; gap: 0.5rem;
+    font-size: 1.05rem; font-weight: 700; color: var(--hz-text, #f4f1ea);
+    margin: 0 0 0.9rem; padding-bottom: 0.5rem;
+    border-bottom: 1px solid var(--hz-border-soft, rgba(255,255,255,0.1));
+  }
+  .allmk__count { font-size: 0.8rem; font-weight: 600; color: var(--hz-text-faint, #8a857b); }
+  .allmk__list {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; gap: 0.5rem;
+    grid-template-columns: repeat(auto-fill, minmax(17rem, 1fr));
+  }
+  .allmk__item { margin: 0; }
+  .allmk__link {
+    display: flex; flex-direction: column; gap: 0.2rem;
+    padding: 0.7rem 0.85rem;
+    border: 1px solid var(--hz-border-soft, rgba(255,255,255,0.1));
+    border-radius: var(--hz-radius-md, 0.6rem);
+    background: var(--hz-surface, rgba(255,255,255,0.03));
+    text-decoration: none;
+    transition: border-color 120ms ease, background 120ms ease;
+  }
+  .allmk__link:hover { border-color: var(--hz-border, rgba(255,255,255,0.2)); background: var(--hz-surface-soft, rgba(255,255,255,0.06)); }
+  .allmk__name { font-weight: 600; color: var(--hz-text, #f4f1ea); line-height: 1.35; }
+  .allmk__meta { font-size: 0.8rem; color: var(--hz-text-faint, #8a857b); }
+  .allmk__meta--winner { color: var(--hz-text-soft, #b9b3a7); }
+</style>
+
+<script>
+  // Status filter = pure client-side visibility toggle over the SSR list. Bound
+  // once via delegation on document (survives ClientRouter soft-nav — the swapped
+  // page DOM is re-created each visit, but document persists, so we never capture
+  // a stale node and never need re-init). Default SSR state is "all", so no-JS and
+  // crawlers get every section.
+  (function () {
+    if (window.__allmkFilterBound) return;
+    window.__allmkFilterBound = true;
+    document.addEventListener('click', (event) => {
+      const btn = event.target instanceof Element ? event.target.closest('.allmk__filter') : null;
+      if (!btn) return;
+      const root = btn.closest('.allmk');
+      if (!root) return;
+      const filter = btn.getAttribute('data-filter') || 'all';
+      root.setAttribute('data-active', filter);
+      root.querySelectorAll('.allmk__filter').forEach((el) => {
+        const on = el === btn;
+        el.classList.toggle('is-active', on);
+        el.setAttribute('aria-pressed', on ? 'true' : 'false');
+      });
+    });
+  })();
+</script>

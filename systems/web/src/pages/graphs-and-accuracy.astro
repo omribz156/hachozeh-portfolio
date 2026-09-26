@@ -1,0 +1,84 @@
+---
+// /graphs-and-accuracy (דיוק וגרפים) — public transparency page, "Instrument"
+// direction, ported from systems/design/to integrate/graphs-and-accuracy/.
+//
+// Chart data is fetched SSR from the backend transparency seam
+// (GET /api/transparency/accuracy) — never seeded. While the endpoint is absent
+// the page shows the empty data-state, not fake numbers. Methodology + FAQ are
+// static editorial copy. A thin client island drives scroll-spy, FAQ, and the
+// 4h/12h toggle. Backend contract: workspace/tasks/queued/finish-graphs-accuracy-integration.md.
+//
+// Preview states: ?state=loading|empty|error|ready overrides the resolved status.
+import Layout from '../layouts/Layout.astro';
+import { BACKEND_INTERNAL_URL } from '../lib/backend.js';
+import {
+  arcGauge, accuracyLine, predictionRealityBars, brierBars, splitBar, section,
+} from '../lib/graphs-accuracy-charts.js';
+import GraphsAccuracy from '../components/graphs-accuracy/GraphsAccuracy.jsx';
+import '../styles/pages/graphs-and-accuracy.css';
+
+// Chart data comes from the backend transparency seam — NOT seeded. Until
+// GET /api/transparency/accuracy ships (workspace/tasks/queued/
+// finish-graphs-accuracy-integration.md), the page degrades to the empty
+// data-state rather than showing placeholder numbers.
+let payload = null;
+let status = 'loading';
+try {
+  const res = await fetch(new URL('/api/transparency/accuracy', BACKEND_INTERNAL_URL), {
+    headers: { accept: 'application/json' },
+    signal: AbortSignal.timeout(1500),
+  });
+  if (res.ok) {
+    payload = await res.json().catch(() => null);
+    status = payload?.meta?.status || 'ready';
+  } else {
+    status = 'empty'; // endpoint not live yet → honest "no data", never seed
+  }
+} catch {
+  status = 'empty';
+}
+
+// Backend-fed chart data. Empty arrays/objects resolve to the per-section empty
+// state — no fabricated numbers ever render.
+const D = payload || {};
+const headline = D.headline || null;
+const accuracyTime = Array.isArray(D.accuracyTime) ? D.accuracyTime : [];
+const byHorizon = D.predictionRealityByHorizon || {};
+const pr4 = Array.isArray(D.predictionReality) ? D.predictionReality : (byHorizon['4h'] || []);
+const pr12 = Array.isArray(D.predictionReality12h) ? D.predictionReality12h : (byHorizon['12h'] || []);
+const brierData = Array.isArray(D.brier) ? D.brier : [];
+const resolution = D.resolution || {};
+const isLive = Boolean(D.meta && D.meta.isLive) && status === 'ready';
+
+// ?state=loading|empty|error|ready overrides for design/QA preview.
+const VALID_STATES = ['ready', 'loading', 'empty', 'error'];
+const urlState = Astro.url.searchParams.get('state');
+if (VALID_STATES.includes(urlState || '')) status = urlState;
+
+const gaugeHtml = (status === 'ready' && Boolean(headline)) ? arcGauge(headline.accuracy) : '';
+
+const charts = {
+  accuracy: section(status, accuracyTime, 300, () => accuracyLine(accuracyTime)),
+  prediction4h: section(status, pr4, 300, () => predictionRealityBars(pr4)),
+  prediction12h: section(status, pr12, 300, () => predictionRealityBars(pr12)),
+  brier: section(status, brierData, 280, () => brierBars(brierData)),
+  resolution: section(status, resolution, 96, () => splitBar(resolution)),
+};
+---
+
+<Layout
+  title="דיוק וגרפים · החוזה"
+  description="דו״ח שקיפות: דיוק התחזיות, כיול, מדד ברייר והרכב ההכרעות של שוק התחזיות החוזה."
+  activePage="graphs-and-accuracy"
+  canonicalPath="/graphs-and-accuracy"
+  image="/share/pages/graphs-and-accuracy.png"
+>
+  <GraphsAccuracy
+    client:load
+    status={status}
+    isLive={isLive}
+    headline={headline}
+    gaugeHtml={gaugeHtml}
+    charts={charts}
+  />
+</Layout>

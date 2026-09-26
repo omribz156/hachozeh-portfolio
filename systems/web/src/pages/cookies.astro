@@ -1,0 +1,71 @@
+---
+// Cookie Policy (Hebrew). Mirrors workspace/docs/legal/drafts/cookie-policy.he.md (v0.2).
+// Keep in sync with that draft; the draft is the lawyer-review working copy.
+export const prerender = true;
+import LegalPageShell from '../components/static/LegalPageShell.astro';
+import '../styles/pages/legal-page.css';
+---
+
+<LegalPageShell
+  title="מדיניות עוגיות — החוזה"
+  description="מדיניות העוגיות (Cookies) של פלטפורמת החוזה."
+  routeKey="cookies"
+  canonicalPath="/cookies"
+  robots="index, follow"
+>
+  <article class="hz-legal">
+    <h1>מדיניות עוגיות (Cookies) — החוזה</h1>
+
+    <h2>1. מהי עוגייה</h2>
+    <p>1.1. "עוגייה" (Cookie) היא קובץ טקסט קטן הנשמר בדפדפן שלך ומאפשר לשירות לזכור מידע בין עמודים ובין ביקורים. בנוסף, השירות עושה שימוש ב"אחסון מקומי" בדפדפן (sessionStorage/localStorage) למטרות דומות.</p>
+    <p>1.2. מדיניות זו מפרטת אילו עוגיות ואחסון מקומי אנו משתמשים בהם ולשם מה. היא משלימה את <a href="/privacy">מדיניות הפרטיות</a> שלנו.</p>
+
+    <h2>2. במה אנו משתמשים</h2>
+    <p>2.1. <strong>עוגיות חיוניות ותפקודיות (הכרחיות או נדרשות לתפקוד תקין):</strong> אנו עושים שימוש בעוגיות הבאות בלבד:</p>
+    <div class="hz-legal__table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>שם</th>
+            <th>מטרה</th>
+            <th>סוג</th>
+            <th>משך</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><code>navi_session</code></td>
+            <td>שמירת מצב ההתחברות שלך לשירות</td>
+            <td>חיונית · HttpOnly · SameSite=Lax · מאובטחת (Secure) בסביבת ייצור</td>
+            <td>עד כ־7 ימים</td>
+          </tr>
+          <tr>
+            <td><code>navi_wallet</code></td>
+            <td>שמירת יתרת השקלים הווירטואליים האחרונה להצגה מיידית בכותרת ולמניעת ריצוד בעת טעינה וניווט. אינה עוגיית מעקב ואינה כוללת מידע מזהה.</td>
+            <td>תפקודית · SameSite=Lax</td>
+            <td>עד כשעה</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <p>ללא עוגיית <code>navi_session</code> לא ניתן להתחבר ולהשתמש בשירות.</p>
+    <p>2.2. <strong>אחסון מקומי בדפדפן (sessionStorage/localStorage):</strong> אנו שומרים באופן זמני:</p>
+    <ul>
+      <li><code>navi.auth-session-cache.v1</code> — שמירת מצב התחברות לזמן קצר (כ־30 דקות).</li>
+      <li><code>posthog*</code> — מדידת שימוש במוצר דרך PostHog, ללא הקלטת מסך/סשן.</li>
+    </ul>
+    <p>2.3. <strong>אנליטיקה, ניטור ופרסום:</strong> אנו משתמשים בכלי אנליטיקה וניטור תקלות למדידת שימוש בסיסית, שיפור המוצר וזיהוי שגיאות. איננו משתמשים בעוגיות פרסום, במעקב פרסומי או בהקלטת מסך/סשן.</p>
+
+    <h2>3. תוכן ושירותים של צד שלישי</h2>
+    <p>3.1. השירות טוען גופנים משירות Google Fonts. טעינה זו אינה מציבה עוגייה, אך כרוכה במסירת כתובת ה־IP ופרטי הדפדפן לשרתי Google בעת הגלישה.</p>
+    <p>3.2. השירות משתמש ב־Google Analytics וב־PostHog למדידת שימוש בסיסית ואנליטיקת מוצר, וב־Sentry לניטור שגיאות. השירות מסופק דרך תשתית/רשת אספקת תוכן (Cloudflare) שעשויה לעשות שימוש באמצעים טכניים לצורכי אבטחה ואספקה. ראה/י מדיניות הפרטיות.</p>
+
+    <h2>4. ניהול עוגיות</h2>
+    <p>4.1. ניתן לחסום או למחוק עוגיות דרך הגדרות הדפדפן. שים/י לב: חסימת העוגייה החיונית <code>navi_session</code> תמנע התחברות ושימוש בשירות.</p>
+    <p>4.2. אם בעתיד נוסיף עוגיות פרסום או שימושים שאינם מתוארים במדיניות זו, נעדכן את המדיניות ונציג בקשת הסכמה מתאימה ככל שתידרש.</p>
+
+    <h2>5. שינויים ויצירת קשר</h2>
+    <p>5.1. אנו רשאים לעדכן מדיניות זו מעת לעת. שינוי מהותי יפורסם בשירות.</p>
+    <p>5.2. לשאלות: החוזה, דוא"ל: <a href="mailto:hachozeh@gmail.com">hachozeh@gmail.com</a>.</p>
+  </article>
+</LegalPageShell>

@@ -1,0 +1,358 @@
+/* ──────────────────────────────────────────────────────────────
+   search-stage.css — Hachozeh canonical search results surface
+   (markets + profiles). Ported from the design drop's search-kit.css,
+   with the stub shell/footer removed (real <Layout> supplies them) and
+   snapped to platform convention:
+     · content cap  → var(--hz-content-max) (was a hardcoded 1370px)
+     · content pad  → var(--hz-content-pad)
+     · rail fold    → 1024px (discovery contract, was 1200px)
+     · collided generics (hz-page/hz-hero/hz-num) namespaced to hz-search-*
+   RTL, driven entirely by --hz-* tokens. See workspace/to-integrate/search.
+   ────────────────────────────────────────────────────────────── */
+
+.hz-search-num {
+  font-family: var(--hz-font-mono);
+  font-feature-settings: "tnum";
+  letter-spacing: -0.01em;
+}
+
+/* ══════════════════ page frame ══════════════════ */
+.hz-search {
+  width: min(100%, var(--hz-content-max));
+  margin-inline: auto;
+  padding-inline: var(--hz-content-pad);
+  padding-block: var(--hz-space-8) var(--hz-space-12);
+}
+
+/* ── header (one line: title · count, optional bookmark glyph on the far edge) ── */
+.hz-search-hero { margin-bottom: var(--hz-space-5); }
+.hz-search-hero__bar {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: var(--hz-space-4);
+  padding-bottom: var(--hz-space-4);
+  border-bottom: 1px solid var(--hz-border-faint);
+}
+.hz-search-hero__head {
+  margin: 0; min-width: 0;
+  display: flex; align-items: baseline; gap: 0.5rem; flex-wrap: wrap;
+}
+.hz-search-hero__title {
+  color: var(--hz-text); font-weight: 800;
+  font-size: clamp(1.35rem, 2vw, 1.75rem); line-height: 1.1; letter-spacing: -0.01em;
+}
+.hz-search-hero__title .q { color: var(--hz-brand-strong); }
+.hz-search-hero__count { color: var(--hz-text-muted); font-size: clamp(1rem, 1.4vw, 1.2rem); font-weight: 600; }
+.hz-search-hero__count .sep { opacity: 0.55; margin-inline-end: 0.15rem; }
+.hz-search-hero__count b { color: inherit; font-weight: 600; }
+/* Inline bookmark glyph in the results header — a client-side toggle that
+   filters the current results down to the viewer's saved markets in place
+   (no navigation). is-saved = filter active. */
+.hz-search-hero__save {
+  display: inline-grid; place-items: center; flex-shrink: 0;
+  width: 2.5rem; height: 2.5rem;
+  border: 0; background: transparent; border-radius: var(--hz-radius-sm);
+  color: var(--hz-text-muted); cursor: pointer;
+  transition: color var(--hz-motion), background var(--hz-motion);
+}
+.hz-search-hero__save:hover { color: var(--hz-text); background: var(--hz-surface-hover); }
+.hz-search-hero__save.is-saved { color: var(--hz-brand); }
+.hz-search-hero__save .material-symbols-outlined { font-size: 1.45rem; }
+
+/* ══════════════════ layout: results + docked filter rail (folds to pill) ══════════════════
+   Filter in RTL column 2 (physical left); results in column 1 (right). Both
+   pinned to grid-row 1 so they align at the top. Under 1024px the rail
+   unhooks into a bottom-left pill + popover at the content edge. */
+.hz-layout2 {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 17.5rem;
+  gap: clamp(1.25rem, 2.5vw, 2.25rem);
+  align-items: start;
+  margin-top: var(--hz-space-6);
+}
+.hz-layout2 > section { grid-column: 1; grid-row: 1; }
+.hz-layout2 > .hz-filter-wrap { grid-column: 2; grid-row: 1; }
+
+.hz-filter-wrap {
+  position: sticky; top: 5rem; z-index: 5;
+  display: flex; flex-direction: column; gap: var(--hz-space-3);
+}
+.hz-filters {
+  display: flex; flex-direction: column; gap: var(--hz-space-4);
+  background: var(--hz-surface-soft);
+  border: 1px solid var(--hz-border-faint);
+  border-radius: var(--hz-radius-lg);
+  padding: var(--hz-space-4);
+}
+.hz-filters__head { display: flex; align-items: center; justify-content: space-between; }
+.hz-filters__title { font-size: 0.95rem; font-weight: 700; color: var(--hz-text); }
+.hz-filters__close {
+  display: none;
+  background: none; border: 0; color: var(--hz-text-muted); cursor: pointer;
+  line-height: 0; padding: 0.25rem; border-radius: 50%;
+}
+.hz-filters__close:hover { color: var(--hz-text); background: var(--hz-surface-hover); }
+
+.hz-filter-fab {
+  display: none;
+  position: fixed; bottom: 1.5rem; inset-inline-start: var(--hz-content-pad); z-index: 45;
+  align-items: center; gap: 0.5rem;
+  padding: 0.7rem 1.2rem; border: 0; border-radius: var(--hz-radius-pill);
+  background: var(--hz-brand); color: var(--hz-text-inverse);
+  font: inherit; font-weight: 700; font-size: 0.9rem; cursor: pointer;
+  box-shadow: var(--hz-shadow-rail);
+  transition: background var(--hz-motion), transform var(--hz-motion);
+}
+.hz-filter-fab:hover { background: var(--hz-brand-strong); transform: translateY(-1px); }
+.hz-filter-fab .material-symbols-outlined { font-size: 1.2rem; }
+.hz-filter-fab__badge {
+  display: inline-grid; place-items: center; min-width: 1.15rem; height: 1.15rem;
+  padding: 0 0.32rem; border-radius: var(--hz-radius-pill);
+  background: var(--hz-text-inverse); color: var(--hz-brand);
+  font-family: var(--hz-font-mono); font-size: 0.7rem; font-weight: 700;
+}
+.hz-filter-fab__badge[hidden] { display: none; }
+
+.hz-filter-backdrop {
+  display: none; position: fixed; inset: 0; z-index: 44; background: rgba(0,0,0,0.28);
+}
+
+@media (max-width: 1024px) {
+  .hz-layout2 { grid-template-columns: 1fr; }
+  .hz-filter-wrap {
+    position: fixed; top: auto; bottom: 5.35rem; inset-inline-start: var(--hz-content-pad);
+    width: min(21rem, calc(100vw - 3rem));
+    z-index: 46; display: none;   /* no transition — instant open/close */
+  }
+  .hz-filter-wrap.is-open { display: flex; }
+  .hz-filters {
+    max-height: min(68vh, 34rem); overflow-y: auto;
+    background: var(--hz-bg-raised); border-color: var(--hz-border-soft);
+    box-shadow: var(--hz-shadow-overlay);
+  }
+  .hz-filters__close { display: inline-flex; }
+  .hz-filter-fab { display: inline-flex; }
+  .hz-filter-backdrop.is-open { display: block; }
+}
+
+/* Phones mount the shell's fixed bottom-tab bar (.hz-shell__tabs: bottom:0,
+   height var(--hz-shell-bottom-tabs-h), z-index 80). The filter pill + popover
+   default to bottom:1.5rem/5.35rem at z-index 45/46 — entirely buried behind
+   that bar, so mobile lost its only filter entry point. Lift them above the bar
+   (same token + safe-area convention as the mobile trade launcher) and past its
+   stacking layer, so the pill is reachable and the open backdrop dims the tabs
+   too. Gated at 640px to match exactly where the bar appears. */
+@media (max-width: 640px) {
+  .hz-filter-fab {
+    bottom: calc(var(--hz-shell-bottom-tabs-h, 5rem) + env(safe-area-inset-bottom, 0px) + 0.9rem);
+    z-index: 82;
+  }
+  .hz-filter-wrap {
+    bottom: calc(var(--hz-shell-bottom-tabs-h, 5rem) + env(safe-area-inset-bottom, 0px) + 4.2rem);
+    z-index: 83;
+  }
+  .hz-filter-backdrop { z-index: 81; }
+}
+
+/* ══════════════════ dense list rows (shared: markets + profiles) ══════════════════ */
+.hz-rows { display: flex; flex-direction: column; }
+.hz-row {
+  display: grid;
+  grid-template-columns: 2.9rem minmax(0, 1fr) 8.5rem;
+  gap: var(--hz-space-4);
+  align-items: center;
+  padding: var(--hz-space-4) var(--hz-space-2);
+  border-bottom: 1px solid var(--hz-border-faint);
+  color: inherit; cursor: pointer;
+  transition: background var(--hz-motion);
+}
+.hz-row:hover { background: var(--hz-surface-soft); }
+.hz-row.is-pinned { background: rgba(var(--hz-brand-rgb), 0.045); }
+
+.hz-thumb {
+  width: 2.9rem; height: 2.9rem; border-radius: var(--hz-radius-sm);
+  display: grid; place-items: center; flex-shrink: 0;
+  background: var(--hz-surface-2); border: 1px solid var(--hz-border-faint);
+  color: var(--hz-text-soft); overflow: hidden;
+}
+.hz-thumb img { width: 100%; height: 100%; object-fit: cover; }
+.hz-thumb .material-symbols-outlined { font-size: 1.4rem; }
+.hz-thumb--amber { background: rgba(232, 178, 87, 0.16); color: var(--hz-brand-strong); }
+.hz-thumb--info  { background: rgba(122, 174, 230, 0.16); color: var(--hz-info); }
+.hz-thumb--buy   { background: rgba(93, 211, 158, 0.16); color: var(--hz-action-buy-strong); }
+.hz-thumb--sell  { background: rgba(231, 122, 138, 0.16); color: var(--hz-action-sell-strong); }
+.hz-thumb--round { border-radius: 50%; }
+.hz-thumb__code { font-family: var(--hz-font-mono); font-weight: 700; font-size: 0.72rem; letter-spacing: 0.02em; }
+
+.hz-row__main { min-width: 0; }
+.hz-row__cat {
+  display: flex; align-items: center; gap: 0.4rem;
+  color: var(--hz-text-muted); font-size: 0.76rem; font-weight: 600;
+  margin-bottom: 0.28rem;
+}
+.hz-row__cat b { color: var(--hz-brand-dim); font-weight: 700; }
+.hz-row__cat .sep { opacity: 0.5; }
+.hz-row__title {
+  /* display:block is required for the ellipsis clamp — a bare inline <span>
+     ignores text-overflow and lets a long RTL title spill left over the value
+     column on narrow (mobile) grids. */
+  display: block;
+  color: var(--hz-text); font-size: 1.02rem; font-weight: 600; line-height: 1.3;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.hz-row:hover .hz-row__title { color: var(--hz-brand-strong); }
+.hz-row__meta {
+  display: flex; align-items: center; gap: 0.85rem; flex-wrap: wrap;
+  margin-top: 0.4rem; color: var(--hz-text-faint); font-size: 0.78rem;
+}
+.hz-row__meta span { display: inline-flex; align-items: center; gap: 0.28rem; white-space: nowrap; }
+.hz-row__meta .material-symbols-outlined { font-size: 0.95rem; opacity: 0.85; }
+.hz-row__meta .val { color: var(--hz-text-muted); }
+.hz-row__meta .hot { color: var(--hz-signal-hot); }
+.hz-row__meta .handle { direction: ltr; color: var(--hz-text-muted); }
+
+/* signal pill inside a row's category strip */
+.hz-tag {
+  display: inline-flex; align-items: center; gap: 0.32rem;
+  padding: 0.14rem 0.5rem; border-radius: var(--hz-radius-pill);
+  font-size: 0.68rem; font-weight: 700; letter-spacing: 0.03em; line-height: 1;
+}
+.hz-tag__dot { width: 0.4rem; height: 0.4rem; border-radius: 50%; }
+.hz-tag--live { background: var(--hz-signal-live-soft); color: var(--hz-signal-live); }
+.hz-tag--live .hz-tag__dot { background: var(--hz-signal-live); animation: hz-search-pulse 1.4s ease-in-out infinite; }
+.hz-tag--hot { background: var(--hz-signal-hot-soft); color: var(--hz-signal-hot); }
+.hz-tag--hot .hz-tag__dot { background: var(--hz-signal-hot); }
+.hz-tag--new { background: var(--hz-signal-new-soft); color: var(--hz-signal-new); }
+.hz-tag--new .hz-tag__dot { background: var(--hz-signal-new); }
+.hz-tag--closing { background: var(--hz-signal-closing-soft); color: var(--hz-signal-closing); }
+.hz-tag--closing .hz-tag__dot { background: var(--hz-signal-closing); }
+@keyframes hz-search-pulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.35); opacity: 0.6; } }
+
+/* right cell — fixed width so the value column + chevron/action align across rows */
+.hz-row__side { display: flex; align-items: center; gap: 0.55rem; }
+.hz-prob { flex: 1; display: flex; flex-direction: column; align-items: flex-end; min-width: 0; }
+.hz-prob__val {
+  font-family: var(--hz-font-mono); font-feature-settings: "tnum";
+  font-size: 1.5rem; font-weight: 700; line-height: 1; color: var(--hz-text);
+}
+.hz-prob__val.acc { color: var(--hz-action-buy-strong); }
+.hz-prob__sub {
+  margin-top: 0.28rem; font-size: 0.74rem; color: var(--hz-text-muted);
+  max-width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.hz-prob__sub.up { color: var(--hz-signal-rising); }
+.hz-prob__sub.down { color: var(--hz-signal-falling); }
+.hz-row__chev { color: var(--hz-text-faint); line-height: 0; flex-shrink: 0; }
+.hz-row:hover .hz-row__chev { color: var(--hz-text-muted); }
+.hz-row__chev .material-symbols-outlined { font-size: 1.4rem; }
+
+/* profile-row specifics (wider side cell for the follow pill) */
+.hz-prow { grid-template-columns: 2.9rem minmax(0, 1fr) 10rem; }
+.hz-prow__name {
+  display: flex; align-items: center; gap: 0.3rem;
+  color: var(--hz-text); font-size: 1.02rem; font-weight: 600; line-height: 1.3;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.hz-row:hover .hz-prow__name { color: var(--hz-brand-strong); }
+.hz-prow__name .material-symbols-outlined { font-size: 1.05rem; color: var(--hz-info); flex-shrink: 0; }
+.hz-follow {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.3rem;
+  padding: 0.4rem 0.85rem; border-radius: var(--hz-radius-pill);
+  border: 1px solid var(--hz-border-soft); background: transparent;
+  color: var(--hz-text-soft); font: inherit; font-size: 0.8rem; font-weight: 700;
+  cursor: pointer; white-space: nowrap; flex-shrink: 0;
+  transition: background var(--hz-motion), color var(--hz-motion), border-color var(--hz-motion);
+}
+.hz-follow:hover { border-color: var(--hz-border); color: var(--hz-text); }
+.hz-follow.is-on { background: var(--hz-brand-soft); color: var(--hz-brand-strong); border-color: rgba(var(--hz-brand-rgb), 0.4); }
+.hz-follow .material-symbols-outlined { font-size: 1rem; }
+.hz-follow[disabled] { opacity: 0.6; cursor: default; }
+
+/* ══════════════════ filter controls (inside .hz-filters) ══════════════════ */
+.hz-rail__within { position: relative; }
+.hz-rail__within .material-symbols-outlined {
+  position: absolute; inset-inline-end: 0.7rem; top: 50%; transform: translateY(-50%);
+  color: var(--hz-text-faint); font-size: 1.05rem; pointer-events: none;
+}
+.hz-rail__within input {
+  width: 100%; appearance: none;
+  background: var(--hz-bg-soft); border: 1px solid var(--hz-border-faint);
+  border-radius: var(--hz-radius-sm); padding: 0.55rem 2.4rem 0.55rem 0.8rem;
+  font: inherit; font-size: 16px; color: var(--hz-text);
+}
+.hz-rail__within input:focus { outline: none; border-color: rgba(var(--hz-brand-rgb), 0.5); }
+
+.hz-rail__label {
+  color: var(--hz-text-muted); font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.06em; text-transform: uppercase;
+  margin-bottom: var(--hz-space-3);
+}
+
+.hz-sort { display: flex; flex-wrap: wrap; gap: 0.4rem; }
+.hz-sort__opt {
+  display: inline-flex; align-items: center; gap: 0.35rem;
+  padding: 0.35rem 0.7rem; border-radius: var(--hz-radius-pill);
+  border: 1px solid var(--hz-border-soft); background: transparent;
+  color: var(--hz-text-soft); font: inherit; font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; white-space: nowrap;
+  transition: background var(--hz-motion), color var(--hz-motion), border-color var(--hz-motion);
+}
+.hz-sort__opt:hover { background: var(--hz-surface-hover); border-color: var(--hz-border); }
+.hz-sort__opt .material-symbols-outlined { font-size: 1rem; color: var(--hz-text-muted); }
+.hz-sort__opt.is-active {
+  background: var(--hz-brand-soft); color: var(--hz-brand-strong);
+  border-color: rgba(var(--hz-brand-rgb), 0.4);
+}
+.hz-sort__opt.is-active .material-symbols-outlined { color: var(--hz-brand); }
+
+.hz-seg {
+  display: grid; grid-auto-flow: column; grid-auto-columns: 1fr;
+  gap: 0.25rem; padding: 0.25rem;
+  background: var(--hz-bg-soft); border: 1px solid var(--hz-border-faint);
+  border-radius: var(--hz-radius-sm);
+}
+.hz-seg__btn {
+  display: grid; place-items: center;   /* <a> doesn't center text like <button> — center it */
+  min-height: 1.9rem;
+  padding: 0.45rem 0.3rem; border-radius: var(--hz-radius-xs);
+  border: 0; background: transparent; color: var(--hz-text-muted);
+  font: inherit; font-size: 0.82rem; font-weight: 600; cursor: pointer;
+  text-align: center; text-decoration: none;
+  transition: background var(--hz-motion), color var(--hz-motion);
+}
+.hz-seg__btn:hover { color: var(--hz-text-soft); }
+.hz-seg__btn.is-active { background: var(--hz-surface-3); color: var(--hz-text); }
+
+.hz-rail__clear {
+  align-self: center;
+  background: none; border: 0; color: var(--hz-text-muted);
+  font: inherit; font-size: 0.82rem; font-weight: 600; cursor: pointer;
+  padding: 0.4rem 0.6rem; border-radius: var(--hz-radius-sm);
+}
+.hz-rail__clear:hover { color: var(--hz-text); background: var(--hz-surface-hover); }
+
+/* avatar / thumb tints */
+.tint-a { background: rgba(232,178,87,0.18); color: var(--hz-brand-strong); }
+.tint-b { background: rgba(122,174,230,0.18); color: var(--hz-info); }
+.tint-c { background: rgba(93,211,158,0.18); color: var(--hz-action-buy-strong); }
+.tint-d { background: rgba(231,122,138,0.18); color: var(--hz-action-sell-strong); }
+
+/* ══════════════════ empty / prompt states ══════════════════ */
+.hz-search-empty {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: var(--hz-space-3); text-align: center;
+  min-height: 40vh; color: var(--hz-text-muted);
+}
+/* the [hidden] attribute must beat the display:flex above (UA display:none is
+   weaker than a class rule) — used by the saved-only filter's empty note. */
+.hz-search-empty[hidden] { display: none; }
+.hz-search-empty .material-symbols-outlined { font-size: 2.6rem; color: var(--hz-text-faint); }
+.hz-search-empty__title { font-size: 1.1rem; font-weight: 700; color: var(--hz-text); }
+.hz-search-empty__body { font-size: 0.9rem; max-width: 30rem; line-height: 1.6; }
+
+/* parent-event row (a grouping page, not a tradable child market) */
+.hz-tag--event {
+  background: var(--hz-brand-soft, rgba(232,178,87,0.16));
+  color: var(--hz-brand-strong, #f5c771);
+  padding: 0.14rem 0.5rem;
+}
+.hz-row--event .hz-row__title { color: var(--hz-brand-strong); }

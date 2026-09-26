@@ -1,0 +1,37 @@
+/* Resolved-market rail — extracted from ResolvedRail.astro <style> block.
+   Imported by ResolvedRail.astro so the scoped styles survive the Preact port. */
+
+.hz-resolved-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.55rem;
+  padding: 1.85rem 1rem 1rem;
+}
+.hz-resolved-rail__check {
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--hz-radius-pill);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.15rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--hz-bg);
+  background: var(--hz-brand);
+}
+.hz-resolved-rail__verdict {
+  font-family: var(--hz-font-display);
+  font-size: 1.15rem;
+  font-weight: 800;
+  line-height: 1.2;
+  color: var(--hz-brand);
+}
+.hz-resolved-rail__name {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--hz-text-muted);
+}

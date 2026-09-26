@@ -1,0 +1,367 @@
+---
+// The shared shell — defined ONCE, inherited by every page.
+// Owns <head>, meta, fonts, the global CSS spine, RTL/lang, and the
+// header/footer chrome. Pages supply only their unique <slot/> content.
+// (The full site-shell — nav, search, auth — gets ported in Phase 2;
+// this is the skeleton that proves the pattern and kills <head> drift.)
+import '../styles/global.css';
+import '../styles/patterns/vshekel.css';
+import '../styles/patterns/site-shell.css';
+import '../styles/patterns/auth-overlays.css';
+import '../styles/patterns/idea-overlay.css';
+import '../styles/patterns/how-it-works-overlay.css';
+import '../styles/patterns/daily-streak.css';
+import '../styles/patterns/share-modal.css';
+import '../styles/patterns/notifications.css';
+import '../styles/patterns/result-overlay.css';
+import '../styles/patterns/live-pulse.css';
+import '../styles/patterns/dispute-modal.css';
+import '../styles/patterns/quick-buy-sheet.css';
+// The trade ticket can now pop on ANY page (QuickBuyHost), so its styling — the
+// ticket layout + mobile-sheet internals (trade-ticket.css) and the submit button
+// (button-primary.css) — must be global, not market-detail-only.
+import '../styles/patterns/trade-ticket.css';
+import '../styles/patterns/button-primary.css';
+import { ClientRouter } from 'astro:transitions';
+import { ASSET_VERSION } from '../lib/asset-version.js';
+import SiteHeader from '../components/SiteHeader.astro';
+import SiteFooter from '../components/SiteFooter.astro';
+import GoogleAnalyticsTag from '../components/GoogleAnalyticsTag.astro';
+import PostHogTag from '../components/PostHogTag.astro';
+import PageOverlayHost from '../components/overlay/PageOverlayHost.jsx';
+import QuickBuyHost from '../components/quick-buy/QuickBuyHost.jsx';
+import { serializeJsonForHtmlScript } from '../lib/json-script.js';
+import {
+  DEFAULT_SEO_DESCRIPTION,
+  SITE_LANGUAGE,
+  SITE_LOCALE,
+  SITE_NAME,
+  buildCanonicalUrl,
+  buildFeedUrl,
+  buildPageTitle,
+  buildSocialImageMeta,
+  buildWebSiteJsonLd,
+  buildWebPageJsonLd,
+  clampSeoText,
+  compactText,
+  withLargeImagePreviewRobots,
+} from '../lib/seo.js';
+
+interface Props {
+  title?: string;
+  description?: string;
+  activePage?: string;
+  canonicalPath?: string;
+  canonicalUrl?: string;
+  image?: string;
+  robots?: string;
+  ogType?: string;
+  twitterCard?: string;
+  structuredData?: Record<string, unknown> | Array<Record<string, unknown>>;
+  feedLinks?: Array<{ title: string; href: string; type?: string }>;
+  descriptionMaxLength?: number;
+  showFooter?: boolean;
+}
+const {
+  title = SITE_NAME,
+  description,
+  activePage = 'trending',
+  canonicalPath,
+  canonicalUrl,
+  image,
+  robots = 'index, follow',
+  ogType = 'website',
+  twitterCard = 'summary',
+  structuredData,
+  feedLinks = [],
+  descriptionMaxLength = 160,
+  showFooter = true,
+} = Astro.props;
+const seoTitle = buildPageTitle(title);
+const seoDescription = clampSeoText(description, descriptionMaxLength, DEFAULT_SEO_DESCRIPTION);
+const seoCanonicalUrl = canonicalUrl || buildCanonicalUrl(canonicalPath || Astro.url.pathname);
+const seoImageMeta = buildSocialImageMeta(image);
+const seoImage = seoImageMeta.url;
+// Auto-upgrade to a large Twitter card when the resolved OG image IS a 1200×630
+// share card, so a page pointing at one never falls back to a small thumbnail by
+// forgetting the override. Pages that set a non-default card still win.
+const seoTwitterCard = twitterCard === 'summary' && seoImageMeta.width === 1200
+  ? 'summary_large_image'
+  : twitterCard;
+const seoRobots = withLargeImagePreviewRobots(robots);
+const jsonLd = structuredData || buildWebPageJsonLd({
+  title: seoTitle,
+  description: seoDescription,
+  canonicalUrl: seoCanonicalUrl,
+  imageUrl: seoImage,
+});
+const jsonLdItems = [buildWebSiteJsonLd(), ...(Array.isArray(jsonLd) ? jsonLd : [jsonLd])];
+const alternateFeeds = feedLinks
+  .filter((feed) => feed?.href && feed?.title)
+  .map((feed) => ({
+    title: feed.title,
+    href: buildFeedUrl(feed.href),
+    type: feed.type || 'application/rss+xml',
+  }));
+
+// Server-validated auth (src/middleware.ts) — drives the header chrome so first
+// paint matches reality, and is handed to the client so it can adopt the already-
+// validated session instead of re-fetching /api/session on load.
+// Fallback = validated:false on purpose: middleware sets locals.auth on every SSR
+// request, so this default is only reached on PRERENDERED pages (e.g. /help, built
+// at build time where no session exists). Marking it unvalidated tells the client
+// to re-check /api/session and flip to user mode — otherwise a build-time 'guest'
+// seed would be trusted as authoritative and signed-in users would see no auth.
+const ssrAuth = Astro.locals.auth ?? { authenticated: false, validated: false, payload: null };
+const ssrAuthenticated = ssrAuth.authenticated === true;
+---
+
+<!doctype html>
+<html class="dark" dir="rtl" lang="he" data-auth-hint={ssrAuthenticated ? 'user' : 'guest'}>
+  <head>
+    <meta charset="utf-8" />
+    <!-- viewport-fit=cover is REQUIRED for env(safe-area-inset-*) to resolve to
+         anything but 0 on notched iPhones. Without it, the bottom-tab bar and the
+         mobile trade launcher (which both already reference the insets) silently
+         fail to clear the home indicator.
+         interactive-widget=resizes-content (Chrome/Android 108+, no-op elsewhere)
+         makes the on-screen keyboard shrink `100dvh`/visualViewport instead of
+         just overlaying content — the simpler Android-side half of the trade-ticket
+         keyboard-avoidance fix (see TradeTicket.jsx's visualViewport handler). -->
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
+    <GoogleAnalyticsTag />
+    <PostHogTag />
+    <ClientRouter />
+    <!-- Server-validated auth seed. middleware.ts validated the navi_session cookie
+         against the backend and Layout stamped <html data-auth-hint> above, so the
+         correct header chrome paints with zero JS. This hands the same verified state
+         to the auth client so it adopts it as the initial state and never flips
+         guest↔user on load. -->
+    <script is:inline define:vars={{ naviSsrAuth: ssrAuth }}>
+      window.__NAVI_SSR_AUTH = naviSsrAuth;
+    </script>
+    <style is:inline>
+      html[data-auth-hint='user'] [data-shell-guest-actions] { display: none !important; }
+      html[data-auth-hint='user'] [data-shell-user-actions] { display: flex !important; }
+      /* Search is shown for everyone now (guests included) via the ≥768px base CSS
+         rule in site-shell.css — no auth gate, no SSR hidden attr, so no flash. */
+      /* Reserve the wallet width so the 'בודק...' placeholder → balance doesn't reflow
+         the action row on every load. Reserve on the CELL, not the value: a min-width
+         on the value widened that box and let the number drift off the 'יתרה' label's
+         edge. On the cell, both label and value stay pinned to the same (flex-end) edge
+         and the slack sits on the far side. */
+      .hz-shell__wallet-cell { min-width: 7.5em; }
+      /* The "איך זה עובד?" walkthrough link is a guest-education affordance;
+         hide it for signed-in users pre-paint (same data-auth-hint pattern as
+         the guest/user action swap above) so it never flashes in for traders.
+         Post-signup users get the one-shot auto-open instead. */
+      html[data-auth-hint='user'] [data-hiw-nav] { display: none !important; }
+    </style>
+    <title>{seoTitle}</title>
+    <meta name="description" content={seoDescription} />
+    <meta name="robots" content={seoRobots} />
+    <link rel="canonical" href={seoCanonicalUrl} />
+    <meta name="theme-color" content="#101512" />
+    <link rel="alternate" hreflang={SITE_LANGUAGE} href={seoCanonicalUrl} />
+    <link rel="alternate" hreflang="x-default" href={seoCanonicalUrl} />
+    {alternateFeeds.map((feed) => (
+      <link rel="alternate" type={feed.type} title={feed.title} href={feed.href} />
+    ))}
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:locale" content={SITE_LOCALE} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={seoTitle} />
+    <meta property="og:description" content={seoDescription} />
+    <meta property="og:url" content={seoCanonicalUrl} />
+    <meta property="og:image" content={seoImage} />
+    <meta property="og:image:secure_url" content={seoImage} />
+    <meta property="og:image:type" content={seoImageMeta.type} />
+    <meta property="og:image:width" content={String(seoImageMeta.width)} />
+    <meta property="og:image:height" content={String(seoImageMeta.height)} />
+    <meta property="og:image:alt" content={compactText(title, SITE_NAME)} />
+    <meta name="twitter:card" content={seoTwitterCard} />
+    <meta name="twitter:title" content={seoTitle} />
+    <meta name="twitter:description" content={seoDescription} />
+    <meta name="twitter:image" content={seoImage} />
+    <meta name="twitter:image:alt" content={compactText(title, SITE_NAME)} />
+    {jsonLdItems.map((item) => (
+      <script type="application/ld+json" set:html={serializeJsonForHtmlScript(item)} />
+    ))}
+    <link rel="icon" href="/favicon.ico" sizes="any" />
+    <link rel="icon" type="image/png" sizes="96x96" href="/assets/brand/favicon-96.png" />
+    <link rel="icon" type="image/png" sizes="48x48" href="/assets/brand/favicon-48.png" />
+    <link rel="icon" type="image/png" sizes="32x32" href="/assets/brand/favicon-32.png" />
+    <link rel="icon" type="image/svg+xml" href="/assets/brand/logo-tile.svg" />
+    <link rel="apple-touch-icon" href="/assets/brand/apple-touch-icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <!-- display=swap (not block) on the TEXT fonts: the metric-matched
+         'Arimo-fallback' (global.css) paints immediately and swaps invisibly, so
+         on a flaky connection the body text is readable at once instead of FOIT-
+         blanked for up to 3s. Material Symbols stays display=block on its own
+         link below — there a swap would flash raw ligature names.
+
+         media="print" loads this stylesheet WITHOUT blocking first paint (a print-
+         media sheet isn't render-blocking); the inline script below promotes it to
+         all-screens once loaded. Safe here precisely because display=swap + the
+         metric-matched fallback mean the page already renders correct text
+         immediately and the real font swaps in with no layout shift — so we're only
+         removing the googleapis round-trip from the critical path, not introducing
+         FOIT. The promote-to-'all' runs from a <script> (NOT an inline onload= attr,
+         which the site CSP `script-src-attr 'none'` blocks). <noscript> keeps the
+         blocking sheet for JS-off clients. -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@500;600;700&display=swap"
+      rel="stylesheet"
+      media="print"
+      data-font-async
+    />
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@500;600;700&display=swap"
+        rel="stylesheet"
+      />
+    </noscript>
+    <!--
+      Material Symbols is SUBSET by icon_names: the unsubset variable font is
+      ~3.9 MB and dominated guest first-load on mobile (found 2026-06-11);
+      the subset is ~35 KB. CONTRACT: every icon ligature used anywhere in
+      systems/web (including public/scripts template literals) must appear in
+      icon_names below, alphabetically sorted, or it renders as raw text.
+      The local .material-symbols-outlined rule in styles/base/primitives.css
+      owns font-family/ligature declarations; this external stylesheet should be
+      needed for @font-face only, so persistent shell icons survive head swaps.
+      Regenerate the list with:
+      grep -rhoE 'material-symbols[^>]*>([a-z_0-9]+)<' systems/web/src systems/web/public/scripts
+      display=block (not swap): a not-yet-loaded icon shows nothing briefly
+      instead of flashing its ligature name as text.
+      Also de-blocked (media="print" + the promote script below): with the text
+      sheet off the critical path, leaving THIS one blocking would still stall first
+      paint on a googleapis round-trip — so both go async. Cost is icons appearing one
+      frame late (display=block already shows nothing until loaded, so no ligature
+      flash); worth it to never block paint on a font request. <noscript> covers JS-off.
+    -->
+    <link
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=account_balance,account_balance_wallet,account_circle,account_tree,add,add_photo_alternate,arrow_drop_down,arrow_drop_up,arrow_forward,attach_file,auto_awesome,auto_graph,balance,bar_chart,bolt,bookmark,bookmark_border,bug_report,calendar_today,campaign,chat,check,check_circle,chevron_left,close,crisis_alert,currency_bitcoin,currency_exchange,delete,do_not_disturb_on,edit,emoji_events,error,expand_more,favorite,flag,format_quote,forum,gavel,gpp_maybe,group,help,history,home,how_to_vote,image,ios_share,laptop_mac,leaderboard,lightbulb,link,local_fire_department,lock,logout,mail,menu,military_tech,mode_comment,mood,more_horiz,more_vert,notifications,notifications_off,payments,percent,photo_camera,policy,query_stats,redeem,repeat,reply,schedule,school,search,search_off,settings,shield,shopping_bag,smartphone,sort,support_agent,tablet_mac,target,thumb_up,trending_down,trending_up,tune,unfold_more,upload,verified,verified_user,warning,workspace_premium&display=block"
+      rel="stylesheet"
+      media="print"
+      data-font-async
+    />
+    <!-- CSP-safe async-font promote: the sheets above load as media="print" (non-
+         render-blocking); flip each to all-screens once parsed/loaded. addEventListener
+         (not an onload= attribute) keeps it within script-src-attr 'none'.
+         data-astro-rerun is required because ClientRouter swaps can reinsert these
+         links at media=print; without promotion Safari paints clipped icon ligatures. -->
+    <script is:inline data-astro-rerun>
+      (function () {
+        document.querySelectorAll('link[data-font-async]').forEach(function (l) {
+          if (l.sheet) { l.media = 'all'; }
+          else { l.addEventListener('load', function () { l.media = 'all'; }, { once: true }); }
+        });
+      })();
+    </script>
+    <noscript>
+      <link
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=account_balance,account_balance_wallet,account_circle,account_tree,add,add_photo_alternate,arrow_drop_down,arrow_drop_up,arrow_forward,attach_file,auto_awesome,auto_graph,balance,bar_chart,bolt,bookmark,bookmark_border,bug_report,calendar_today,campaign,chat,check,check_circle,chevron_left,close,crisis_alert,currency_bitcoin,currency_exchange,delete,do_not_disturb_on,edit,emoji_events,error,expand_more,favorite,flag,format_quote,forum,gavel,gpp_maybe,group,help,history,home,how_to_vote,image,ios_share,laptop_mac,leaderboard,lightbulb,link,local_fire_department,lock,logout,mail,menu,military_tech,mode_comment,mood,more_horiz,more_vert,notifications,notifications_off,payments,percent,photo_camera,policy,query_stats,redeem,repeat,reply,schedule,school,search,search_off,settings,shield,shopping_bag,smartphone,sort,support_agent,tablet_mac,target,thumb_up,trending_down,trending_up,tune,unfold_more,upload,verified,verified_user,warning,workspace_premium&display=block"
+        rel="stylesheet"
+      />
+    </noscript>
+  </head>
+  <body class="bg-background-dark text-off-white font-display min-h-screen flex flex-col">
+    <a class="skip-link" href="#main-content">דלג לתוכן הראשי</a>
+    <SiteHeader activePage={activePage} />
+
+    <main class="flex-1 w-full" id="main-content">
+      <slot />
+    </main>
+
+    {showFooter && <SiteFooter />}
+
+    <!-- Auth/session client (Phase 3.4). runtime-config FIRST: it sets the
+         NAVI_* env before auth-session and header-session read it.
+         page-overlay.js is intentionally NOT imported here — its behavior is
+         now handled by the PageOverlayHost Preact island below. -->
+    <script>
+      import '../client/auth/runtime-config.js';
+      import '../client/currency/vshekel.client.js';
+      import '../client/auth/auth-session.js';
+      import '../client/shell/header-session.client.js';
+      import '../client/quick-buy/cards.client.js';
+    </script>
+
+    <PageOverlayHost client:only="preact" />
+    <QuickBuyHost client:only="preact" />
+
+    <!-- A11y: when any modal dialog is open, mark the page chrome `inert` so screen
+         readers + keyboard can't wander behind it (covers Preact AND vanilla dialogs;
+         aria-modal alone leaks in VoiceOver/Safari). Central + soft-nav safe. -->
+    <script is:inline>
+      (function () {
+        if (window.__naviInertInstalled) return;
+        window.__naviInertInstalled = true;
+        function chrome() {
+          return [
+            document.getElementById('main-content'),
+            document.querySelector('body > header'),
+            document.querySelector('footer.hz-footer'),
+            document.querySelector('nav.hz-shell__tabs'),
+          ].filter(Boolean);
+        }
+        // A modal is "open" only if it is actually RENDERED — many dialogs (notifications,
+        // the vanilla overlays) stay mounted with aria-modal but hidden via CSS display:none
+        // (not the [hidden] attribute), so a plain :not([hidden]) check false-positives and
+        // would inert the whole page forever. getClientRects() is empty for display:none.
+        function modalOpen() {
+          return Array.prototype.some.call(
+            document.querySelectorAll('[role="dialog"][aria-modal="true"]'),
+            function (d) { return !d.hasAttribute('hidden') && d.getClientRects().length > 0; }
+          );
+        }
+        var pending = false;
+        function sync() {
+          pending = false;
+          var on = modalOpen();
+          chrome().forEach(function (el) {
+            var has = el.hasAttribute('inert');
+            if (on && !has) el.setAttribute('inert', '');
+            else if (!on && has) el.removeAttribute('inert');
+          });
+        }
+        function schedule() {
+          if (pending) return;
+          pending = true;
+          requestAnimationFrame(sync);
+        }
+        // Watch class/style too — vanilla dialogs open by toggling a class/inline-display,
+        // which is not an aria-modal/hidden change. rAF-debounced so churn stays cheap.
+        new MutationObserver(schedule).observe(document.body, {
+          childList: true,
+          subtree: true,
+          attributes: true,
+          attributeFilter: ['aria-modal', 'role', 'hidden', 'class', 'style'],
+        });
+        sync();
+      })();
+    </script>
+
+    <!-- These nine feature scripts (live-pulse, how-it-works, daily-streak FX +
+         logic, share, result-overlay, dispute) ship on EVERY page but are all
+         event-driven overlays that idle until a tap or a notification. `defer`
+         takes them off the critical path: the browser fetches them in parallel
+         during parse and runs them, IN DOCUMENT ORDER, after the DOM is ready —
+         so they no longer block DOMContentLoaded / first interactivity. Order is
+         preserved (defer, not async) because the daily-streak trio has an init
+         sequence (fx → state → mount). Helps desktop too; mobile just feels it
+         more. Soft-nav re-init is unchanged (each self-arms on astro:page-load). -->
+    <script is:inline defer src={`/scripts/live-pulse/live-pulse.js?v=${ASSET_VERSION}`}></script>
+    <script is:inline defer src={`/scripts/how-it-works/hz-how-it-works.js?v=${ASSET_VERSION}`}></script>
+    <script is:inline defer src={`/scripts/how-it-works/how-it-works.js?v=${ASSET_VERSION}`}></script>
+
+    <script is:inline defer src={`/scripts/daily-streak/hz-streak-fx.js?v=${ASSET_VERSION}`}></script>
+    <script is:inline defer src={`/scripts/daily-streak/hz-daily-streak.js?v=${ASSET_VERSION}`}></script>
+    <script is:inline defer src={`/scripts/daily-streak/daily-streak.js?v=${ASSET_VERSION}`}></script>
+    <script is:inline defer src={`/scripts/share/share-modal.js?v=${ASSET_VERSION}`}></script>
+    <script is:inline defer src={`/scripts/result-overlay/result-overlay.js?v=${ASSET_VERSION}`}></script>
+    <script is:inline defer src={`/scripts/dispute-modal/dispute-modal.js?v=${ASSET_VERSION}`}></script>
+  </body>
+</html>

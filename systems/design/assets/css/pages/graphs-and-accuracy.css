@@ -1,0 +1,159 @@
+/* graphs-and-accuracy.css — /graphs-and-accuracy (דיוק וגרפים).
+   Ported from systems/design/to integrate/graphs-and-accuracy/ (the "Instrument"
+   direction). Chrome + layout as token-driven classes; the SVG chart geometry is
+   built in lib/graphs-accuracy-charts.js. Charts scale via viewBox (width:100%),
+   so the desktop-only prototype now degrades on narrow viewports. */
+
+.ga-page { font-family: var(--hz-font-ui); color: var(--hz-text); }
+.ga-body {
+  display: flex; gap: 60px;
+  max-width: 1340px; margin: 0 auto;
+  padding: 48px 48px 120px;
+}
+
+/* ── TOC (sticky scroll-spy) ── */
+.ga-toc { width: 212px; flex-shrink: 0; }
+.ga-toc__inner { position: sticky; top: 96px; }
+.ga-eyebrow {
+  font-size: 12.5px; font-weight: 700; letter-spacing: 0; line-height: 1.35;
+  color: var(--hz-text-faint); font-family: var(--hz-font-ui);
+}
+.ga-toc__eyebrow { margin-bottom: 22px; padding-inline-start: 16px; }
+.ga-toc__nav { display: flex; flex-direction: column; gap: 4px; }
+.ga-toc__link {
+  font-size: 14px; font-weight: 500; padding: 13px 16px; text-decoration: none; line-height: 1.3;
+  color: var(--hz-text-muted);
+  border-right: 2px solid transparent;
+  border-radius: 0 9px 9px 0;
+  transition: color var(--hz-motion), border-color var(--hz-motion), background var(--hz-motion);
+}
+.ga-toc__link:hover { color: var(--hz-text-soft); }
+.ga-toc__link.is-on {
+  font-weight: 700; color: var(--hz-brand);
+  border-right-color: var(--hz-brand);
+  background: linear-gradient(to left, rgb(var(--hz-brand-rgb) / 0.1), transparent);
+}
+
+/* ── main column ── */
+.ga-main { flex: 1; min-width: 0; }
+.ga-panel {
+  background: rgba(255, 248, 232, 0.022);
+  border: 1px solid var(--hz-border-faint);
+  border-radius: 16px; padding: 28px;
+}
+.ga-section { margin-top: 52px; scroll-margin-top: 96px; }
+
+/* ── hero ── */
+.ga-hero {
+  padding: 36px; display: flex; align-items: center; justify-content: space-between; gap: 40px;
+  background:
+    radial-gradient(circle at 88% 12%, rgb(var(--hz-brand-rgb) / 0.07), transparent 60%),
+    rgba(255, 248, 232, 0.022);
+}
+.ga-hero__copy { max-width: 460px; }
+.ga-hero__title { margin: 14px 0 0; font-size: 38px; font-weight: 800; line-height: 1.12; letter-spacing: -0.02em; color: var(--hz-text); }
+.ga-hero__sub { margin: 14px 0 0; font-size: 15.5px; line-height: 1.6; color: var(--hz-text-soft); }
+.ga-kpis { margin-top: 26px; display: flex; gap: 36px; }
+.ga-kpi__value { font-size: 28px; font-weight: 700; color: var(--hz-text); font-family: var(--hz-font-mono); letter-spacing: -0.02em; }
+.ga-kpi__label { font-size: 12.5px; color: var(--hz-text-muted); margin-top: 4px; font-weight: 600; }
+.ga-kpis__rule { width: 1px; background: var(--hz-border-faint); }
+.ga-gauge { width: 216px; flex-shrink: 0; }
+.ga-kpi__value--empty { color: var(--hz-text-faint); }
+.ga-gauge--empty { width: 216px; height: 216px; flex-shrink: 0; border-radius: 50%; border: 14px solid rgb(255 248 232 / 0.06); display: grid; place-items: center; }
+.ga-gauge--empty span { font-size: 48px; font-weight: 800; color: var(--hz-text-faint); font-family: var(--hz-font-mono); }
+
+/* ── section head ── */
+.ga-head { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 26px; gap: 20px; }
+.ga-head__title { margin: 0; font-size: 21px; font-weight: 700; color: var(--hz-text); }
+.ga-head__desc { margin: 8px 0 0; font-size: 14px; line-height: 1.55; color: var(--hz-text-muted); max-width: 560px; }
+
+/* static segmented control (4h/12h) */
+.ga-segmented { display: flex; gap: 2px; padding: 3px; border-radius: 9px; background: rgba(255, 248, 232, 0.04); border: 1px solid var(--hz-border-faint); flex-shrink: 0; }
+.ga-segmented__opt { font-size: 12.5px; font-weight: 600; padding: 6px 12px; border-radius: 6px; white-space: nowrap; color: var(--hz-text-muted); border: 0; background: transparent; font-family: inherit; cursor: pointer; transition: color var(--hz-motion), background var(--hz-motion); }
+.ga-segmented__opt:hover { color: var(--hz-text-soft); }
+.ga-segmented__opt.is-on { color: var(--hz-text); background: rgba(255, 248, 232, 0.07); }
+
+/* prediction-vs-reality legend */
+.ga-legend { display: flex; gap: 22px; margin-bottom: 18px; }
+.ga-legend__item { display: flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--hz-text-soft); }
+.ga-legend__sw { width: 12px; height: 12px; border-radius: 3px; }
+.ga-legend__sw--expected { background: rgb(var(--hz-info-rgb) / 0.3); border: 1px solid var(--hz-info); }
+.ga-legend__sw--resolved { background: rgb(var(--hz-signal-new-rgb) / 0.3); border: 1px solid var(--hz-signal-new); }
+
+/* ── resolution split bar ── */
+.ga-split__legend { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 14px; font-weight: 700; }
+.ga-split__track { display: flex; gap: 3px; }
+.ga-seg { display: flex; align-items: center; justify-content: center; transition: filter var(--hz-motion); }
+.ga-seg span { font-size: 12px; font-weight: 700; font-family: var(--hz-font-mono); }
+.ga-seg--yes { background: rgb(var(--hz-action-buy-rgb) / 0.13); border: 1px solid rgb(var(--hz-action-buy-rgb) / 0.4); border-radius: 4px 8px 8px 4px; }
+.ga-seg--yes span { color: var(--hz-action-buy); }
+.ga-seg--no { background: rgb(var(--hz-action-sell-rgb) / 0.11); border: 1px solid rgb(var(--hz-action-sell-rgb) / 0.33); border-radius: 8px 4px 4px 8px; }
+.ga-seg--no span { color: var(--hz-action-sell); }
+.ga-seg:hover { filter: brightness(1.14); }
+
+/* ── methodology ── */
+.ga-methodology { display: flex; flex-direction: column; gap: 14px; max-width: 760px; }
+.ga-methodology p { margin: 0; font-size: 14.5px; line-height: 1.75; color: var(--hz-text-soft); }
+
+/* ── FAQ accordion ── */
+.ga-faq { border-top: 1px solid var(--hz-border-faint); }
+.ga-faq__item { border-bottom: 1px solid var(--hz-border-faint); }
+.ga-faq__q {
+  width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  padding: 18px 4px; background: transparent; border: none; cursor: pointer; text-align: right; font: inherit;
+}
+.ga-faq__qtext { font-size: 15.5px; font-weight: 600; color: var(--hz-text-soft); }
+.ga-faq__item.is-open .ga-faq__qtext { color: var(--hz-text); }
+.ga-faq__icon { font-size: 18px; color: var(--hz-text-faint); line-height: 1; transition: transform var(--hz-motion), color var(--hz-motion); }
+.ga-faq__item.is-open .ga-faq__icon { color: var(--hz-brand); transform: rotate(45deg); }
+.ga-faq__a { font-size: 14px; line-height: 1.7; color: var(--hz-text-muted); padding: 0 4px 20px; max-width: 620px; display: none; }
+.ga-faq__item.is-open .ga-faq__a { display: block; }
+
+/* ── chart hover fx ── */
+.ga-bar { transition: opacity 0.2s ease, filter 0.2s ease; }
+.ga-bar:hover { opacity: 1 !important; filter: brightness(1.12); }
+.ga-dot { transition: transform 0.2s ease; transform-box: fill-box; transform-origin: center; }
+.ga-dot:hover { transform: scale(1.45); }
+.ga-pair rect { transition: opacity 0.2s ease, filter 0.2s ease; }
+.ga-pair:hover rect { filter: brightness(1.12); }
+
+/* ── data-state placeholders ── */
+.ga-statewrap { position: relative; width: 100%; }
+.ga-skelline { position: absolute; left: 0; right: 0; height: 1px; background: var(--hz-border-faint); }
+.ga-skel { position: absolute; inset: 0; overflow: hidden; background: rgba(255, 248, 232, 0.04); border-radius: 8px; }
+.ga-skel::after {
+  content: ""; position: absolute; inset: 0; transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 248, 232, 0.06), transparent);
+  animation: ga-shimmer 1.4s infinite;
+}
+@keyframes ga-shimmer { 100% { transform: translateX(100%); } }
+@media (prefers-reduced-motion: reduce) { .ga-skel::after { animation: none; } }
+.ga-state { width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; gap: 8px; }
+.ga-state__rule { width: 28px; height: 2px; background: var(--hz-text-muted); border-radius: 2px; opacity: 0.7; margin-bottom: 6px; }
+.ga-state__rule--error { background: var(--hz-action-sell); }
+.ga-state__title { font-size: 15.5px; font-weight: 700; color: var(--hz-text-soft); }
+.ga-state__body { font-size: 13.5px; color: var(--hz-text-muted); max-width: 360px; line-height: 1.55; }
+.ga-retry { margin-top: 10px; font-size: 13px; font-weight: 700; color: var(--hz-text); cursor: pointer; padding: 8px 18px; border-radius: 8px; border: 1px solid var(--hz-border-soft); background: rgba(255, 248, 232, 0.04); font-family: inherit; }
+.ga-retry:hover { background: var(--hz-surface-hover); }
+
+/* ── responsive (prototype was desktop-only) ── */
+@media (max-width: 1024px) {
+  .ga-body { gap: 28px; padding: 32px 28px 96px; }
+  .ga-toc { width: 168px; }
+}
+@media (max-width: 860px) {
+  .ga-body { flex-direction: column; padding: 24px 16px 80px; gap: 8px; }
+  .ga-toc { width: auto; position: sticky; top: 0; z-index: 5; margin: 0 -16px; padding: 8px 16px; background: rgba(19,20,26,0.82); backdrop-filter: blur(12px); border-bottom: 1px solid var(--hz-border-faint); }
+  .ga-toc__inner { position: static; }
+  .ga-toc__eyebrow { display: none; }
+  .ga-toc__nav { flex-direction: row; gap: 4px; overflow-x: auto; scrollbar-width: none; }
+  .ga-toc__nav::-webkit-scrollbar { display: none; }
+  .ga-toc__link { flex: 0 0 auto; padding: 8px 13px; border-inline-end: 0; border-radius: var(--hz-radius-pill); white-space: nowrap; font-size: 13px; }
+  .ga-toc__link.is-on { background: var(--hz-brand-soft); }
+  .ga-hero { flex-direction: column; align-items: flex-start; padding: 24px; gap: 24px; }
+  .ga-hero__title { font-size: 30px; }
+  .ga-gauge { width: 180px; align-self: center; }
+  .ga-panel { padding: 18px; }
+  .ga-section { margin-top: 28px; }
+  .ga-head { flex-direction: column; align-items: flex-start; gap: 12px; }
+}

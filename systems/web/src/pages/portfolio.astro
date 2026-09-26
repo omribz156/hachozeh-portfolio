@@ -1,0 +1,19 @@
+---
+import Layout from '../layouts/Layout.astro';
+import PortfolioIsland from '../components/portfolio/PortfolioIsland.astro';
+import '../styles/pages/portfolio.css';
+import '../styles/patterns/pnl-sparkline.css';
+---
+
+<Layout
+  title="התיק שלי · החוזה"
+  description="תיק התחזיות האישי בהחוזה."
+  activePage="portfolio"
+  canonicalPath="/portfolio"
+  robots="noindex, nofollow"
+>
+  <div class="portfolio-page-shell mx-auto" data-portfolio-page>
+    <h1 class="market-detail-visually-hidden">התיק שלי</h1>
+    <PortfolioIsland />
+  </div>
+</Layout>

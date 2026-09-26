@@ -1,0 +1,25 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import '../../styles/pages/static-page.css';
+
+const {
+  title,
+  description = 'החוזה — שוק תחזיות עברי',
+  activePage = 'static',
+  routeKey = 'static',
+  canonicalPath = `/${routeKey}`,
+  robots = 'noindex, follow',
+} = Astro.props;
+---
+
+<Layout
+  title={title}
+  description={description}
+  activePage={activePage}
+  canonicalPath={canonicalPath}
+  robots={robots}
+>
+  <div class="hz-static-page" data-static-page={routeKey}>
+    <slot />
+  </div>
+</Layout>

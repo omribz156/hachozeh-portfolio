@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="politics market image">
+  <defs>
+    <linearGradient id="g" x1="66" y1="44" x2="446" y2="470" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#26364a"/>
+      <stop offset=".55" stop-color="#201d2b"/>
+      <stop offset="1" stop-color="#0b111b"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#g)"/>
+  <path d="M116 220h280L256 116 116 220Z" fill="#f7c66a"/>
+  <path d="M146 246h220M154 344h204M132 386h248" stroke="#e7edf4" stroke-width="24" stroke-linecap="round"/>
+  <path d="M174 246v98M256 246v98M338 246v98" stroke="#6ee7b7" stroke-width="24" stroke-linecap="round"/>
+</svg>

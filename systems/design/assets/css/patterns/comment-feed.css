@@ -1,0 +1,1018 @@
+/* ──────────────────────────────────────────────────────────────
+   patterns/comment-feed.css
+   The social section under a market: tabs (comments / holders /
+   positions / activity), the post-a-comment form, the comment
+   stream itself with nested replies, plus the surrounding filter
+   chips and toolbar. Block names mirror the original
+   community/social/comment vocabulary with the `hz-` prefix —
+   keeps the JS renderers' class strings short.
+   Top-level wrappers:
+     .hz-social-shell, .hz-social-head, .hz-social-title,
+     .hz-social-subtitle, .hz-social-panel
+   Tabs & form:
+     .hz-comment-tabs, .hz-comment-tab(+--active),
+     .hz-comment-tab-count, .hz-comment-form, .hz-textarea
+   Filters / chips / toolbar:
+     .hz-community-toolbar(+--between),
+     .hz-community-outcome-summary, .hz-community-select-pill,
+     .hz-community-filter-group, .hz-community-outcomes,
+     .hz-community-chip(+--active, -count)
+   Stream / comments / replies:
+     .hz-community-stream, .hz-community-comment(+
+     -body, -layout, -main, -meta), .hz-community-name(+--reply),
+     .hz-community-time, .hz-community-actions(+--reply),
+     .hz-comment-action, .hz-community-replies,
+     .hz-community-reply(+-body), .hz-community-empty
+   ────────────────────────────────────────────────────────────── */
+
+
+  .hz-comment-tabs {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    margin-bottom: 1rem;
+    padding-bottom: 0;
+    color: var(--hz-text-muted);
+    font-size: 0.875rem;
+    font-weight: 700;
+  }
+
+
+  .hz-social-shell {
+    display: grid;
+    gap: 1rem;
+  }
+
+
+  .hz-social-head {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+
+  .hz-social-title {
+    color: var(--hz-text);
+    font-size: 1.25rem;
+    font-weight: 900;
+  }
+
+
+  .hz-social-subtitle {
+    margin-top: 0.25rem;
+    color: var(--hz-text-muted);
+    font-size: 0.875rem;
+  }
+
+
+  .hz-comment-tab-count {
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 0.125rem 0.375rem;
+    color: var(--hz-text);
+    font-size: 0.625rem;
+  }
+
+
+  .hz-comment-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border-bottom: 2px solid transparent;
+    padding-bottom: 0.75rem;
+    transition: color 180ms ease;
+  }
+
+
+  .hz-comment-tab:hover {
+    color: var(--hz-text);
+  }
+
+
+  .hz-comment-tab--active {
+    border-bottom-color: var(--hz-text);
+    color: var(--hz-text);
+  }
+
+
+  .hz-comment-form {
+    display: flex;
+    align-items: flex-start;
+    gap: 1rem;
+    margin-bottom: 2rem;
+  }
+
+  .hz-comment-form__avatar-slot {
+    width: 2.75rem;
+    min-width: 0;
+  }
+
+
+  .hz-social-panel {
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 1.25rem;
+    background: rgba(15, 23, 42, 0.55);
+    padding: 1rem;
+  }
+
+
+  .hz-community-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    justify-content: flex-start;
+    margin-bottom: 1.5rem;
+  }
+
+
+  .hz-community-toolbar--between {
+    justify-content: space-between;
+  }
+
+
+  .hz-community-outcome-summary {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    color: var(--hz-text-muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+
+  .hz-community-select-pill {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 0.8rem;
+    background: rgba(255, 255, 255, 0.04);
+    padding: 0.55rem 0.75rem;
+    color: var(--hz-text-soft);
+    font-weight: 800;
+  }
+
+
+  .hz-community-filter-group,
+  .hz-community-outcomes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+
+  .hz-community-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 9999px;
+    background: rgba(255, 255, 255, 0.04);
+    padding: 0.45rem 0.85rem;
+    color: var(--hz-text-soft);
+    font-size: 0.75rem;
+    font-weight: 700;
+    transition: all 180ms ease;
+  }
+
+
+  .hz-community-chip:hover {
+    border-color: rgba(255, 255, 255, 0.18);
+    color: var(--hz-text);
+  }
+
+
+  .hz-community-chip--active {
+    border-color: rgba(43, 108, 238, 0.38);
+    background: rgba(43, 108, 238, 0.14);
+    color: var(--hz-text);
+  }
+
+
+  .hz-community-chip-count {
+    color: var(--hz-text-muted);
+    font-size: 0.6875rem;
+  }
+
+
+  .hz-textarea {
+    width: 100%;
+    min-height: 6rem;
+    resize: none;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 0.75rem;
+    background: #0b1222;
+    padding: 0.75rem;
+    color: var(--hz-text);
+    font-size: 0.875rem;
+    transition: border-color 180ms ease, box-shadow 180ms ease;
+  }
+
+
+  .hz-textarea:focus {
+    outline: none;
+    border-color: #2b6cee;
+    box-shadow: 0 0 0 1px rgba(43, 108, 238, 0.5);
+  }
+
+
+  .hz-comment-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    transition: color 180ms ease;
+  }
+
+
+  .hz-comment-action:hover {
+    color: var(--hz-text);
+  }
+
+
+  .hz-comment-action.is-active {
+    color: var(--hz-brand-mint);
+  }
+
+
+  .hz-comment-reply-form {
+    display: none;
+    gap: 0.55rem;
+    margin-top: 0.75rem;
+  }
+
+
+  .hz-community-comment.is-replying .hz-comment-reply-form {
+    display: grid;
+  }
+
+
+  .hz-comment-reply-form .hz-textarea {
+    min-height: 3.25rem;
+  }
+
+
+  .hz-community-stream {
+    display: grid;
+  }
+
+
+  .hz-community-comment {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    padding: 1rem 0;
+  }
+
+
+  .hz-community-comment:last-child {
+    border-bottom: 0;
+  }
+
+
+  .hz-community-comment-layout,
+  .hz-community-reply,
+  .hz-community-row-copy {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+
+
+  .hz-community-comment-layout,
+  .hz-community-reply {
+    align-items: flex-start;
+  }
+
+
+  .hz-community-comment-main {
+    min-width: 0;
+    flex: 1;
+  }
+
+
+  .hz-community-comment-meta,
+  .hz-community-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+
+  .hz-community-name {
+    color: var(--hz-text);
+    font-size: 0.875rem;
+    font-weight: 800;
+  }
+
+  .hz-community-profile-link {
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .hz-community-profile-link:hover {
+    color: var(--hz-brand);
+  }
+
+  .hz-community-profile-link--avatar {
+    display: inline-flex;
+  }
+
+
+  .hz-community-name--reply {
+    font-size: 0.75rem;
+  }
+
+
+  .hz-community-time,
+  .hz-community-row-meta {
+    color: var(--hz-text-faint);
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+
+  .hz-community-comment-body {
+    margin-top: 0.45rem;
+    color: var(--hz-text-soft);
+    font-size: 0.875rem;
+    line-height: 1.65;
+  }
+
+
+  .hz-community-actions {
+    margin-top: 0.7rem;
+    color: var(--hz-text-faint);
+    font-size: 0.75rem;
+    font-weight: 800;
+  }
+
+
+  .hz-community-replies {
+    display: grid;
+    gap: 0.75rem;
+    margin-top: 1rem;
+    margin-inline-start: 1.5rem;
+    border-inline-start: 2px solid rgba(255, 255, 255, 0.1);
+    padding-inline-start: 1rem;
+  }
+
+
+  .hz-community-reply-body {
+    margin-top: 0.25rem;
+    color: var(--hz-text-muted);
+    font-size: 0.75rem;
+    line-height: 1.6;
+  }
+
+
+  .hz-community-empty {
+    color: var(--hz-text-muted);
+  }
+
+
+  .hz-community-trade-copy {
+    min-width: 0;
+    color: var(--hz-text-soft);
+    font-size: 0.875rem;
+  }
+
+
+  .hz-community-trade-strong {
+    color: var(--hz-text);
+    font-weight: 800;
+  }
+
+
+  .hz-community-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+
+
+  .hz-community-column {
+    min-width: 0;
+  }
+
+
+  .hz-community-column-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+    color: var(--hz-text);
+    font-size: 0.875rem;
+    font-weight: 800;
+  }
+
+
+  .hz-community-column-head span:last-child {
+    color: #93c5fd;
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+
+  .hz-community-list,
+  .hz-community-feed {
+    display: flex;
+    flex-direction: column;
+  }
+
+
+  .hz-community-row,
+  .hz-community-feed-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.875rem 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  }
+
+
+  .hz-community-row:last-child,
+  .hz-community-feed-row:last-child {
+    border-bottom: 0;
+  }
+
+
+  .hz-community-value {
+    flex-shrink: 0;
+    font-size: 1rem;
+    font-weight: 900;
+  }
+
+
+  .hz-community-value--shares,
+  .hz-community-value--positive {
+    color: #00ff88;
+  }
+
+
+  .hz-community-value--negative {
+    color: #ff7a9b;
+  }
+
+
+  .hz-community-live-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #f87171;
+    font-size: 0.875rem;
+    font-weight: 800;
+  }
+
+
+  .hz-community-live-dot {
+    width: 0.625rem;
+    height: 0.625rem;
+    border-radius: 9999px;
+    background: #ef4444;
+    box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.18);
+  }
+
+
+  .hz-community-trade--buy {
+    color: #00ff88;
+    font-weight: 800;
+  }
+
+
+  .hz-community-trade--sell {
+    color: #ff7a9b;
+    font-weight: 800;
+  }
+
+
+  .hz-community-row,
+  .hz-community-feed-row {
+    color: var(--hz-text-soft);
+    font-size: 0.9rem;
+    font-weight: 500;
+    line-height: 1.78;
+  }
+
+
+  .hz-comment-tabs {
+    flex-wrap: wrap;
+    gap: 1.05rem;
+    border-bottom-color: var(--hz-border-soft);
+    margin: 0;
+    color: var(--hz-text-faint);
+    font-size: 0.82rem;
+  }
+
+
+  .hz-comment-tab--active {
+    border-bottom-color: var(--hz-text-soft);
+  }
+
+
+  .hz-comment-tab-count {
+    background: rgba(255, 255, 255, 0.075);
+    color: var(--hz-text-soft);
+    font-family: var(--hz-font-mono);
+    font-size: 0.62rem;
+  }
+
+
+  .hz-social-shell {
+    display: grid;
+    gap: 1.1rem;
+    max-width: min(100%, 58rem);
+    /* Only paint the bottom border. The trust shell that sits above the
+       social section already paints its own `border-block` bottom, which
+       serves as the separator between rules and social — adding a top
+       border here stacks two hairlines a few px apart. */
+    border-bottom: 1px solid var(--hz-border);
+    margin-top: 1.45rem;
+    padding: 1.35rem 0 0;
+  }
+
+
+  .hz-social-head {
+    display: grid;
+    grid-template-columns: minmax(0, 0.72fr) auto;
+    gap: 1.25rem;
+    align-items: end;
+  }
+
+
+  .hz-social-title {
+    color: var(--hz-text);
+    font-size: 1.18rem;
+    font-weight: 700;
+    letter-spacing: -0.035em;
+  }
+
+
+  .hz-social-subtitle {
+    margin-top: 0.25rem;
+    color: var(--hz-text-muted);
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+
+
+  .hz-social-panel {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    padding: 0;
+  }
+
+
+  .hz-comment-form {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 0.75rem;
+    align-items: center;
+    border-block: 1px solid var(--hz-border-soft);
+    margin: 0;
+    padding: 0.82rem 0;
+  }
+
+  .hz-comment-form__avatar-slot:empty {
+    display: none;
+  }
+
+  .hz-comment-form:has(.hz-comment-form__avatar-slot:empty) {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .hz-avatar__img {
+    width: 100%;
+    height: 100%;
+    border-radius: inherit;
+    object-fit: cover;
+    display: block;
+  }
+
+  .hz-avatar__img[data-default-avatar] {
+    object-fit: contain;
+  }
+
+
+  .hz-textarea {
+    min-height: 2.75rem;
+    height: 2.75rem;
+    resize: none;
+    border-color: var(--hz-border-soft);
+    border-radius: 1.05rem;
+    background: rgba(0, 0, 0, 0.12);
+    padding: 0.72rem 0.9rem;
+    color: var(--hz-text-soft);
+    font-size: 0.82rem;
+    font-weight: 750;
+    line-height: 1.35;
+  }
+
+
+  .hz-textarea::placeholder {
+    color: var(--hz-text-faint);
+  }
+
+
+  .hz-community-toolbar {
+    margin: 0.85rem 0 0.15rem;
+  }
+
+
+  .hz-community-toolbar--between {
+    align-items: center;
+    gap: 1rem;
+    margin: 0 0 0.85rem;
+  }
+
+
+  .hz-community-outcome-summary {
+    color: var(--hz-text-muted);
+    font-size: 0.73rem;
+    font-weight: 760;
+  }
+
+
+  .hz-community-select-pill {
+    border-color: var(--hz-border-soft);
+    border-radius: 0.9rem;
+    background: rgba(255, 255, 255, 0.035);
+    padding: 0.5rem 0.72rem;
+    color: var(--hz-text-soft);
+    font-size: 0.76rem;
+  }
+
+
+  .hz-community-chip {
+    border-color: var(--hz-border-soft);
+    background: transparent;
+    padding: 0.42rem 0.72rem;
+    color: var(--hz-text-muted);
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
+
+  .hz-community-chip--active {
+    border-color: rgba(97, 228, 167, 0.28);
+    background: rgba(97, 228, 167, 0.065);
+    color: var(--hz-action-buy);
+  }
+
+
+  .hz-community-chip-count {
+    color: var(--hz-text-faint);
+    font-family: var(--hz-font-mono);
+    font-size: 0.65rem;
+  }
+
+
+  .hz-community-stream {
+    display: grid;
+  }
+
+
+  .hz-community-comment,
+  .hz-community-row,
+  .hz-community-feed-row {
+    border-bottom-color: var(--hz-border-soft);
+  }
+
+
+  .hz-community-comment {
+    padding: 1.05rem 0;
+  }
+
+
+  .hz-community-comment-layout,
+  .hz-community-row-copy {
+    gap: 0.72rem;
+  }
+
+
+  .hz-community-name {
+    color: var(--hz-text);
+    font-size: 0.84rem;
+    font-weight: 700;
+  }
+
+
+  .hz-community-time,
+  .hz-community-row-meta {
+    color: var(--hz-text-faint);
+    font-size: 0.7rem;
+    font-weight: 750;
+  }
+
+
+  .hz-community-comment-body {
+    max-width: 42rem;
+    color: var(--hz-text-soft);
+    font-size: 0.9rem;
+    font-weight: 560;
+    line-height: 1.72;
+  }
+
+
+  .hz-community-actions {
+    color: var(--hz-text-faint);
+    font-size: 0.72rem;
+    font-weight: 700;
+  }
+
+
+  .hz-community-replies {
+    border-inline-start-color: var(--hz-border-soft);
+  }
+
+
+  .hz-community-reply-body {
+    color: var(--hz-text-muted);
+  }
+
+
+  .hz-community-grid {
+    gap: clamp(1.35rem, 3vw, 2rem);
+  }
+
+
+  .hz-community-column-head,
+  .hz-community-row,
+  .hz-community-feed-row {
+    border-bottom-color: var(--hz-border-soft);
+  }
+
+
+  .hz-community-column-head {
+    margin-bottom: 0;
+    padding-bottom: 0.58rem;
+    color: var(--hz-text-muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+  }
+
+
+  .hz-community-column-head span:first-child {
+    color: var(--hz-text);
+    font-size: 0.82rem;
+  }
+
+
+  .hz-community-column-head span:last-child {
+    color: var(--hz-text-faint);
+    font-family: var(--hz-font-mono);
+    font-size: 0.68rem;
+  }
+
+
+  .hz-community-row,
+  .hz-community-feed-row {
+    padding: 0.82rem 0;
+  }
+
+
+  .hz-community-row {
+    display: flex;
+  }
+
+
+  .hz-community-value {
+    color: var(--hz-text);
+    font-family: var(--hz-font-mono);
+    font-size: 0.84rem;
+    font-weight: 800;
+  }
+
+
+  .hz-community-value--shares,
+  .hz-community-value--positive {
+    color: var(--hz-action-buy);
+  }
+
+
+  /* No-side holder share counts mirror the side split in OUR palette (pink =
+     sell tone), rather than borrowing the reference's amber. */
+  .hz-community-value--shares-no,
+  .hz-community-value--negative {
+    color: var(--hz-action-sell-strong);
+  }
+
+
+  .hz-community-feed {
+    border-top: 1px solid var(--hz-border-soft);
+  }
+
+
+  .hz-community-feed-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+
+  .hz-community-trade-copy {
+    color: var(--hz-text-muted);
+    font-size: 0.84rem;
+    font-weight: 650;
+    line-height: 1.55;
+  }
+
+
+  .hz-community-trade-strong {
+    color: var(--hz-text);
+  }
+
+
+  .hz-community-live-pill {
+    color: var(--hz-action-sell-strong);
+    font-size: 0.78rem;
+    font-weight: 700;
+  }
+
+
+  .hz-community-live-dot {
+    width: 0.46rem;
+    height: 0.46rem;
+    background: var(--hz-action-sell-strong);
+    box-shadow: 0 0 16px rgba(255, 145, 162, 0.55);
+  }
+
+
+  .hz-community-trade--buy {
+    color: var(--hz-action-buy);
+  }
+
+
+  .hz-community-trade--sell {
+    color: var(--hz-action-sell-strong);
+  }
+
+
+  /* Reserve a stable height for the tab body so the island hydrating (and
+     later tab switches through a brief "טוען…" state) doesn't collapse the
+     section and shove the footer — load-time CLS protection. */
+  .hz-community-panel {
+    min-height: 18rem;
+  }
+
+
+  /* Event-mode selectors: child-date picker (holders/positions) and the
+     all/per-child picker (activity). Mirrors the chart menu mechanics —
+     inset-inline-start anchor so the menu opens INTO the panel, not off the
+     RTL page edge — but styled to the community pill/chip vocabulary. */
+  /* Board toolbar: primary selector on the start edge, positions filter+sort
+     cluster on the opposite end. */
+  .hz-community-toolbar-left,
+  .hz-community-toolbar-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .hz-community-dropdown {
+    position: relative;
+  }
+
+  .hz-community-dropdown__button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    border: 1px solid var(--hz-border-soft);
+    border-radius: 0.9rem;
+    background: rgba(255, 255, 255, 0.035);
+    padding: 0.5rem 0.6rem 0.5rem 0.72rem;
+    color: var(--hz-text-soft);
+    font-size: 0.76rem;
+    font-weight: 800;
+    cursor: pointer;
+    transition: border-color 180ms ease, color 180ms ease;
+  }
+
+  .hz-community-dropdown__button:hover {
+    border-color: var(--hz-border);
+    color: var(--hz-text);
+  }
+
+  .hz-community-dropdown__menu {
+    position: absolute;
+    top: calc(100% + 0.4rem);
+    inset-inline-start: 0;
+    z-index: 10;
+    min-width: 9rem;
+    max-height: 16rem;
+    overflow-y: auto;
+    display: grid;
+    gap: 0.1rem;
+    border: 1px solid var(--hz-border);
+    border-radius: 0.7rem;
+    background: var(--hz-bg-raised);
+    padding: 0.35rem;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+  }
+
+  .hz-community-dropdown__menu[hidden] {
+    display: none;
+  }
+
+  .hz-community-dropdown__item {
+    display: flex;
+    align-items: center;
+    text-align: start;
+    border-radius: 0.55rem;
+    padding: 0.45rem 0.6rem;
+    color: var(--hz-text-muted);
+    font-size: 0.76rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background-color 140ms ease, color 140ms ease;
+  }
+
+  .hz-community-dropdown__item:hover {
+    background: var(--hz-surface-hover);
+    color: var(--hz-text);
+  }
+
+  .hz-community-dropdown__item.is-active {
+    color: var(--hz-action-buy);
+  }
+
+
+/* ──────────────────────────────────────────────────────────────
+   Mobile overrides (≤767px)
+   The desktop `.hz-social-head` uses a 2-column grid (title block |
+   tabs) which competes for inline space at phone widths and pushes
+   the tabs to one side. Mobile gets the title row alone, then the
+   tabs row alone — three vertical rows. Tabs use an equal-width
+   grid so each label gets exactly 1/4 of the width regardless of
+   content length (matches GitHub's mobile tab pattern).
+   ────────────────────────────────────────────────────────────── */
+@media (max-width: 767px) {
+  .market-detail-page .hz-social-shell {
+    gap: 0.75rem;
+    padding-top: 1rem;
+  }
+
+  .market-detail-page .hz-social-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 0.55rem;
+    align-items: stretch;
+  }
+
+  .market-detail-page .hz-social-subtitle {
+    font-size: 0.74rem;
+  }
+
+  /* Equal-width tab strip: each of the 4 tabs gets 1fr. Tabs are
+     centered within their cell and truncate via ellipsis if a label
+     ever exceeds its column. */
+  .market-detail-page .hz-comment-tabs {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 0;
+    flex-wrap: nowrap;
+    margin: 0;
+    padding: 0;
+  }
+
+  .market-detail-page .hz-comment-tab {
+    justify-content: center;
+    gap: 0.32rem;
+    padding: 0.6rem 0.3rem;
+    border-bottom-width: 2px;
+    font-size: 0.78rem;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .market-detail-page .hz-comment-tab-count {
+    padding: 0.08rem 0.32rem;
+    font-size: 0.58rem;
+  }
+
+  /* Comment form on mobile: avatar + textarea + post button still in
+     a 3-col grid, but tighter padding/gap. */
+  .market-detail-page .hz-comment-form {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    gap: 0.55rem;
+    padding: 0.75rem 0;
+  }
+
+  /* Filter pill row (only visible inside the comments tab) gets
+     a small top margin instead of competing for space in the head. */
+  .market-detail-page .hz-community-toolbar {
+    margin: 0.55rem 0 0.35rem;
+  }
+
+  /* Holders/positions board: two columns side-by-side on desktop, stacked on
+     phones where two narrow lists would be too cramped. */
+  .market-detail-page .hz-community-grid {
+    grid-template-columns: 1fr;
+  }
+}

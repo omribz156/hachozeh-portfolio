@@ -1,0 +1,447 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { fetchFeed } from '../lib/discovery.js';
+import { buildBreadcrumbJsonLd, buildCanonicalUrl, buildMarketItemListJsonLd, buildWebPageJsonLd } from '../lib/seo.js';
+import '../styles/pages/breaking-markets-stage.css';
+
+const CAT_GLYPH = {
+  politics: 'politics',
+  economy: 'economy',
+  tech: 'tech',
+  technology: 'tech',
+  ai: 'tech-ai',
+  'tech-ai': 'tech-ai',
+  crypto: 'crypto',
+  sports: 'sports',
+  world: 'world',
+  international: 'world',
+};
+
+function clampPct(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return 0;
+  const pct = n <= 1 ? n * 100 : n;
+  return Math.max(0, Math.min(100, Math.round(pct)));
+}
+
+function signedPct(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return '—';
+  const rounded = Math.round(n);
+  const sign = rounded > 0 ? '+' : rounded < 0 ? '−' : '';
+  return `${sign}${Math.abs(rounded)}%`;
+}
+
+function marketToBreakingRow(market) {
+  const movementSignal = (market.signals || []).find((s) => s?.type === 'moved')
+    || (market.signals || []).find((s) => s?.type === 'breaking');
+  const movement = market.movement || movementSignal || null;
+  const outcomes = Array.isArray(market.outcomes) ? market.outcomes : [];
+  const isEvent = Boolean(market.event?.childMarketKeys?.length);
+  const category = market.category || { key: 'world', label: '' };
+
+  // Resolve the mover: its name (shown under the title), price, and delta.
+  let outcomeLabel = '';
+  let price;
+  let delta;
+
+  // For an event, the ladder `outcomes` ARE the child markets, and `movement`
+  // points at one child's side (`<childKey>-outcome-yes|no`). Resolve the moving
+  // child and normalize to its *yes-chance* so the row reads "<child> rose/fell"
+  // (a moved `no` side is flipped to the child's chance going the other way).
+  const childMatch = isEvent && movement?.outcomeKey
+    ? String(movement.outcomeKey).match(/^(.*)-outcome-(yes|no)$/)
+    : null;
+  if (childMatch) {
+    const child = outcomes.find((o) => o?.outcomeKey === childMatch[1]) || null;
+    const movedNo = childMatch[2] === 'no';
+    const toProb = Number(movement.toProbability);
+    const rawDelta = Number(movement.deltaPercent);
+    const yesDelta = movedNo ? -rawDelta : rawDelta;
+    outcomeLabel = child?.label || '';
+    price = clampPct(movedNo ? 1 - toProb : toProb);
+    delta = Number.isFinite(yesDelta) ? Math.round(yesDelta) : null;
+  } else {
+    const movedOutcome = outcomes.find((o) => o?.outcomeKey === movement?.outcomeKey)
+      || market.preview?.topOutcomes?.[0]
+      || outcomes[0]
+      || null;
+    const rawDelta = Number(movement?.deltaPercent);
+    price = clampPct(movement?.toProbability ?? movedOutcome?.probability);
+    delta = Number.isFinite(rawDelta) ? Math.round(rawDelta) : null;
+    // Only an EXACT key match earns a name — a fallback (outcomes[0]) would
+    // mislabel the mover, so we show nothing in that case.
+    outcomeLabel = (movement?.outcomeKey
+      ? outcomes.find((o) => o?.outcomeKey === movement.outcomeKey)?.label
+      : '') || '';
+  }
+
+  return {
+    id: market.marketKey,
+    title: market.title,
+    href: `/markets/${encodeURIComponent(market.marketKey)}`,
+    category,
+    price,
+    delta,
+    shape: market.shape || null,
+    isEvent,
+    outcomeLabel,
+  };
+}
+
+function trackSvg(current, delta) {
+  const width = 360;
+  const height = 30;
+  const pad = 6;
+  const trackH = 8;
+  const trackY = (height - trackH) / 2;
+  const innerW = width - pad * 2;
+  // 0% sits at the LEFT, 100% at the RIGHT — higher probability reads rightward
+  // (conventional numeric axis), so a rise travels right and a drop left.
+  const xAt = (value) => (value / 100) * innerW + pad;
+  const xCurrent = xAt(current);
+  const marks = [25, 50, 75].map((value) => {
+    const x = xAt(value);
+    return `<line x1="${x}" y1="${trackY - 3}" x2="${x}" y2="${trackY + trackH + 3}" stroke="var(--hz-border-faint)" stroke-width="1"></line>`;
+  }).join('');
+
+  let movement = '';
+  if (delta != null) {
+    const prior = Math.max(0, Math.min(100, current - delta));
+    const up = delta >= 0;
+    const xPrior = xAt(prior);
+    const xLeft = Math.min(xCurrent, xPrior);
+    const xRight = Math.max(xCurrent, xPrior);
+    const spanColor = up ? 'rgba(93,211,158,0.45)' : 'rgba(231,122,138,0.45)';
+    const markColor = up ? 'var(--hz-action-buy)' : 'var(--hz-action-sell)';
+    movement = `
+      <rect x="${xLeft}" y="${trackY}" width="${Math.max(2, xRight - xLeft)}" height="${trackH}" rx="3" fill="${spanColor}"></rect>
+      <line x1="${xPrior}" y1="${trackY - 5}" x2="${xPrior}" y2="${trackY + trackH + 5}" stroke="var(--hz-text-faint)" stroke-width="1.5" stroke-dasharray="2 2"></line>
+      <line x1="${xCurrent}" y1="${trackY - 6}" x2="${xCurrent}" y2="${trackY + trackH + 6}" stroke="${markColor}" stroke-width="2.4" stroke-linecap="round"></line>
+      <circle cx="${xCurrent}" cy="${trackY + trackH / 2}" r="4.5" fill="var(--hz-bg)" stroke="${markColor}" stroke-width="2.2"></circle>
+    `;
+  } else {
+    movement = `
+      <line x1="${xCurrent}" y1="${trackY - 6}" x2="${xCurrent}" y2="${trackY + trackH + 6}" stroke="var(--hz-text-muted)" stroke-width="2" stroke-linecap="round"></line>
+      <circle cx="${xCurrent}" cy="${trackY + trackH / 2}" r="4.5" fill="var(--hz-bg)" stroke="var(--hz-text-muted)" stroke-width="2"></circle>
+    `;
+  }
+
+  return `
+    <svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" style="display:block">
+      <rect x="${pad}" y="${trackY}" width="${innerW}" height="${trackH}" rx="4" fill="rgba(255,248,232,0.045)"></rect>
+      ${marks}
+      <line x1="${xAt(50)}" y1="${trackY - 5}" x2="${xAt(50)}" y2="${trackY + trackH + 5}" stroke="var(--hz-border-soft)" stroke-width="1"></line>
+      ${movement}
+    </svg>
+  `;
+}
+
+let items = [];
+let error = null;
+try {
+  const data = await fetchFeed('breaking');
+  items = Array.isArray(data?.items) ? data.items : [];
+} catch (e) {
+  // Authored copy only — never surface the raw exception to users.
+  console.error('[breaking-markets] fetchFeed failed', e);
+  error = 'לא הצלחנו לטעון את השווקים. נסו שוב בעוד רגע.';
+}
+
+const rows = items.map(marketToBreakingRow).sort((a, b) => {
+  const ad = a.delta == null ? -Infinity : Math.abs(a.delta);
+  const bd = b.delta == null ? -Infinity : Math.abs(b.delta);
+  return bd - ad;
+});
+
+const catCounts = new Map();
+for (const row of rows) {
+  const key = row.category?.key;
+  const label = row.category?.label;
+  if (!key || !label) continue;
+  if (!catCounts.has(key)) catCounts.set(key, { key, label, count: 0 });
+  catCounts.get(key).count += 1;
+}
+const chips = [{ key: '', label: 'הכל' }, ...[...catCounts.values()].sort((a, b) => b.count - a.count).slice(0, 7)];
+
+const dateLabel = new Intl.DateTimeFormat('he-IL', {
+  day: 'numeric',
+  month: 'long',
+  year: 'numeric',
+}).format(new Date());
+const breakingTitle = 'מתפרץ · החוזה';
+const breakingDescription = 'השווקים שזזו הכי הרבה ב-24 שעות האחרונות בהחוזה.';
+const breakingCanonicalUrl = buildCanonicalUrl('/breaking-markets');
+const breakingShareImage = '/share/pages/breaking-markets.png';
+const structuredData = [
+  buildWebPageJsonLd({
+    title: breakingTitle,
+    description: breakingDescription,
+    canonicalUrl: breakingCanonicalUrl,
+    imageUrl: buildCanonicalUrl(breakingShareImage),
+    type: 'CollectionPage',
+  }),
+  buildBreadcrumbJsonLd({
+    items: [
+      { name: 'החוזה', href: '/' },
+      { name: 'מתפרץ', href: '/breaking-markets' },
+    ],
+  }),
+  buildMarketItemListJsonLd({
+    name: 'שווקים מתפרצים בהחוזה',
+    items: rows.map((row) => ({
+      marketKey: row.id,
+      title: row.title,
+      href: row.href,
+      category: row.category,
+    })),
+  }),
+];
+---
+
+<Layout
+  title={breakingTitle}
+  description={breakingDescription}
+  activePage="breaking"
+  canonicalPath="/breaking-markets"
+  image={breakingShareImage}
+  twitterCard="summary_large_image"
+  structuredData={structuredData}
+  feedLinks={[{ title: 'מתפרץ בהחוזה RSS', href: '/feeds/breaking.xml' }]}
+>
+  <div class="hz-breaking" data-breaking-stage data-feed="breaking" data-ready>
+    <section class="hz-breaking__hero" aria-label="חדשות מתפרצות">
+      <div class="hz-breaking__hero-text">
+        <div class="hz-breaking__hero-date">{dateLabel}</div>
+        <h1 class="hz-breaking__hero-title">חדשות מתפרצות</h1>
+        <p class="hz-breaking__hero-sub">השווקים שזזו הכי הרבה ב-24 שעות האחרונות.</p>
+      </div>
+      <div class="hz-breaking__hero-motif" aria-hidden="true">
+        <svg width="320" height="100%" viewBox="0 0 320 130" preserveAspectRatio="xMaxYMid meet" style="display:block; overflow:visible;">
+          <defs>
+            <linearGradient id="hz-breaking-fade" x1="0" y1="0" x2="1" y2="0">
+              <stop offset="0%" stop-color="var(--hz-bg-raised)" stop-opacity="1"></stop>
+              <stop offset="40%" stop-color="var(--hz-bg-raised)" stop-opacity="0"></stop>
+            </linearGradient>
+          </defs>
+          <line x1="0" y1="28" x2="320" y2="28" stroke="var(--hz-border-faint)" stroke-width="1" stroke-dasharray="2 4"></line>
+          <line x1="0" y1="56" x2="320" y2="56" stroke="var(--hz-border-faint)" stroke-width="1" stroke-dasharray="2 4"></line>
+          <line x1="0" y1="84" x2="320" y2="84" stroke="var(--hz-border-faint)" stroke-width="1" stroke-dasharray="2 4"></line>
+          <line x1="0" y1="112" x2="320" y2="112" stroke="var(--hz-border-faint)" stroke-width="1" stroke-dasharray="2 4"></line>
+          <path d="M0 100 L40 92 L80 96 L120 78 L160 70 L200 50 L240 36 L280 28 L320 18" fill="none" stroke="var(--hz-action-buy)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.85"></path>
+          <circle cx="320" cy="18" r="3.5" fill="var(--hz-action-buy)"></circle>
+          <path d="M0 40 L40 48 L80 44 L120 60 L160 72 L200 86 L240 96 L280 104 L320 110" fill="none" stroke="var(--hz-action-sell)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" opacity="0.55"></path>
+          <circle cx="160" cy="56" r="4" fill="var(--hz-brand)"></circle>
+          <circle cx="160" cy="56" r="10" fill="var(--hz-brand)" opacity="0.18"></circle>
+          <rect x="0" y="0" width="320" height="130" fill="url(#hz-breaking-fade)"></rect>
+        </svg>
+      </div>
+    </section>
+
+    <div class="hz-breaking__body">
+      <div class="hz-breaking__content">
+        <nav class="hz-breaking__chips" aria-label="סינון לפי קטגוריה" data-breaking-chips>
+          {chips.map((chip, index) => (
+            <button class={`hz-breaking__chip${index === 0 ? ' is-active' : ''}`} type="button" data-chip={chip.key}>{chip.label}</button>
+          ))}
+        </nav>
+
+        <h2 class="sr-only">שווקים מתפרצים</h2>
+        <section class="hz-breaking__rows" aria-label="שווקים מתפרצים" data-breaking-rows>
+          {error && <div class="hz-breaking__state">{error}</div>}
+          {!error && rows.length === 0 && <div class="hz-breaking__state">אין שווקים שזזו בקטגוריה הזו כרגע.</div>}
+          {rows.map((row, index) => {
+            const glyphMod = CAT_GLYPH[row.category?.key] || 'world';
+            const initial = (row.category?.label || '').trim().charAt(0) || '·';
+            const deltaTone = row.delta == null
+              ? 'hz-breaking__row-delta--none'
+              : row.delta >= 0 ? 'hz-breaking__row-delta--up' : 'hz-breaking__row-delta--down';
+            const showMover = row.outcomeLabel && (row.shape === 'multi' || row.shape === 'matchup' || row.isEvent);
+            const moverUp = row.delta != null && row.delta >= 0;
+            return (
+              <a class="hz-breaking__row" href={row.href} data-market-key={row.id} data-category={row.category?.key || ''} data-shape={row.shape || ''}>
+                <span class="hz-breaking__row-rank hz-mono">{String(index + 1).padStart(2, '0')}</span>
+                <span class={`hz-breaking__glyph hz-breaking__glyph--${glyphMod}`} aria-hidden="true">{initial}</span>
+                <div class="hz-breaking__row-title">
+                  <span class="hz-breaking__row-q">{row.title}</span>
+                  {showMover && (
+                    <span class={`hz-breaking__row-mover hz-breaking__row-mover--${moverUp ? 'up' : 'down'}`} data-breaking-mover>
+                      <span class="hz-breaking__row-mover-arrow" aria-hidden="true">{moverUp ? '↑' : '↓'}</span>
+                      <span class="hz-breaking__row-mover-name">{row.outcomeLabel}</span>
+                    </span>
+                  )}
+                </div>
+                <div class="hz-breaking__row-track" set:html={trackSvg(row.price, row.delta)}></div>
+                <div class="hz-breaking__row-price">
+                  <span class="hz-breaking__row-pct hz-num">{row.price}<span class="hz-breaking__row-pct-unit">%</span></span>
+                  <span class={`hz-breaking__row-delta hz-mono ${deltaTone}`}>{signedPct(row.delta)}</span>
+                </div>
+              </a>
+            );
+          })}
+        </section>
+      </div>
+
+      <aside class="hz-breaking__rail" aria-label="עדכונים">
+        <div class="hz-breaking__mail">
+          <div class="hz-breaking__mail-head">
+            <h3 class="hz-breaking__mail-title">עדכון יומי באימייל</h3>
+            <span class="hz-breaking__mail-soon">בקרוב</span>
+          </div>
+        </div>
+
+        <!--
+          DEFERRED FEATURE — live @hachozeh social feed + follow.
+          The feed items below were hardcoded placeholders (not a real feed) and the
+          `עקוב` button had no real social link. Collapsed to a single `בקרוב` stub
+          rather than showing fake liveness. To build later: a real @hachozeh feed
+          source + a working follow/social link, then restore the feed list + button.
+          See workspace/coordination/front-breaking.md.
+        -->
+        <div class="hz-breaking__feed hz-breaking__feed--soon">
+          <div class="hz-breaking__feed-head">
+            <div class="hz-breaking__feed-handle">
+              <span class="hz-breaking__feed-pulse" aria-hidden="true"></span>
+              לייב מ-<span class="hz-breaking__feed-handle-at">@hachozeh</span>
+            </div>
+            <span class="hz-breaking__mail-soon">בקרוב</span>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </div>
+</Layout>
+
+<script>
+  // @ts-nocheck — breaking page consumes the feed-level live-fetch seam.
+  (function () {
+    // Soft-nav-aware: manages exactly ONE breaking feed SSE tied to the visible page — open on
+    // enter (initial + astro:page-load), close on astro:before-swap. Was: ran once with a
+    // beforeunload-only close → the breaking SSE leaked once the user soft-nav'd away.
+    // Mirrors FeedPage.astro's pattern (see its trending-stage script): `reopen` is armed by
+    // init() to the CURRENT page's stream-opener, so the once-bound visibilitychange handler
+    // can reopen the right stream WITHOUT re-running init (which would double-bind chips/rows).
+    let source = null;
+    let reopen = null;
+    function closeStream() { if (source) { source.close(); source = null; } }
+    function init() {
+    closeStream();
+    reopen = null;
+    const stage = document.querySelector('[data-breaking-stage]');
+    if (!stage || typeof window.EventSource !== 'function') return;
+    function clampPct(value) {
+      const n = Number(value);
+      if (!Number.isFinite(n)) return null;
+      return Math.max(0, Math.min(100, Math.round(n <= 1 ? n * 100 : n)));
+    }
+    function signedPct(value) {
+      const n = Number(value);
+      if (!Number.isFinite(n)) return '—';
+      const rounded = Math.round(n);
+      const sign = rounded > 0 ? '+' : rounded < 0 ? '−' : '';
+      return sign + Math.abs(rounded) + '%';
+    }
+    function updateRow(item) {
+      const row = Array.from(stage.querySelectorAll('[data-market-key]'))
+        .find((candidate) => candidate.dataset.marketKey === String(item.marketKey || ''));
+      if (!row) return;
+      const movement = item.movement || (item.signals || []).find((signal) => signal?.type === 'moved') || null;
+      const isEvent = !!(item.event && item.event.childMarketKeys && item.event.childMarketKeys.length);
+      const childMatch = isEvent && movement && movement.outcomeKey
+        ? String(movement.outcomeKey).match(/^(.*)-outcome-(yes|no)$/)
+        : null;
+      let price, delta, moverLabel;
+      if (childMatch) {
+        const child = (item.outcomes || []).find((o) => o.outcomeKey === childMatch[1]);
+        const movedNo = childMatch[2] === 'no';
+        const toProb = Number(movement.toProbability);
+        const raw = Number(movement.deltaPercent);
+        price = clampPct(movedNo ? 1 - toProb : toProb);
+        delta = movedNo ? -raw : raw;
+        moverLabel = child && child.label;
+      } else {
+        const movedOutcome = (item.outcomes || []).find((o) => o.outcomeKey === movement?.outcomeKey)
+          || item.preview?.topOutcomes?.[0]
+          || item.outcomes?.[0]
+          || null;
+        price = clampPct(movement?.toProbability ?? movedOutcome?.probability);
+        delta = Number(movement?.deltaPercent);
+        const exact = (item.outcomes || []).find((o) => o.outcomeKey === movement?.outcomeKey);
+        moverLabel = exact && exact.label;
+      }
+      const priceNode = row.querySelector('.hz-breaking__row-pct');
+      const deltaNode = row.querySelector('.hz-breaking__row-delta');
+      if (priceNode && price != null) priceNode.innerHTML = price + '<span class="hz-breaking__row-pct-unit">%</span>';
+      if (deltaNode) {
+        deltaNode.textContent = signedPct(delta);
+        deltaNode.classList.toggle('hz-breaking__row-delta--up', Number.isFinite(delta) && delta >= 0);
+        deltaNode.classList.toggle('hz-breaking__row-delta--down', Number.isFinite(delta) && delta < 0);
+        deltaNode.classList.toggle('hz-breaking__row-delta--none', !Number.isFinite(delta));
+      }
+      const moverNode = row.querySelector('[data-breaking-mover]');
+      if (moverNode) {
+        const nameNode = moverNode.querySelector('.hz-breaking__row-mover-name');
+        const arrowNode = moverNode.querySelector('.hz-breaking__row-mover-arrow');
+        const up = Number.isFinite(delta) && delta >= 0;
+        if (nameNode && moverLabel) nameNode.textContent = moverLabel;
+        if (arrowNode) arrowNode.textContent = up ? '↑' : '↓';
+        moverNode.classList.toggle('hz-breaking__row-mover--up', up);
+        moverNode.classList.toggle('hz-breaking__row-mover--down', !up);
+      }
+    }
+    function openStream() {
+      if (source) return;          // already live
+      if (document.hidden) return; // backgrounded → wait for visibilitychange to reopen
+      source = new EventSource('/api/discovery/feed/stream?feed=breaking');
+      source.addEventListener('discovery.feed_snapshot', (event) => {
+        let payload = null;
+        try { payload = JSON.parse(event.data || '{}'); } catch (_) {}
+        if (!payload || !Array.isArray(payload.items)) return;
+        window.dispatchEvent(new CustomEvent('hz:discovery-feed-snapshot', { detail: payload }));
+        payload.items.forEach(updateRow);
+      });
+    }
+    reopen = openStream; // arm for visibility-driven reconnect
+    openStream();        // open now (no-op if the tab is currently hidden)
+    } // end init()
+
+    init();
+    document.addEventListener('astro:page-load', init);       // re-enter breaking → reopen
+    document.addEventListener('astro:before-swap', () => {     // leave → close (no leak)
+      closeStream();
+      reopen = null;
+    });
+    // Mobile lens: a backgrounded tab's SSE either burns battery/data or silently
+    // goes dead (socket "open" but no events), so you return to a stale feed. Drop
+    // the socket when hidden; reopen on return — the fresh connection's snapshot IS
+    // the catch-up. Bound ONCE (the IIFE runs once; only init re-runs on soft-nav).
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) closeStream();
+      else if (reopen) reopen();
+    });
+  })();
+</script>
+
+<script>
+  // @ts-nocheck — untyped inline script; TODO(typecheck-tighten): annotate then remove
+  (function () {
+    const stage = document.querySelector('[data-breaking-stage]');
+    if (!stage) return;
+    const chips = Array.from(stage.querySelectorAll('[data-breaking-chips] [data-chip]'));
+    const rows = Array.from(stage.querySelectorAll('[data-breaking-rows] [data-category]'));
+    function setCategory(key) {
+      chips.forEach((chip) => chip.classList.toggle('is-active', (chip.getAttribute('data-chip') || '') === key));
+      rows.forEach((row) => {
+        const cat = row.getAttribute('data-category') || '';
+        row.hidden = Boolean(key) && cat !== key;
+      });
+      const url = new URL(window.location.href);
+      if (key) url.searchParams.set('category', key);
+      else url.searchParams.delete('category');
+      window.history.replaceState({}, '', url.toString());
+    }
+    const initial = new URLSearchParams(window.location.search).get('category') || '';
+    if (initial && chips.some((chip) => (chip.getAttribute('data-chip') || '') === initial)) setCategory(initial);
+    chips.forEach((chip) => chip.addEventListener('click', () => setCategory(chip.getAttribute('data-chip') || '')));
+  })();
+</script>

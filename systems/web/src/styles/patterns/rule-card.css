@@ -1,0 +1,221 @@
+/* ──────────────────────────────────────────────────────────────
+   patterns/rule-card.css
+   The "rules vocabulary" — everything that lives inside the rules
+   trust fold (and the small prohibition-copy used in the
+   prohibitions fold). A two-column grid: long-form rule copy with
+   structured contract clauses on the left, a facts sidebar with
+   source links on the right. Tokens drive color; gradients/hairlines
+   are warm.
+   BEM-ish blocks (siblings, composed inside a trust-fold panel):
+     .hz-rule-grid         — outer 2-col grid
+     .hz-rule-copy         — left column body
+     .hz-rule-copy__lead   — emphasized lead paragraph
+     .hz-contract-list     — ordered/structured clauses
+     .hz-contract-card     — one clause (label + paragraph)
+     .hz-resolution-note   — pill noting resolution timing
+     .hz-rule-facts        — right column sidebar
+     .hz-rule-fact         — one fact row
+     .hz-rule-source       — source link / anchor
+     .hz-rule-source--pending
+     .hz-rule-source-note  — small companion note
+     .hz-prohibition-copy  — the prohibitions paragraph (sister)
+   ────────────────────────────────────────────────────────────── */
+
+
+  .hz-rule-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(12rem, 0.31fr);
+    gap: clamp(1.4rem, 3vw, 2.35rem);
+    align-items: start;
+  }
+
+  .hz-rule-copy {
+    display: grid;
+    gap: 0.86rem;
+    max-width: 42rem;
+  }
+
+  .hz-rule-copy p {
+    margin: 0;
+    color: var(--hz-text-muted);
+    font-size: 0.88rem;
+    font-weight: 560;
+    line-height: 1.68;
+  }
+
+  .hz-rule-copy .hz-rule-copy__lead {
+    color: var(--hz-text);
+    font-size: 1rem;
+    font-weight: 700;
+    line-height: 1.55;
+  }
+
+  .hz-contract-list {
+    display: grid;
+    gap: 0;
+  }
+
+  .hz-contract-card {
+    display: grid;
+    grid-template-columns: minmax(4.6rem, 0.2fr) minmax(0, 1fr);
+    gap: clamp(0.8rem, 2vw, 1.15rem);
+    align-items: start;
+    text-align: right;
+    border: 0;
+    border-bottom: 1px solid var(--hz-border-soft);
+    border-radius: 0;
+    background: transparent;
+    padding: 0.86rem 0;
+  }
+
+  .hz-contract-card:first-child {
+    padding-top: 0.25rem;
+  }
+
+  .hz-contract-card:last-child {
+    border-bottom: 0;
+    padding-bottom: 0.1rem;
+  }
+
+  .hz-contract-card > span {
+    color: var(--hz-action-buy);
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 0;
+    line-height: 1.6;
+    white-space: nowrap;
+  }
+
+  .hz-contract-card__body {
+    display: grid;
+    gap: 0.7rem;
+  }
+
+  .hz-contract-card__body > p {
+    color: var(--hz-text-soft);
+    font-size: 0.92rem;
+    font-weight: 620;
+    line-height: 1.64;
+    max-width: 38rem;
+    text-align: right;
+  }
+
+  .hz-resolution-note {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+    align-items: center;
+    width: fit-content;
+    border: 1px solid rgb(var(--hz-action-buy-rgb) / 0.18);
+    border-radius: var(--hz-radius-pill);
+    padding: 0.42rem 0.72rem;
+    background: rgb(var(--hz-action-buy-rgb) / 0.055);
+    color: var(--hz-text-muted);
+    font-size: 0.74rem;
+    font-weight: 700;
+  }
+
+  .hz-resolution-note b {
+    color: var(--hz-action-buy);
+  }
+
+  .hz-rule-facts {
+    display: grid;
+    gap: 0.88rem;
+    border-right: 0;
+    padding: 0.05rem 0 0;
+  }
+
+  .hz-rule-fact {
+    display: grid;
+    gap: 0.34rem;
+    margin: 0;
+    padding: 0 0 0.86rem;
+    border-bottom: 1px solid var(--hz-border-faint);
+    text-align: right;
+  }
+
+  .hz-rule-fact > span:first-child {
+    color: var(--hz-text-faint);
+    font-size: 0.76rem;
+    font-weight: 700;
+    letter-spacing: 0;
+  }
+
+  .hz-rule-fact b,
+  .hz-rule-source {
+    color: var(--hz-text);
+    font-size: 0.84rem;
+    font-weight: 700;
+    line-height: 1.42;
+  }
+
+  .hz-rule-source {
+    display: inline-flex;
+    max-width: 100%;
+    width: fit-content;
+    align-items: center;
+    gap: 0.35rem;
+    text-decoration: none;
+  }
+
+  .hz-rule-source > span:first-child {
+    overflow-wrap: anywhere;
+  }
+
+  a.hz-rule-source {
+    color: var(--hz-action-buy);
+  }
+
+  .hz-rule-source--pending {
+    display: grid;
+    gap: 0.28rem;
+    color: var(--hz-text);
+  }
+
+  .hz-rule-source-note {
+    color: var(--hz-text-faint);
+    font-size: 0.68rem;
+    font-weight: 750;
+  }
+
+  .hz-prohibition-copy {
+    max-width: 44rem;
+    margin: 0;
+    color: var(--hz-text-muted);
+    font-size: 0.86rem;
+    font-weight: 560;
+    line-height: 1.68;
+  }
+
+  @media (max-width: 767px) {
+    .hz-rule-grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+
+    .hz-rule-facts {
+      border-right: 0;
+      border-top: 1px solid var(--hz-border-soft);
+      padding-top: 1rem;
+      padding-right: 0;
+    }
+
+    /* Match the מה/אם contract-card rows: label sits inline beside the
+       value instead of stacking above it. The source link keeps its own
+       overflow-wrap so a long provider name still wraps within the row
+       instead of pushing the link off-screen. */
+    .hz-rule-fact {
+      grid-template-columns: minmax(4.6rem, 0.2fr) minmax(0, 1fr);
+      gap: clamp(0.8rem, 2vw, 1.15rem);
+      align-items: start;
+    }
+
+    .hz-rule-fact > span:first-child {
+      white-space: nowrap;
+    }
+
+    .hz-rule-source,
+    .hz-rule-source--pending {
+      width: 100%;
+    }
+  }

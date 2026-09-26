@@ -1,0 +1,23 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    restart: "no"
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-navi}
+      POSTGRES_USER: ${POSTGRES_USER:-navi}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-navi}
+    ports:
+      # Loopback-only: never expose the DB on all interfaces — the default
+      # password is trivial and this file may follow the repo to a cloud host.
+      - "127.0.0.1:${POSTGRES_HOST_PORT:-55432}:5432"
+    volumes:
+      - navi-postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $$POSTGRES_USER -d $$POSTGRES_DB"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+      start_period: 5s
+
+volumes:
+  navi-postgres-data:

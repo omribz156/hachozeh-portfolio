@@ -1,0 +1,98 @@
+---
+// Community surface (שיחת השוק) — 4 tabs: comments / holders / positions /
+// activity. Hydrated via Preact (Community.jsx) with client:visible so the
+// island only boots when the section scrolls near the viewport, matching the
+// old IntersectionObserver + requestIdleCallback lazy-paint contract.
+//
+// SSR comment preview: the 10 most recent comments + count render as static HTML
+// (crawlable + first-paint social proof). The interactive island hides this preview
+// on boot (see Community.jsx) and takes over the full thread. Preview data is
+// server-cached per market (lib/market-comments-preview.js), so this is not a
+// per-view DB hit on the hot market path.
+//
+// Vanilla files community.client.js / community-board.js are left in place
+// (dead) — this wrapper no longer imports them.
+import Community from './Community.jsx';
+
+const {
+  marketKey = '',
+  outcomes = [],
+  marketStatus = '',
+  eventChildren = [],
+  defaultChildKey = '',
+  eventId = '',
+  commentPreview = { count: 0, comments: [] },
+} = Astro.props;
+
+// Compact outcome list the board's outcome-filter needs (key + display label).
+const communityOutcomes = (outcomes || []).map((o) => ({
+  key: o.key || o.id,
+  label: o.shortLabel || o.label || o.id,
+}));
+
+// Event mode: child markets (date series). Used by the board/activity dropdowns.
+const communityChildren = (eventChildren || []).map((c) => ({
+  key: c.key || c.marketId,
+  label: c.label,
+  status: c.status,
+}));
+
+const previewComments = Array.isArray(commentPreview?.comments) ? commentPreview.comments : [];
+const commentCount = Number(commentPreview?.count) || previewComments.length;
+const profileHref = (h) => {
+  const key = String(h || '').trim().replace(/^@/, '');
+  return key ? `/@${encodeURIComponent(key)}` : '';
+};
+---
+
+{previewComments.length > 0 && (
+  <section class="hz-comment-preview" data-comment-preview aria-label="תגובות אחרונות">
+    <h3 class="hz-comment-preview__title">{commentCount} תגובות</h3>
+    <ul class="hz-comment-preview__list">
+      {previewComments.map((c) => (
+        <li class="hz-comment-preview__item">
+          {profileHref(c.handle) ? (
+            <a class="hz-comment-preview__author" href={profileHref(c.handle)}>{c.author}</a>
+          ) : (
+            <span class="hz-comment-preview__author">{c.author}</span>
+          )}
+          <p class="hz-comment-preview__body">{c.body}</p>
+        </li>
+      ))}
+    </ul>
+  </section>
+)}
+
+<Community
+  client:visible
+  marketKey={marketKey}
+  outcomes={communityOutcomes}
+  marketStatus={marketStatus}
+  eventChildren={communityChildren}
+  defaultChildKey={defaultChildKey}
+  eventId={eventId}
+/>
+
+<style>
+  .hz-comment-preview { margin-block: 1rem 0.5rem; }
+  .hz-comment-preview__title {
+    font-size: 0.9rem; font-weight: 700;
+    color: var(--hz-text, #f4f1ea); margin: 0 0 0.75rem;
+  }
+  .hz-comment-preview__list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 0.75rem; }
+  .hz-comment-preview__item {
+    margin: 0; padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--hz-border-faint, rgba(255, 255, 255, 0.06));
+  }
+  .hz-comment-preview__item:last-child { border-bottom: 0; padding-bottom: 0; }
+  .hz-comment-preview__author {
+    font-size: 0.82rem; font-weight: 600;
+    color: var(--hz-text-soft, #b9b3a7); text-decoration: none;
+  }
+  .hz-comment-preview__author:hover { color: var(--hz-text, #f4f1ea); }
+  .hz-comment-preview__body {
+    margin: 0.2rem 0 0; font-size: 0.9rem; line-height: 1.4;
+    color: var(--hz-text, #f4f1ea);
+    overflow-wrap: anywhere;
+  }
+</style>

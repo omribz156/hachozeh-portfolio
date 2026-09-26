@@ -1,0 +1,28 @@
+/* ──────────────────────────────────────────────────────────────
+   patterns/position-pill.css
+   Small pill that shows a held position next to an outcome — e.g.
+   "+1.001 כן" or, when the user has no position on that side, the
+   muted "—" placeholder.
+   Used on market-detail outcome rows and community position-table
+   today; reusable in portfolio holding rows and any "you hold X"
+   indicator.
+   ────────────────────────────────────────────────────────────── */
+
+
+  .hz-position-pill {
+    display: inline-flex;
+    align-items: center;
+    border: 1px solid rgb(var(--hz-action-buy-rgb) / 0.18);
+    border-radius: var(--hz-radius-pill);
+    background: var(--hz-action-buy-soft);
+    padding: 0.12rem 0.45rem;
+    color: var(--hz-action-buy);
+    font-size: 0.66rem;
+    font-weight: 700;
+  }
+
+  .hz-position-pill--muted {
+    border-color: var(--hz-border);
+    background: var(--hz-border-faint);
+    color: var(--hz-text-muted);
+  }

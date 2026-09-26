@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="technology market image">
+  <defs>
+    <linearGradient id="g" x1="58" y1="52" x2="456" y2="466" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#17384c"/>
+      <stop offset=".56" stop-color="#151f33"/>
+      <stop offset="1" stop-color="#0b111b"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#g)"/>
+  <rect x="146" y="146" width="220" height="220" rx="34" fill="none" stroke="#e7edf4" stroke-width="26"/>
+  <path d="M206 206h100v100H206z" fill="#6ee7b7"/>
+  <path d="M174 96v48M226 96v48M286 96v48M338 96v48M174 368v48M226 368v48M286 368v48M338 368v48M96 174h48M96 226h48M96 286h48M96 338h48M368 174h48M368 226h48M368 286h48M368 338h48" stroke="#f7c66a" stroke-width="18" stroke-linecap="round"/>
+</svg>

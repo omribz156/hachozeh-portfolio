@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="esports market image">
+  <defs>
+    <linearGradient id="g" x1="58" y1="48" x2="456" y2="466" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#27304f"/>
+      <stop offset=".56" stop-color="#182137"/>
+      <stop offset="1" stop-color="#0b111b"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#g)"/>
+  <path d="M146 268c14-64 42-96 110-96s96 32 110 96l18 82c6 29-26 50-50 32l-48-36h-60l-48 36c-24 18-56-3-50-32l18-82Z" fill="none" stroke="#e7edf4" stroke-width="24" stroke-linejoin="round"/>
+  <path d="M198 260h64M230 228v64" stroke="#6ee7b7" stroke-width="20" stroke-linecap="round"/>
+  <circle cx="306" cy="250" r="15" fill="#f7c66a"/>
+  <circle cx="344" cy="286" r="15" fill="#f7c66a"/>
+</svg>

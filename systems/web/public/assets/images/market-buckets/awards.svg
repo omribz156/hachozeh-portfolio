@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="awards market image">
+  <defs>
+    <linearGradient id="g" x1="62" y1="52" x2="452" y2="466" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#3a2a43"/>
+      <stop offset=".58" stop-color="#1b2030"/>
+      <stop offset="1" stop-color="#0b111b"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#g)"/>
+  <path d="M184 128h144v66c0 58-32 102-72 102s-72-44-72-102v-66Z" fill="#f7c66a"/>
+  <path d="M184 164h-54v24c0 46 30 77 70 82M328 164h54v24c0 46-30 77-70 82" fill="none" stroke="#e7edf4" stroke-width="22" stroke-linecap="round"/>
+  <path d="M256 296v60M204 384h104M178 424h156" stroke="#e7edf4" stroke-width="24" stroke-linecap="round"/>
+  <path d="m256 166 14 28 31 4-23 22 6 31-28-15-28 15 6-31-23-22 31-4 14-28Z" fill="#0b111b"/>
+</svg>

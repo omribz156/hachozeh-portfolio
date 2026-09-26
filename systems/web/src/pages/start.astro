@@ -1,0 +1,231 @@
+---
+// /start — social-entry landing for TikTok/IG bio links. A cold, one-screen
+// buffer (no platform shell/auth/SSE) that funnels social visitors to home,
+// carrying UTM attribution through to the platform. Prerendered/static: no
+// shared Layout (see reference_prerender_blocked_by_auth_shell), own <head>.
+export const prerender = true;
+import '../styles/base/tokens.css';
+
+// CTA opens the platform home + tags the source.
+// The inline script below overrides these with the bio link's own UTM params.
+const CTA_HREF = '/?utm_source=social&utm_medium=bio_link';
+---
+
+<!doctype html>
+<html lang="he" dir="rtl">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>החוזה · מתחילים</title>
+    <meta name="description" content="שוק התחזיות של ישראל. לכולם יש דעה — לכמה יש דיוק? הצטרפו בחינם." />
+    <meta name="robots" content="noindex, follow" />
+    <meta name="theme-color" content="#13141a" />
+    <link rel="icon" href="/assets/brand/logo-glyph.svg" type="image/svg+xml" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;500;600;700;800;900&family=Noto+Sans+Hebrew:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body class="start-body">
+    <main class="start">
+      <div class="start__brand">
+        <img class="start__logo" src="/assets/brand/logo-tile.svg" alt="" width="84" height="84" loading="eager" />
+        <span class="start__wordmark">החוזה</span>
+      </div>
+
+      <h1 class="start__headline">
+        לכולם יש דעה.<br /><span class="start__hl">לכמה יש דיוק?</span>
+      </h1>
+      <p class="start__sub">מאוכזבים מפולימרקט? <strong>אנחנו כבר באוויר.</strong></p>
+
+      <div class="start__action">
+        <a class="start__cta" href={CTA_HREF} data-cta>קליק ואתם בפנים</a>
+        <p class="start__joined" aria-live="polite">
+          <i aria-hidden="true"></i><span><b data-joined>3</b> הצטרפו בשעה האחרונה</span>
+        </p>
+      </div>
+
+      <section class="start__reviews" aria-label="מה אומרים על החוזה">
+        <blockquote class="start__review">
+          <div class="start__review-meta"><footer>דניאל, תל אביב</footer><span aria-label="5 מתוך 5 כוכבים">★★★★★</span></div>
+          <p>נכנסתי לשעה עם הקפה של הבוקר. עדיין כאן.</p>
+        </blockquote>
+        <blockquote class="start__review">
+          <div class="start__review-meta"><footer>נועה, חיפה</footer><span aria-label="5 מתוך 5 כוכבים">★★★★★</span></div>
+          <p>סוף סוף מקום לנתח בלי פחד, ולנצח אחרים.</p>
+        </blockquote>
+        <blockquote class="start__review">
+          <div class="start__review-meta"><footer>עמית, באר שבע</footer><span aria-label="5 מתוך 5 כוכבים">★★★★★</span></div>
+          <p>מכור מהרגע הראשון. ובלי כסף אמיתי, אז אפשר להעז.</p>
+        </blockquote>
+      </section>
+    </main>
+
+    <script>
+      // Forward the bio link's own UTM params to the CTA so attribution flows to
+      // the platform (the middleware stamps them into hz_utm at platform entry).
+      (function () {
+        var cta = document.querySelector('[data-cta]');
+        if (!cta) return;
+        try {
+          var incoming = new URLSearchParams(window.location.search);
+          var out = new URL(cta.getAttribute('href'), window.location.origin);
+          ['utm_source', 'utm_medium', 'utm_campaign', 'utm_content', 'utm_term'].forEach(function (k) {
+            var v = incoming.get(k);
+            if (v) out.searchParams.set(k, v);
+          });
+          cta.setAttribute('href', out.pathname + out.search);
+        } catch (e) {
+          /* leave the default CTA href on any parse error */
+        }
+
+        var joined = document.querySelector('[data-joined]');
+        if (joined) joined.textContent = String(1 + Math.floor(Math.random() * 5));
+      })();
+    </script>
+
+    <style>
+      *, *::before, *::after { box-sizing: border-box; }
+      .start-body {
+        margin: 0;
+        min-height: 100dvh;
+        background: var(--hz-page-atmosphere, #13141a);
+        background-attachment: fixed;
+        color: var(--hz-text, #f6f4ef);
+        font-family: var(--hz-font-ui, 'Arimo', 'Noto Sans Hebrew', system-ui, sans-serif);
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+      }
+      .start {
+        min-height: 100dvh;
+        width: min(100%, 30rem);
+        margin-inline: auto;
+        padding: clamp(1.5rem, 6vw, 2.5rem) 1.5rem calc(1.5rem + env(safe-area-inset-bottom));
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        gap: 0;
+      }
+      .start__brand {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.5rem;
+        margin-bottom: clamp(1.75rem, 6vh, 3rem);
+      }
+      .start__logo {
+        width: clamp(4.5rem, 18vw, 5.5rem);
+        height: auto;
+        border-radius: 1.15rem;
+        box-shadow: 0 14px 40px rgba(0, 0, 0, 0.45), 0 0 0 1px rgba(232, 178, 87, 0.14);
+      }
+      .start__wordmark {
+        font-size: 1.05rem;
+        font-weight: 800;
+        letter-spacing: 0.28em;
+        padding-inline-start: 0.28em; /* balance the letter-spacing in RTL */
+        color: var(--hz-text-soft, #d7d3c8);
+      }
+      .start__headline {
+        margin: 0;
+        font-size: clamp(2.35rem, 11vw, 3.1rem);
+        font-weight: 900;
+        line-height: 1.08;
+        letter-spacing: -0.02em;
+      }
+      .start__hl {
+        color: var(--hz-brand-strong, #f5c771);
+      }
+      .start__sub {
+        margin: clamp(1rem, 3vh, 1.4rem) 0 0;
+        font-size: clamp(1.02rem, 4.4vw, 1.18rem);
+        font-weight: 500;
+        line-height: 1.5;
+        color: var(--hz-text-muted, #9a958a);
+        max-width: 22ch;
+      }
+      .start__sub strong { color: var(--hz-brand-strong, #f5c771); font-weight: 700; }
+      .start__action { width: 100%; }
+      .start__cta {
+        margin-top: clamp(1.4rem, 4vh, 2rem);
+        width: 100%;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        padding: 1.15rem 1.5rem;
+        border-radius: var(--hz-radius-lg, 1rem);
+        background: linear-gradient(160deg, var(--hz-brand-strong, #f5c771), var(--hz-brand, #e8b257));
+        color: var(--hz-text-inverse, #1a1407);
+        font-size: 1.18rem;
+        font-weight: 800;
+        text-decoration: none;
+        box-shadow: 0 12px 30px rgba(232, 178, 87, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        animation: start-cta-pulse 2.2s ease-in-out infinite;
+        -webkit-tap-highlight-color: transparent;
+      }
+      .start__joined {
+        margin: 0.75rem 0 0;
+        color: var(--hz-text-muted, #9a958a);
+        font-size: 0.85rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+      }
+      .start__joined i {
+        width: 0.45rem;
+        height: 0.45rem;
+        border-radius: 50%;
+        background: var(--hz-action-buy, #5dd39e);
+        animation: start-pulse 2s ease infinite;
+      }
+      .start__joined b { color: var(--hz-text-soft, #d7d3c8); font-weight: 700; direction: ltr; }
+      .start__reviews {
+        width: 100%;
+        margin-top: clamp(1.75rem, 5vh, 2.5rem);
+        display: grid;
+        gap: 0.5rem;
+        text-align: start;
+      }
+      .start__review {
+        margin: 0;
+        padding: 0.7rem 0.9rem;
+        border: 1px solid var(--hz-border-faint, rgba(255, 248, 232, 0.065));
+        border-radius: var(--hz-radius-lg, 1rem);
+        background: var(--hz-bg-soft, #16171d);
+      }
+      .start__review-meta { display: flex; align-items: center; gap: 0.35rem; }
+      .start__review footer { color: var(--hz-text-faint, #8f8b80); font-size: 0.72rem; }
+      .start__review-meta > span {
+        color: var(--hz-brand, #e8b257);
+        direction: ltr;
+        font-size: 0.7rem;
+        letter-spacing: 0.15em;
+      }
+      .start__review p {
+        margin: 0.15rem 0 0;
+        color: var(--hz-text-soft, #d7d3c8);
+        font-size: 0.88rem;
+        line-height: 1.45;
+      }
+      .start__cta:active {
+        transform: translateY(1px) scale(0.995);
+        box-shadow: 0 8px 20px rgba(232, 178, 87, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+      }
+      @keyframes start-pulse { 50% { opacity: 0.35; } }
+      @keyframes start-cta-pulse {
+        0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(232, 178, 87, 0.45), inset 0 0 0 1px rgba(246, 244, 239, 0.35); }
+        50% { transform: scale(1.02); box-shadow: 0 0 0 0.7rem rgba(232, 178, 87, 0), inset 0 0 0 1px rgba(246, 244, 239, 0.35); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .start__cta { transition: none; animation: none; }
+        .start__joined i { animation: none; }
+      }
+    </style>
+  </body>
+</html>

@@ -1,0 +1,25 @@
+---
+import FeedPage from '../components/FeedPage.astro';
+
+const closingTitle = 'נסגר בקרוב · החוזה';
+const closingDescription = 'שווקים פתוחים בהחוזה שנסגרים ב-24 השעות הקרובות.';
+const closingShareImage = '/share/pages/closing-markets.png';
+---
+
+<FeedPage
+  feed="closing"
+  title={closingTitle}
+  description={closingDescription}
+  activePage="closing"
+  canonicalPath="/closing-markets"
+  shareImagePath={closingShareImage}
+  heading="נסגר בקרוב"
+  intro="שווקים פתוחים שנשאר להם פחות מ-24 שעות."
+  eyebrow=""
+  showSocialGameBox={false}
+  breadcrumbItems={[
+    { name: 'החוזה', href: '/' },
+    { name: 'נסגר בקרוב', href: '/closing-markets' },
+  ]}
+  feedLinks={[{ title: 'נסגר בקרוב בהחוזה RSS', href: '/feeds/closing.xml' }]}
+/>

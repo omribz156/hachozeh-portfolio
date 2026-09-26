@@ -1,0 +1,577 @@
+/* ============================================================
+   HZ — How It Works overlay (component styles)
+   Ported from systems/design/to-integrate/how-it-works/dist/hz-how-it-works.css.
+   Token-driven (--hz-*). Self-mounting; everything scoped to .hzhiw*.
+   Body scroll-lock is owned by hz-how-it-works.js via window.NaviScrollLock
+   (auth-overlay parity pass) — body.overlay-open supplies `overflow:hidden`
+   + the coarse-pointer overscroll hardening (auth-overlays.css). This file
+   still carries no inert + no scrim blur — the panel just floats above the
+   (now non-scrolling) page.
+
+   z-index 99: above the shell chrome (site-shell tops out at 95) but BELOW the
+   auth overlay tier (auth-overlays.css = 100). The walkthrough tears down before
+   it hands off to the signup overlay, so they never truly coexist — but keeping
+   it under the auth tier means an auth overlay opened from the still-live header
+   correctly covers it (matches the drop's signup-above-hiw intent).
+   ============================================================ */
+
+.hzhiw-scrim,
+.hzhiw-scrim *,
+.hzhiw-scrim *::before,
+.hzhiw-scrim *::after { box-sizing: border-box; }
+
+/* full-viewport layer. Catches the outside-click that closes the overlay,
+   but does NOT blur or freeze the page; dim only. */
+.hzhiw-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  /* Flex (not grid place-items): a grid auto-track grows to the 540px panel, so
+     the panel's max-width:100% resolved against the track and never clamped to
+     the viewport (→ 540px panel on a 390px phone). In flex, max-width:100%
+     resolves against the container content box, so it clamps correctly. The
+     panel's margin:auto centers it AND lets it scroll when taller than the
+     viewport (auto margins beat align-items, no top-clip). */
+  display: flex;
+  overflow-y: auto;
+  padding: 30px;
+  background: radial-gradient(circle at 50% 45%, rgba(7, 8, 12, 0.18), rgba(7, 8, 12, 0.42));
+  font-family: var(--hz-font-ui);
+  color: var(--hz-text);
+}
+
+/* the panel */
+.hzhiw {
+  position: relative;
+  margin: auto;
+  width: 540px;
+  max-width: 100%;
+  /* match the auth/idea overlay panel exactly (was the lighter --hz-surface-2) */
+  background: rgba(19, 20, 26, 0.96);
+  backdrop-filter: blur(28px);
+  border: 1px solid var(--hz-border-soft);
+  border-radius: var(--hz-radius-2xl);
+  box-shadow: var(--hz-shadow-overlay);
+  padding: 18px 18px 22px;
+  text-align: start;
+}
+
+/* image placeholder — host swaps the inner for a real <img>/screenshot */
+.hzhiw__art {
+  position: relative;
+  height: 248px;
+  width: 100%;
+  border-radius: var(--hz-radius-lg);
+  background:
+    repeating-linear-gradient(135deg,
+      rgba(255, 248, 232, 0.045) 0 11px,
+      rgba(255, 248, 232, 0.012) 11px 22px),
+    var(--hz-bg-muted);
+  border: 1px solid var(--hz-border-soft);
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.hzhiw__art[data-hiw-art-mode="demo"] {
+  background: transparent;
+  border-color: transparent;
+}
+.hzhiw__art > img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.hzhiw__art-tag {
+  position: absolute;
+  inset-block-start: 11px;
+  inset-inline-start: 11px;
+  font-family: var(--hz-font-mono);
+  font-size: 10px;
+  letter-spacing: 0.04em;
+  color: var(--hz-text-faint);
+  padding: 3px 8px;
+  border-radius: var(--hz-radius-pill);
+  border: 1px solid var(--hz-border-faint);
+  background: rgba(0, 0, 0, 0.25);
+}
+.hzhiw__art-inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.hzhiw__art-icon {
+  width: 34px;
+  height: 34px;
+  margin-bottom: 12px;
+  color: var(--hz-brand-dim, var(--hz-brand));
+  opacity: 0.9;
+}
+.hzhiw__art-label {
+  font-family: var(--hz-font-mono);
+  font-size: 12px;
+  color: var(--hz-text-muted);
+  text-align: center;
+  padding: 0 16px;
+  line-height: 1.5;
+}
+
+.hzhiw-demo {
+  --hzhiw-yes: #65e8ae;
+  --hzhiw-yes-rgb: 101 232 174;
+  --hzhiw-no: #ff7a9d;
+  --hzhiw-no-rgb: 255 122 157;
+  direction: rtl;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  padding: 8px;
+  display: grid;
+  place-items: center;
+  background:
+    radial-gradient(circle at 72% 18%, rgba(var(--hz-brand-rgb), 0.12), transparent 34%),
+    linear-gradient(180deg, rgba(18, 21, 29, 0.98), rgba(10, 12, 18, 0.98));
+  color: var(--hz-text);
+}
+.hzhiw-demo,
+.hzhiw-demo * {
+  letter-spacing: 0;
+}
+.hzhiw-demo-card {
+  width: 100%;
+  height: 100%;
+  max-height: 100%;
+  border: 0;
+  border-radius: var(--hz-radius-lg);
+  background: linear-gradient(180deg, rgba(18, 24, 34, 0.96), rgba(10, 13, 19, 0.98));
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.26);
+  overflow: hidden;
+}
+.hzhiw-demo__money {
+  direction: ltr;
+  unicode-bidi: isolate;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.42em;
+  white-space: nowrap;
+  font-weight: 800;
+  transform-origin: center;
+}
+.hzhiw-demo-ticket .hzhiw-demo__money {
+  gap: 0.5em;
+}
+.hzhiw-demo-ticket .hz-vshekel-symbol {
+  inline-size: 1.12em;
+  block-size: 0.64em;
+}
+.hzhiw-demo-board .hzhiw-demo__money {
+  gap: 0.46em;
+}
+.hzhiw-demo-result__amount .hzhiw-demo__money {
+  gap: 0.3em;
+}
+.hzhiw-demo-result__amount .hz-vshekel-symbol {
+  inline-size: 0.88em;
+  block-size: 0.52em;
+  vertical-align: -0.02em;
+}
+.hzhiw-demo-market {
+  min-height: 222px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 17px;
+}
+.hzhiw-demo-market__top,
+.hzhiw-demo-market__meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.hzhiw-demo-market__category {
+  color: var(--hz-brand);
+  font-size: 12px;
+  font-weight: 800;
+}
+.hzhiw-demo-market__chance {
+  color: var(--hz-brand-strong);
+  font-size: 37px;
+  line-height: 1;
+}
+.hzhiw-demo-market__title {
+  min-height: 32px;
+  margin: 8px 0 10px;
+  font-size: 19px;
+  line-height: 1.25;
+  text-align: start;
+}
+.hzhiw-demo-market__outcomes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.hzhiw-demo-pill {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1px solid var(--hz-border-soft);
+  font-weight: 900;
+}
+.hzhiw-demo-pill--yes {
+  color: var(--hzhiw-yes);
+  background: rgb(var(--hzhiw-yes-rgb) / 0.14);
+  border-color: rgb(var(--hzhiw-yes-rgb) / 0.32);
+}
+.hzhiw-demo-pill--no {
+  color: var(--hzhiw-no);
+  background: rgb(var(--hzhiw-no-rgb) / 0.15);
+  border-color: rgb(var(--hzhiw-no-rgb) / 0.28);
+}
+.hzhiw-demo-market__meta {
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--hz-border-faint);
+  color: var(--hz-text-muted);
+  font-size: 12px;
+}
+
+.hzhiw-demo-ticket {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 11px;
+}
+.hzhiw-demo-ticket__tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  margin-bottom: 8px;
+  color: var(--hz-text-faint);
+  font-weight: 800;
+  text-align: center;
+}
+.hzhiw-demo-ticket__tabs span {
+  padding: 6px 0;
+  border-bottom: 2px solid transparent;
+}
+.hzhiw-demo-ticket__tabs .is-active {
+  color: var(--hzhiw-yes);
+  border-color: var(--hzhiw-yes);
+}
+.hzhiw-demo-ticket__outcomes {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.hzhiw-demo-ticket__outcomes button {
+  min-height: 37px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid var(--hz-border-soft);
+  border-radius: 10px;
+  background: rgba(20, 23, 31, 0.96);
+  color: var(--hz-text);
+  padding: 0 13px;
+  font: inherit;
+  font-weight: 900;
+}
+.hzhiw-demo-ticket__outcomes .is-selected {
+  color: var(--hzhiw-yes);
+  background: rgb(var(--hzhiw-yes-rgb) / 0.15);
+  border-color: rgb(var(--hzhiw-yes-rgb) / 0.45);
+}
+.hzhiw-demo-field,
+.hzhiw-demo-ticket__quote {
+  min-height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 7px;
+  padding: 0 13px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.035);
+  color: var(--hz-text-muted);
+  font-weight: 700;
+}
+.hzhiw-demo-field strong,
+.hzhiw-demo-ticket__quote strong {
+  color: var(--hz-text);
+}
+.hzhiw-demo-buy {
+  width: 100%;
+  min-height: 36px;
+  margin-top: 8px;
+  border: 0;
+  border-radius: var(--hz-radius-pill);
+  background: linear-gradient(180deg, #70e5ad, #4fc48f);
+  color: var(--hz-text-inverse);
+  font: inherit;
+  font-weight: 900;
+  transform-origin: center;
+}
+
+.hzhiw-demo-board {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 13px;
+}
+.hzhiw-demo-board__head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: var(--hz-text-muted);
+  font-size: 13px;
+  margin-bottom: 8px;
+}
+.hzhiw-demo-board__head strong {
+  color: var(--hz-text);
+}
+.hzhiw-demo-board__list {
+  list-style: none;
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+}
+.hzhiw-demo-board__list li {
+  min-height: 35px;
+  display: grid;
+  grid-template-columns: 28px 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 0 12px;
+  border-radius: 9px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid var(--hz-border-faint);
+  transform-origin: center;
+}
+.hzhiw-demo-board__list .is-focus {
+  border-color: rgba(var(--hz-brand-rgb), 0.72);
+  background: rgba(var(--hz-brand-rgb), 0.08);
+}
+.hzhiw-demo-board__list b {
+  color: var(--hz-brand);
+}
+.hzhiw-demo-board__list strong {
+  color: var(--hzhiw-yes);
+}
+.hzhiw-demo-board p {
+  margin: 8px 0 0;
+  padding-top: 8px;
+  font-size: 13px;
+  border-top: 1px solid var(--hz-border-faint);
+  color: var(--hz-text-muted);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+/* Welcome-mode streak teaser (final card, post-signup first run).
+   The ladder itself reuses the real daily-streak stamps (hz-foil__title / hz-stamps
+   / hz-stamp from daily-streak.css, globally loaded) so it matches the claim overlay
+   1:1 — this only provides the card-level frame. */
+.hzhiw-streak {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 16px 14px;
+}
+
+.hzhiw-demo-result {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 24px 22px;
+  text-align: center;
+  background: linear-gradient(180deg, rgba(18, 24, 34, 0.98), rgba(10, 13, 19, 0.98));
+  color: var(--hz-text);
+  border-color: rgba(var(--hz-brand-rgb), 0.55);
+}
+.hzhiw-demo-result__label {
+  display: block;
+  color: var(--hz-text-muted);
+  font-size: 13px;
+  font-weight: 800;
+}
+.hzhiw-demo-result__amount {
+  display: block;
+  margin: 10px 0 8px;
+  color: var(--hz-brand);
+  font-size: 42px;
+  line-height: 1;
+  transform-origin: center;
+}
+.hzhiw-demo-result h3 {
+  margin: 0;
+  font-size: 20px;
+}
+.hzhiw-demo-result p {
+  width: fit-content;
+  margin: 20px auto 0;
+  padding: 9px 26px;
+  border-radius: var(--hz-radius-pill);
+  background: rgba(var(--hz-brand-rgb), 0.12);
+  color: var(--hz-brand);
+  font-size: 13px;
+  font-weight: 800;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .hzhiw-demo--choose .hzhiw-demo-pill--yes,
+  .hzhiw-demo--trade .hzhiw-demo-buy,
+  .hzhiw-demo--compete .hzhiw-demo-board__list .is-focus {
+    animation: hzhiwActionPulse 2.35s ease-in-out infinite;
+    will-change: transform, box-shadow;
+  }
+  .hzhiw-demo--trade .hzhiw-demo-buy {
+    animation-duration: 1.9s;
+  }
+  .hzhiw-demo--redeem .hzhiw-demo-result__amount {
+    animation: hzhiwPrizePulse 1.8s ease-in-out infinite;
+    will-change: transform, filter;
+  }
+}
+
+@keyframes hzhiwActionPulse {
+  0%, 100% {
+    transform: scale(1);
+    box-shadow: none;
+  }
+  48% {
+    transform: scale(1.025);
+    box-shadow: 0 0 0 1px rgb(var(--hzhiw-yes-rgb) / 0.18), 0 8px 24px rgb(var(--hzhiw-yes-rgb) / 0.12);
+  }
+}
+@keyframes hzhiwNumberPulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  48% {
+    transform: scale(1.055);
+    filter: brightness(1.12);
+  }
+}
+@keyframes hzhiwPrizePulse {
+  0%, 100% {
+    transform: scale(1);
+    filter: brightness(1);
+  }
+  48% {
+    transform: scale(1.075);
+    filter: brightness(1.18);
+  }
+}
+
+@media (max-width: 560px) {
+  .hzhiw-demo { padding: 5px; }
+  .hzhiw-demo-card { width: 100%; }
+  .hzhiw-demo-market { min-height: 178px; padding: 12px; }
+  .hzhiw-demo-market__chance { font-size: 24px; }
+  .hzhiw-demo-market__title { font-size: 14px; }
+  .hzhiw-demo-pill,
+  .hzhiw-demo-ticket__outcomes button {
+    min-height: 30px;
+    padding-inline: 10px;
+  }
+  .hzhiw-demo-field,
+  .hzhiw-demo-ticket__quote,
+  .hzhiw-demo-buy {
+    min-height: 28px;
+  }
+  .hzhiw-demo-board__list li {
+    grid-template-columns: 22px 1fr auto;
+    min-height: 29px;
+    padding-inline: 9px;
+  }
+  .hzhiw-demo-board p { display: none; }
+  .hzhiw-demo-result { width: min(100%, 300px); }
+}
+
+/* body */
+.hzhiw__body {
+  padding: 0 8px;
+  margin-top: 26px;
+  text-align: start;
+}
+.hzhiw__title {
+  font-family: var(--hz-font-ui);
+  font-size: 27px;
+  font-weight: 700;
+  line-height: 1.18;
+  letter-spacing: -0.01em;
+  margin: 0 0 12px;
+  color: var(--hz-text);
+  text-wrap: balance;
+}
+.hzhiw__text {
+  font-size: 15px;
+  line-height: 1.62;
+  color: var(--hz-text-soft);
+  margin: 0;
+  text-wrap: pretty;
+  text-align: start;
+}
+
+/* footer — single full-width CTA */
+.hzhiw__foot {
+  margin-top: 28px;
+  padding: 0 2px;
+}
+.hzhiw__cta {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--hz-font-ui);
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  border: 0;
+  border-radius: var(--hz-radius-pill);
+  padding-block: 14px;
+  background: var(--hz-brand);
+  color: var(--hz-text-inverse);
+  box-shadow: 0 10px 26px rgba(var(--hz-brand-rgb), 0.22);
+  transition: background var(--hz-motion);
+}
+@media (hover: hover) {
+  .hzhiw__cta:hover { background: var(--hz-brand-strong); }
+}
+.hzhiw__cta svg { width: 16px; height: 16px; }
+
+/* ── mobile (≤560px) ──────────────────────────────────────────
+   Tighten the frame: less scrim padding (more room for the panel), a shorter
+   art frame, and a smaller title so a step fits a phone without scrolling. */
+@media (max-width: 560px) {
+  .hzhiw-scrim { padding: 16px; }
+  .hzhiw { padding: 14px 14px 18px; border-radius: var(--hz-radius-xl); }
+  .hzhiw__art { height: 190px; }
+  .hzhiw__body { margin-top: 20px; padding: 0 4px; }
+  .hzhiw__title { font-size: 22px; }
+  .hzhiw__text { font-size: 14.5px; }
+  .hzhiw__foot { margin-top: 22px; }
+}
+
+/* entrance — base state is VISIBLE; animate only when allowed */
+@media (prefers-reduced-motion: no-preference) {
+  .hzhiw-scrim[data-anim] { animation: hzhiwScrimIn var(--hz-motion) ease; }
+  .hzhiw-scrim[data-anim] .hzhiw { animation: hzhiwPanelIn var(--hz-motion-slow) cubic-bezier(.2,.9,.25,1.05); }
+  /* per-step content swap */
+  .hzhiw__body[data-swap] { animation: hzhiwFade var(--hz-motion-slow); }
+}
+@keyframes hzhiwScrimIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes hzhiwPanelIn { from { opacity: 0; transform: translateY(10px) scale(0.99); } to { opacity: 1; transform: none; } }
+@keyframes hzhiwFade   { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }

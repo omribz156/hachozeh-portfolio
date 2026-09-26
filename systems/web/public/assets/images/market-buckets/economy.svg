@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="economy market image">
+  <defs>
+    <linearGradient id="g" x1="64" y1="64" x2="448" y2="448" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2f2618"/>
+      <stop offset=".55" stop-color="#17212d"/>
+      <stop offset="1" stop-color="#0b111b"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#g)"/>
+  <path d="M104 368h304" stroke="#f7c66a" stroke-width="28" stroke-linecap="round"/>
+  <path d="M142 328V206M218 328V164M294 328V238M370 328V126" stroke="#e7edf4" stroke-width="30" stroke-linecap="round"/>
+  <path d="M118 242c70 2 91-82 142-54 42 23 58 79 139 12" fill="none" stroke="#6ee7b7" stroke-width="18" stroke-linecap="round"/>
+</svg>

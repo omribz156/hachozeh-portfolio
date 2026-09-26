@@ -1,0 +1,138 @@
+---
+import { fetchWeeklyLeaderboard } from '../lib/social.js';
+import { vshekelMoneyHtml } from '../lib/vshekel';
+
+let leaders = [];
+let error = null;
+
+try {
+  const data = await fetchWeeklyLeaderboard(3);
+  leaders = Array.isArray(data?.entries)
+    ? data.entries.filter((entry) => Number(entry?.weeklyPnl) > 0)
+    : [];
+} catch (e) {
+  error = e?.message || 'leaderboard unavailable';
+}
+
+/** @param {number} rank */
+const rankClass = (rank) => (
+  rank === 1 ? ' hz-leader--gold' :
+  rank === 2 ? ' hz-leader--silver' :
+  rank === 3 ? ' hz-leader--bronze' :
+  ''
+);
+/** @param {string | number | null | undefined} value */
+const formatPnl = (value) => {
+  const amount = Number(value || 0);
+  const sign = amount > 0 ? '+' : amount < 0 ? '-' : '';
+  return vshekelMoneyHtml(`${sign}${Math.abs(amount)}`, { signed: true });
+};
+---
+
+<div class="hz-social-col">
+<aside class="hz-social" data-social-game data-auth-state="guest">
+  <h2 class="hz-social__title">הקהילה</h2>
+
+  <section class="hz-social__section">
+    <div class="hz-social__section-head">
+      <span class="hz-social__section-title">לוח מובילים · השבוע</span>
+      <span class="hz-social__section-link" aria-disabled="true">הכל</span>
+    </div>
+    <div data-leaderboard-rows>
+    {leaders.length > 0 ? (
+      leaders.map((leader) => leader.profileHref ? (
+        <a class={`hz-leader${rankClass(leader.rank)}`} href={leader.profileHref} aria-label={`לפרופיל של ${leader.displayName}`}>
+          <span class="hz-leader__rank">{leader.rank}</span>
+          <span class="hz-leader__name">{leader.displayName}</span>
+          <span class={`hz-leader__stat${Number(leader.weeklyPnl) < 0 ? ' hz-leader__stat--down' : ''}`} set:html={formatPnl(leader.weeklyPnl)}></span>
+        </a>
+      ) : (
+        <div class={`hz-leader${rankClass(leader.rank)}`}>
+          <span class="hz-leader__rank">{leader.rank}</span>
+          <span class="hz-leader__name">{leader.displayName}</span>
+          <span class={`hz-leader__stat${Number(leader.weeklyPnl) < 0 ? ' hz-leader__stat--down' : ''}`} set:html={formatPnl(leader.weeklyPnl)}></span>
+        </div>
+      ))
+    ) : error ? (
+      <p class="hz-social__empty">לוח המובילים לא זמין כרגע.</p>
+    ) : (
+      <p class="hz-social__empty">עוד לא נקבעו מובילים חיוביים השבוע. מי שקורא נכון מופיע כאן.</p>
+    )}
+    </div>
+  </section>
+
+  <section class="hz-social__section hz-social__section--wisdom" id="social-accuracy">
+    <div class="hz-social__section-head">
+      <span class="hz-social__section-title">דיוק ציבורי</span>
+    </div>
+    <div class="hz-wisdom__ring" aria-hidden="true">
+      <span>−</span>
+    </div>
+  </section>
+</aside>
+
+  <a class="hz-social__cta" href="/community" aria-label="מעבר לקהילה">
+    <span>קחו אותי לשם</span>
+    <span class="hz-social__cta-arrow" aria-hidden="true">←</span>
+  </a>
+</div>
+
+<script>
+  // Interim 60s leaderboard refresh (weekly PnL is slow-moving + the box already
+  // re-renders on navigation; this only helps a viewer who stays put). Soft-nav safe:
+  // the module runs once, astro:page-load (re)starts the timer and before-swap clears
+  // it. Superseded by the upcoming full leaderboard rebuild.
+  (function () {
+    let timer = null;
+    const rankClass = (r) => (r === 1 ? ' hz-leader--gold' : r === 2 ? ' hz-leader--silver' : r === 3 ? ' hz-leader--bronze' : '');
+    const esc = (s) => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+    const attr = (s) => esc(s).replace(/"/g, '&quot;');
+    // Kept in sync with the SSR empty copy above (was previously a different string —
+    // divergence flagged by the UX cold-start audit; unified here).
+    const empty = '<p class="hz-social__empty">עוד לא נקבעו מובילים חיוביים השבוע. מי שקורא נכון מופיע כאן.</p>';
+    const fmt = (v) => {
+      const a = Number(v || 0);
+      const sign = a > 0 ? '+' : a < 0 ? '-' : '';
+      const amount = sign + Math.abs(a).toLocaleString('he-IL', { maximumFractionDigits: 0 });
+      return '<bdi class="hz-money" dir="ltr" aria-label="V₪ ' + amount + '">' +
+        (window['HZCurrency']?.symbolHtml?.({ decorative: true }) || '<span aria-hidden="true">V₪</span>') +
+        '<span>' + amount + '</span></bdi>';
+    };
+    async function refresh() {
+      if (document.hidden) return;
+      const box = document.querySelector('[data-social-game] [data-leaderboard-rows]');
+      if (!box) return;
+      try {
+        const res = await fetch('/api/social/leaderboard/weekly?limit=3', { headers: { accept: 'application/json' } });
+        if (!res.ok) return;
+        const data = await res.json().catch(() => null);
+        const entries = Array.isArray(data?.entries)
+          ? data.entries.filter((entry) => Number(entry?.weeklyPnl) > 0)
+          : [];
+        if (!entries.length) {
+          box.innerHTML = empty;
+          return;
+        }
+        box.innerHTML = entries.map((l) => {
+          const href = typeof l.profileHref === 'string' && l.profileHref.startsWith('/@') ? l.profileHref : '';
+          const content =
+            '<span class="hz-leader__rank">' + esc(l.rank) + '</span>' +
+            '<span class="hz-leader__name">' + esc(l.displayName) + '</span>' +
+            '<span class="hz-leader__stat' + (Number(l.weeklyPnl) < 0 ? ' hz-leader__stat--down' : '') + '">' + fmt(l.weeklyPnl) + '</span>';
+          return href
+            ? '<a class="hz-leader' + rankClass(l.rank) + '" href="' + attr(href) + '" aria-label="לפרופיל של ' + attr(l.displayName) + '">' + content + '</a>'
+            : '<div class="hz-leader' + rankClass(l.rank) + '">' + content + '</div>';
+        }).join('');
+      } catch {}
+    }
+    function start() {
+      if (timer) { clearInterval(timer); timer = null; }
+      if (!document.querySelector('[data-social-game] [data-leaderboard-rows]')) return; // not on this page
+      timer = setInterval(refresh, 60000);
+    }
+    document.addEventListener('astro:page-load', start);
+    document.addEventListener('astro:before-swap', () => { if (timer) { clearInterval(timer); timer = null; } });
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
+    start();
+  })();
+</script>

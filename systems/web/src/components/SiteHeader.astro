@@ -1,0 +1,819 @@
+---
+// Site shell — header bar + nav row + dropdowns. Server-rendered chrome uses
+// the middleware auth seed so first paint matches the real guest/user state.
+import { PUBLIC_CATEGORY_HUBS, categoryBrowsePath } from '../lib/category-hubs.js';
+import { vshekelMoneyHtml, vshekelMoneyText } from '../lib/vshekel';
+import HeaderAvatar from './header/HeaderAvatar.jsx';
+import HeaderMenuIdentity from './header/HeaderMenuIdentity.jsx';
+
+const { activePage = 'trending' } = Astro.props;
+
+const HOME = '/';
+const HELP = '/help';
+
+// Live feed-nav item is hidden for now (parked 2026-06-01). Flip to `true` to
+// bring back the pulsing dot + לייב label + live-count pill in one move — the
+// render branch and the live-count poll island stay intact below. When hidden,
+// the poll self-gates (no [data-live-count] node → no fetch).
+const SHOW_LIVE = false;
+
+const FEED_NAV = [
+  { key: 'trending', label: 'טרנדי', href: HOME, icon: 'local_fire_department', iconMod: 'hot' },
+  { key: 'closing', label: 'נסגר בקרוב', href: '/closing-markets', icon: 'notifications', iconMod: 'closing' },
+  { key: 'live', label: 'לייב', live: true },
+  { key: 'breaking', label: 'מתפרץ', href: '/breaking-markets', icon: 'bolt', iconMod: 'warning' },
+].filter((i) => SHOW_LIVE || !i.live);
+
+const CATEGORIES = PUBLIC_CATEGORY_HUBS;
+
+const MORE = [
+  { icon: 'leaderboard', label: 'לוח מובילים', sub: 'תחרות שבועית של תחזיות' },
+  { icon: 'redeem', label: 'הישגים', sub: 'מסלול התגים והישגים', href: '/achievements', authGate: true },
+  { icon: 'bookmark', label: 'רשימות מעקב', sub: 'שמור שווקים ועקוב' },
+  { icon: 'auto_graph', label: 'תובנות אישיות', sub: 'ניתוח התחזיות שלך' },
+  { icon: 'verified', label: 'דיוק תחזיות והיסטוריה', sub: 'דיוק הפלטפורמה לאורך זמן' },
+];
+
+const SEARCH_EMPTY_MARKETS = 'התחל להקליד כדי לחפש שווקים.';
+const SEARCH_EMPTY_PROFILES = 'התחל להקליד כדי לחפש משתמשים.';
+const homeActive = activePage === 'trending';
+const portfolioActive = activePage === 'portfolio';
+const isStaticHelpPage = Astro.url.pathname === '/help' || Astro.url.pathname.startsWith('/help/');
+
+// Hamburger menu groups (a hairline divider renders BETWEEN groups). Dividers are
+// computed from group adjacency, not stored as array entries, so a group that
+// filters down to empty for an audience (e.g. a userOnly-only group on the guest
+// menu) is dropped without leaving a stray group or dangling hairline.
+type HamburgerItem = { icon: string; label: string; href: string; badge?: string; emphasis?: boolean; overlay?: string; userOnly?: boolean; hiw?: boolean; streak?: boolean; newTab?: boolean; authGate?: boolean };
+const HAMBURGER_GROUPS: HamburgerItem[][] = [
+  [
+    { icon: 'school', label: 'איך זה עובד?', href: '#', hiw: true },
+    { icon: 'local_fire_department', label: 'רצף יומי', href: '#', streak: true },
+  ],
+  [
+    { icon: 'lightbulb', label: 'יש לכם רעיון?', href: '', overlay: 'idea', emphasis: true, userOnly: true },
+    { icon: 'support_agent', label: 'תמיכה / צור קשר', href: '', badge: 'בקרוב' },
+    { icon: 'help', label: 'מרכז עזרה', href: HELP, newTab: true },
+    { icon: 'gavel', label: 'תקנון', href: '/terms', newTab: true },
+  ],
+];
+// Drop groups left empty after the per-audience filter so no stray divider shows.
+const guestHamburger = HAMBURGER_GROUPS.map((items) => items.filter((i) => !i.userOnly)).filter((g) => g.length > 0);
+const userHamburger = HAMBURGER_GROUPS.filter((g) => g.length > 0);
+
+// Wallet balance, rendered from the navi_wallet cookie (the last balance the client
+// persisted) so the real number paints on first frame instead of a 'בודק...'
+// placeholder that flickers in. Formatted identically to header-session's formatMoney
+// so the client's silent refresh is a no-op when the balance is unchanged.
+const walletRaw = isStaticHelpPage ? undefined : Astro.cookies.get('navi_wallet')?.value;
+const walletHasValue = walletRaw != null && walletRaw !== '' && Number.isFinite(Number(walletRaw));
+const walletDisplay =
+  walletHasValue
+    ? vshekelMoneyHtml(Number(walletRaw))
+    : 'בודק...';
+const walletDisplayLabel =
+  walletHasValue
+    ? vshekelMoneyText(Number(walletRaw))
+    : walletDisplay;
+
+// Authed identity, server-rendered (src/middleware.ts validated the session and
+// embedded currentUser). The avatar used to ship a hardcoded 'ח' initial with no
+// tier, and the client swapped in the real initial + verified badge after
+// hydration — the avatar flash. Deriving it here mirrors header-session.client.js
+// exactly, so first paint is already correct and the client re-render is a no-op.
+const ssrAuthState = (Astro.locals.auth ?? { authenticated: false, payload: null }) as any;
+const currentUser = ssrAuthState.authenticated ? (ssrAuthState.payload?.currentUser ?? null) : null;
+const userName =
+  currentUser?.user?.displayName ||
+  currentUser?.user?.name ||
+  currentUser?.user?.handle ||
+  currentUser?.identity?.primary?.identifierHint ||
+  ssrAuthState.payload?.identity?.identifierHint ||
+  'משתמש';
+const userInitial = (String(userName).trim()[0] || 'ח').toLocaleUpperCase('he-IL');
+const userAvatarUrl = currentUser?.user?.avatarUrl || '';
+const userTier = currentUser?.reputation?.verification?.currentTier || null;
+const userSub = currentUser?.capabilities?.canTrade ? 'מסחר פעיל' : 'קריאה בלבד';
+const ownHandle = currentUser?.user?.handle || '';
+const profileHref = ownHandle ? `/@${encodeURIComponent(ownHandle)}` : '/settings';
+
+---
+
+<!-- Persistent app shell: the whole chrome (header bar, bottom tabs, hamburger menus)
+     is kept across ClientRouter soft-nav as ONE unit — its DOM + island state +
+     auth-applied state (wallet, user-menu visibility) survive navigation, so the header
+     never rebuilds, never flashes, and its handlers stay bound. display:contents keeps the
+     wrapper layout-transparent (sticky header / fixed bottom-tabs behave as before). -->
+<div transition:persist="site-shell" data-shell-persist style="display: contents">
+<div class="hz-shell-wrap" data-site-shell data-shell-variant={currentUser ? 'landing-user' : 'landing-guest'}>
+  <header class="hz-shell__bar">
+    <div class="hz-shell__inner">
+      <div class="hz-shell__lead">
+        <a class="hz-shell__brand hz-brand" href={HOME} data-astro-prefetch>
+          <span class="hz-brand__mark" aria-hidden="true"></span>
+          <span class="hz-brand__name">החוזה</span>
+        </a>
+        <div class="hz-shell__search" data-search-wrap>
+          <span class="material-symbols-outlined hz-shell__search-icon" aria-hidden="true">search</span>
+          <input class="hz-shell__search-input" placeholder="חפש שווקים, אנשים, נושאים..." type="search" inputmode="search" enterkeyhint="search" autocomplete="off" data-search-input aria-label="חיפוש שווקים, אנשים, נושאים" />
+          <button class="hz-shell__search-close" type="button" data-search-close aria-label="סגירה">
+            <span class="material-symbols-outlined" aria-hidden="true">close</span>
+          </button>
+          <div class="hz-shell__search-dropdown" data-search-dropdown>
+            <div class="hz-shell__search-tabs" role="tablist" aria-label="סוג תוצאות חיפוש">
+              <button class="hz-shell__search-tab is-active" data-search-tab="markets" type="button" role="tab" id="search-tab-markets" aria-controls="search-panel-markets" aria-selected="true">שווקים</button>
+              <button class="hz-shell__search-tab" data-search-tab="profiles" type="button" role="tab" id="search-tab-profiles" aria-controls="search-panel-profiles" aria-selected="false">משתמשים</button>
+            </div>
+            <div data-search-panel="markets" id="search-panel-markets" role="tabpanel" aria-labelledby="search-tab-markets">
+              <div class="hz-shell__search-empty">{SEARCH_EMPTY_MARKETS}</div>
+            </div>
+            <div data-search-panel="profiles" id="search-panel-profiles" role="tabpanel" aria-labelledby="search-tab-profiles" hidden>
+              <div class="hz-shell__search-empty">{SEARCH_EMPTY_PROFILES}</div>
+            </div>
+          </div>
+        </div>
+        <a class="hz-shell__hiw-link" href="#" data-hiw-open data-hiw-nav title="איך זה עובד?">
+          <span class="material-symbols-outlined hz-shell__hiw-link-icon" aria-hidden="true">school</span>
+          <span class="hz-shell__hiw-link-label">איך זה עובד?</span>
+        </a>
+      </div>
+      <div class="hz-shell__actions">
+        <button class="hz-shell__hiw-mobile" type="button" data-hiw-open data-hiw-nav aria-label="איך זה עובד?" title="איך זה עובד?">
+          <span class="material-symbols-outlined" aria-hidden="true">school</span>
+        </button>
+        <div class="hz-shell__actions-group" data-shell-guest-actions>
+          <a class="hz-shell__cta hz-shell__cta--ghost" href="?overlay=login" data-overlay-open="login">התחברות</a>
+          <a class="hz-shell__cta hz-shell__cta--primary" href="?overlay=signup" data-overlay-open="signup">הרשמה</a>
+          <button class="hz-shell__hamburger" type="button" data-hamburger-trigger="guest" aria-haspopup="true" aria-expanded="false" aria-label="תפריט">
+            <span class="material-symbols-outlined">menu</span>
+          </button>
+        </div>
+        <div class="hz-shell__actions-group" data-shell-user-actions hidden>
+          <a class="hz-shell__wallet" href="/portfolio" data-shell-wallet>
+            <div class="hz-shell__wallet-cell">
+              <span class="hz-shell__wallet-label">יתרה</span>
+              <span class="hz-shell__wallet-value" data-shell-wallet-value aria-live="polite" aria-atomic="true" aria-label={walletDisplayLabel} set:html={walletDisplay}></span>
+            </div>
+          </a>
+          <a class="hz-shell__verification-upgrade" href="/achievements" data-shell-verification-upgrade hidden>
+            <span class="hz-shell__verification-upgrade-kicker" data-shell-verification-upgrade-kicker>נפתח</span>
+            <span class="hz-shell__verification-upgrade-label" data-shell-verification-upgrade-label></span>
+          </a>
+          <button class="hz-shell__bell" type="button" aria-label="התראות">
+            <span class="material-symbols-outlined">notifications</span>
+            <span class="hz-shell__bell-dot" aria-hidden="true"></span>
+          </button>
+          <div class="hz-shell__avatar-slot">
+            <HeaderAvatar
+              client:load
+              initial={userInitial}
+              tier={userTier}
+              avatarUrl={userAvatarUrl}
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <nav class="hz-shell__nav" aria-label="ניווט ראשי">
+    <div class="hz-shell__nav-inner">
+      <div class="hz-shell__nav-track">
+        {FEED_NAV.map((i) => i.live ? (
+          <button class={`hz-shell__feed-item${activePage === 'live' ? ' is-active' : ''}`} data-feed-key="live" type="button" aria-current={activePage === 'live' ? 'page' : undefined}>
+            <span class="hz-shell__feed-live">
+              <span class="hz-shell__feed-dot--live" aria-hidden="true"></span>
+              <span class="hz-shell__feed-label">לייב</span>
+              <span class="hz-shell__feed-count" data-live-count>0</span>
+            </span>
+          </button>
+        ) : (
+          <a class={`hz-shell__feed-item${activePage === i.key ? ' is-active' : ''}`} data-feed-key={i.key} href={i.href} data-astro-prefetch aria-current={activePage === i.key ? 'page' : undefined}>
+            <span class={`material-symbols-outlined hz-shell__feed-icon hz-shell__feed-icon--${i.iconMod}`}>{i.icon}</span>
+            <span class="hz-shell__feed-label">{i.label}</span>
+          </a>
+        ))}
+        <div class="hz-shell__nav-divider" aria-hidden="true"></div>
+        {CATEGORIES.map((c) => (
+          <a href={categoryBrowsePath(c.key)} class="hz-shell__cat-item">{c.label}</a>
+        ))}
+      </div>
+      <div class="hz-shell__nav-end">
+        <a class="hz-shell__social-link" href="/community" title="קהילה">
+          <span class="material-symbols-outlined hz-shell__social-link-icon" aria-hidden="true">forum</span>
+          <span>חברתי</span>
+        </a>
+        <div class="hz-shell__cat-more-wrap" data-cat-more>
+          <button class="hz-shell__cat-more" type="button" data-cat-more-trigger aria-haspopup="true" aria-expanded="false">
+            <span class="material-symbols-outlined hz-shell__cat-more-icon" aria-hidden="true">auto_awesome</span>
+            <span>עוד</span>
+          </button>
+          <div class="hz-shell__cat-dropdown" data-cat-more-dropdown>
+            <div class="hz-shell__more-header">
+              <span class="hz-shell__more-eyebrow">בעבודה</span>
+              <p class="hz-shell__more-lede">תכונות חדשות שבדרך לפלטפורמה.</p>
+            </div>
+            <div class="hz-shell__more-list">
+              {MORE.map((item) => (item as any).href ? (
+                <a class="hz-shell__more-item hz-shell__more-item--live" href={(item as any).href} data-auth-gate={(item as any).authGate ? '' : undefined}>
+                  <span class="material-symbols-outlined hz-shell__more-icon" aria-hidden="true">{item.icon}</span>
+                  <div class="hz-shell__more-text">
+                    <span class="hz-shell__more-label">{item.label}</span>
+                    <span class="hz-shell__more-sub">{item.sub}</span>
+                  </div>
+                  <span class="material-symbols-outlined hz-shell__more-go" aria-hidden="true">chevron_left</span>
+                </a>
+              ) : (
+                <div class="hz-shell__more-item">
+                  <span class="material-symbols-outlined hz-shell__more-icon" aria-hidden="true">{item.icon}</span>
+                  <div class="hz-shell__more-text">
+                    <span class="hz-shell__more-label">{item.label}</span>
+                    <span class="hz-shell__more-sub">{item.sub}</span>
+                  </div>
+                  <span class="hz-shell__more-badge">בקרוב</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+</div>
+
+<nav class="hz-shell__tabs" aria-label="ניווט תחתון" data-shell-bottom-tabs>
+  <a class={`hz-shell__tab${homeActive ? ' is-active' : ''}`} href={HOME} data-tab="home" data-astro-prefetch="tap" aria-current={homeActive ? 'page' : undefined}>
+    <span class="material-symbols-outlined hz-shell__tab-icon" aria-hidden="true">home</span>
+    <span class="hz-shell__tab-label">בית</span>
+  </a>
+  <button class="hz-shell__tab" type="button" data-tab="search" data-shell-tab-search>
+    <span class="material-symbols-outlined hz-shell__tab-icon" aria-hidden="true">search</span>
+    <span class="hz-shell__tab-label">חיפוש</span>
+  </button>
+  <a class="hz-shell__tab" href="/community" data-tab="social" title="קהילה" data-astro-prefetch="tap">
+    <span class="material-symbols-outlined hz-shell__tab-icon" aria-hidden="true">forum</span>
+    <span class="hz-shell__tab-label">חברתי</span>
+  </a>
+  <a
+    class={`hz-shell__tab hz-shell__tab--portfolio${portfolioActive ? ' is-active' : ''}`}
+    href="?overlay=login"
+    data-overlay-open="login"
+    data-tab="portfolio"
+    data-shell-tab-portfolio
+    aria-current={portfolioActive ? 'page' : undefined}
+  >
+    <span class="material-symbols-outlined hz-shell__tab-icon" aria-hidden="true">account_balance_wallet</span>
+    <span class="hz-shell__tab-label hz-shell__tab-label--portfolio">תיק</span>
+    {/* Mobile-only: the wallet balance lives here (out of the header). Authed
+        users see the live gold number in place of the "תיק" label — see the
+        ≤640 .hz-shell__tab-balance rules. Shares [data-shell-wallet-value] with
+        the desktop header chip (client updates ALL matches). */}
+    <span class="hz-shell__tab-balance" data-shell-wallet-value aria-live="polite" aria-atomic="true" aria-label={walletDisplayLabel} set:html={walletDisplay}></span>
+  </a>
+  {/* Guests have no wallet → the portfolio slot becomes the menu trigger (3-line
+      hamburger) instead. Reuses the shared [data-hamburger-trigger="guest"]
+      delegated handler; the popover flips upward off a bottom-band anchor. The
+      portfolio link / menu trigger swap by auth-hint (see ≤640 CSS). */}
+  <button
+    class="hz-shell__tab hz-shell__tab--menu"
+    type="button"
+    data-hamburger-trigger="guest"
+    aria-haspopup="true"
+    aria-expanded="false"
+    aria-label="תפריט"
+  >
+    <span class="material-symbols-outlined hz-shell__tab-icon" aria-hidden="true">menu</span>
+    <span class="hz-shell__tab-label">תפריט</span>
+  </button>
+</nav>
+
+<!-- Hamburger menu (position:fixed; opened by the popover island) -->
+<div class="hz-shell__menu" data-hamburger-menu="guest" role="menu">
+  <div class="hz-shell__menu-body">
+    {guestHamburger.map((items, gi) => (
+      <>
+        {gi > 0 && <div class="hz-shell__menu-divider" aria-hidden="true"></div>}
+        <div class="hz-shell__menu-group">
+          {items.map((item) => {
+            const disabled = !item.href && !item.overlay;
+            const cls = `hz-shell__menu-item${item.emphasis ? ' hz-shell__menu-item--emphasis' : ''}${disabled ? ' is-disabled' : ''}`;
+            return disabled ? (
+              <span class={cls} aria-disabled="true">
+                <span class="material-symbols-outlined hz-shell__menu-icon" aria-hidden="true">{item.icon}</span>
+                <span class="hz-shell__menu-label">{item.label}</span>
+                {item.badge && <span class="hz-shell__menu-badge">{item.badge}</span>}
+              </span>
+            ) : (
+              <a class={cls} href={item.overlay ? `?overlay=${item.overlay}` : item.href} data-overlay-open={item.overlay || undefined} data-hiw-open={item.hiw ? '' : undefined} data-streak-open={item.streak ? '' : undefined} data-auth-gate={item.authGate ? '' : undefined} target={item.newTab ? '_blank' : undefined} rel={item.newTab ? 'noopener noreferrer' : undefined}>
+                <span class="material-symbols-outlined hz-shell__menu-icon" aria-hidden="true">{item.icon}</span>
+                <span class="hz-shell__menu-label">{item.label}</span>
+                {item.badge && <span class="hz-shell__menu-badge">{item.badge}</span>}
+              </a>
+            );
+          })}
+        </div>
+      </>
+    ))}
+  </div>
+</div>
+
+<div class="hz-shell__menu" data-hamburger-menu="user" role="menu" hidden>
+  <div class="hz-shell__menu-user-row">
+    <HeaderMenuIdentity
+      client:load
+      initial={userInitial}
+      tier={userTier}
+      avatarUrl={userAvatarUrl}
+      name={userName}
+      sub={userSub}
+      profileHref={profileHref}
+    />
+    <a class="hz-shell__menu-settings" href="/settings" aria-label="הגדרות">
+      <span class="material-symbols-outlined" aria-hidden="true">settings</span>
+    </a>
+  </div>
+  <div class="hz-shell__menu-body">
+    {userHamburger.map((items, gi) => (
+      <>
+        {gi > 0 && <div class="hz-shell__menu-divider" aria-hidden="true"></div>}
+        <div class="hz-shell__menu-group">
+          {items.map((item) => {
+            const disabled = !item.href && !item.overlay;
+            const cls = `hz-shell__menu-item${item.emphasis ? ' hz-shell__menu-item--emphasis' : ''}${disabled ? ' is-disabled' : ''}`;
+            return disabled ? (
+              <span class={cls} aria-disabled="true">
+                <span class="material-symbols-outlined hz-shell__menu-icon" aria-hidden="true">{item.icon}</span>
+                <span class="hz-shell__menu-label">{item.label}</span>
+                {item.badge && <span class="hz-shell__menu-badge">{item.badge}</span>}
+              </span>
+            ) : (
+              <a class={cls} href={item.overlay ? `?overlay=${item.overlay}` : item.href} data-overlay-open={item.overlay || undefined} data-hiw-open={item.hiw ? '' : undefined} data-streak-open={item.streak ? '' : undefined} data-auth-gate={item.authGate ? '' : undefined} target={item.newTab ? '_blank' : undefined} rel={item.newTab ? 'noopener noreferrer' : undefined}>
+                <span class="material-symbols-outlined hz-shell__menu-icon" aria-hidden="true">{item.icon}</span>
+                <span class="hz-shell__menu-label">{item.label}</span>
+                {item.badge && <span class="hz-shell__menu-badge">{item.badge}</span>}
+              </a>
+            );
+          })}
+        </div>
+      </>
+    ))}
+  </div>
+  <button class="hz-shell__menu-logout" type="button" data-auth-logout>
+    <span class="material-symbols-outlined hz-shell__menu-icon" aria-hidden="true">logout</span>
+    <span>התנתקות</span>
+  </button>
+</div>
+</div><!-- /shell-persist -->
+
+<script>
+  // @ts-nocheck — untyped inline script; TODO(typecheck-tighten): annotate then remove
+  // Island 1 — live-count poll. Self-gating: if the live feed-nav item isn't
+  // rendered (SHOW_LIVE = false in the frontmatter), there are no
+  // [data-live-count] nodes to update, so we skip the poll entirely — no
+  // wasted fetch every 15s for a pill nobody can see.
+  // Visibility-gated (same pattern as market-detail-chart.js): timer pauses
+  // when the tab is hidden and resumes on visibility-regain with an immediate
+  // refresh so the count is never stale after a long background period.
+  // CLIENTROUTER NOTE: the header is now `transition:persist`'d (Layout.astro), so its
+  // DOM + island state + auth-applied state (wallet, user-menu visibility) SURVIVE soft
+  // navigation — the header is never rebuilt. The delegation / `astro:page-load` re-bind
+  // patterns below are therefore now belt-and-suspenders (harmless to keep). The one thing
+  // persist freezes is the active-nav highlight (the `is-active` server prop is fixed at
+  // first render) — re-derived from the URL by the "active-nav sync" block below.
+  (function () {
+    var timerId = null;
+    async function refresh() {
+      if (document.visibilityState !== 'visible') return;
+      try {
+        const r = await fetch('/api/markets/live-count', { credentials: 'include', cache: 'no-store' });
+        if (!r.ok) return;
+        const p = await r.json();
+        const n = Math.floor(Number(p && p.count));
+        if (!Number.isFinite(n) || n < 0) return;
+        document.querySelectorAll('[data-live-count]').forEach((el) => { el.textContent = String(n); });
+      } catch (_) {}
+    }
+    function startTimer() {
+      if (!timerId) timerId = setInterval(refresh, 15000);
+    }
+    function stopTimer() {
+      if (timerId) { clearInterval(timerId); timerId = null; }
+    }
+    // Self-gating: only poll when a live-count pill is actually rendered. Re-checked
+    // on each soft nav (a page that has the pill may load after one that didn't).
+    function maybeStart() {
+      if (!document.querySelector('[data-live-count]')) return;
+      refresh();
+      startTimer();
+    }
+    document.addEventListener('visibilitychange', function () {
+      if (document.visibilityState === 'visible') { refresh(); startTimer(); }
+      else stopTimer();
+    });
+    maybeStart();
+    document.addEventListener('astro:page-load', maybeStart);
+  })();
+
+  // Active-nav sync — the shell is transition:persist'd, so the DOM (and its server-
+  // rendered `is-active` highlight) is kept across soft-nav and would freeze on the FIRST
+  // page's value. Re-derive the highlight from the URL on each page view. Bound once
+  // (the persisted script runs once); astro:page-load fires per soft navigation.
+  (function () {
+    function syncActive() {
+      var path = location.pathname;
+      document
+        .querySelectorAll('.hz-shell__feed-item[href], .hz-shell__tab[href]')
+        .forEach(function (el) {
+          var p;
+          try { p = new URL(el.getAttribute('href'), location.origin).pathname; }
+          catch (_) { p = el.getAttribute('href') || ''; }
+          el.classList.toggle('is-active', p === path);
+        });
+    }
+    syncActive();
+    document.addEventListener('astro:page-load', syncActive);
+  })();
+
+  // Island 2 — anchored popovers (hamburger + עוד). DELEGATED on document/window so
+  // the handlers survive soft-nav header re-renders (no per-nav re-bind needed). A
+  // single document click handler toggles the trigger's wrap and closes on outside
+  // click; Escape + scroll also close. Positioning queries the live trigger rect.
+  (function () {
+    const OPEN = 'is-open';
+    function panelOf(wrap) {
+      // cat-more positions its dropdown child; the hamburger positions its own menu.
+      return wrap.matches('[data-cat-more]') ? wrap.querySelector('[data-cat-more-dropdown]') : wrap;
+    }
+    function wrapOf(trigger) {
+      if (trigger.matches('[data-cat-more-trigger]')) return trigger.closest('[data-cat-more]');
+      return document.querySelector(`[data-hamburger-menu="${trigger.getAttribute('data-hamburger-trigger')}"]`);
+    }
+    function triggerOf(wrap) {
+      return wrap.matches('[data-cat-more]')
+        ? wrap.querySelector('[data-cat-more-trigger]')
+        : document.querySelector(`[data-hamburger-trigger="${wrap.getAttribute('data-hamburger-menu')}"]`);
+    }
+    function position(trigger, panel) {
+      if (!trigger || !panel) return;
+      const r = trigger.getBoundingClientRect();
+      // Flip upward when anchored low in the viewport (the mobile bottom-tab band)
+      // so the menu opens above the trigger instead of off the bottom edge.
+      const openUp = r.top > window.innerHeight * 0.6;
+      if (openUp) {
+        panel.style.top = 'auto';
+        panel.style.bottom = `${window.innerHeight - r.top + 8}px`;
+      } else {
+        panel.style.bottom = 'auto';
+        panel.style.top = `${r.bottom + 8}px`;
+      }
+      panel.style.left = `${r.left}px`;
+      panel.style.right = 'auto';
+    }
+    function openWraps() {
+      return document.querySelectorAll(`[data-cat-more].${OPEN}, [data-hamburger-menu].${OPEN}`);
+    }
+    function closeAll() {
+      openWraps().forEach((w) => {
+        w.classList.remove(OPEN);
+        const t = triggerOf(w);
+        if (t) t.setAttribute('aria-expanded', 'false');
+      });
+    }
+    document.addEventListener('click', (e) => {
+      const trigger = e.target.closest('[data-cat-more-trigger], [data-hamburger-trigger]');
+      if (trigger) {
+        e.stopPropagation();
+        const wrap = wrapOf(trigger);
+        if (!wrap) return;
+        const wasOpen = wrap.classList.contains(OPEN);
+        closeAll();
+        if (!wasOpen) {
+          const panel = panelOf(wrap);
+          position(trigger, panel);
+          wrap.classList.add(OPEN);
+          trigger.setAttribute('aria-expanded', 'true');
+        }
+        return;
+      }
+      // A click on any actionable item INSIDE an open menu closes it. The shell now
+      // persists across soft-nav, so nav links (e.g. "help center") no longer auto-close
+      // the menu via a header re-render — close it here so EVERY item behaves like
+      // "how it works"/overlay items already do (nav, overlay, settings, logout, idea).
+      if (e.target.closest('[data-hamburger-menu] a, [data-hamburger-menu] button, [data-cat-more] a, [data-cat-more] button')) {
+        closeAll();
+        return; // don't preventDefault — the item's own handler (nav / overlay / logout) still fires
+      }
+      // A click anywhere outside an open popover (and not on a trigger) closes them.
+      if (!e.target.closest('[data-cat-more], [data-hamburger-menu]')) closeAll();
+    });
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') closeAll(); });
+    window.addEventListener('scroll', () => { if (openWraps().length) closeAll(); }, { passive: true });
+    window.addEventListener('resize', () => {
+      openWraps().forEach((w) => position(triggerOf(w), panelOf(w)));
+    });
+  })();
+
+  // Island 2b — hamburger "רצף יומי" entry. Delegated on document (same pattern as
+  // [data-hiw-open] in how-it-works.js) so it survives the persisted shell across
+  // soft-nav without a per-render rebind. Resolves window.HZDailyStreakReminder
+  // LIVE at click time — the daily-streak trio loads as separate deferred
+  // scripts, so the API may not exist yet on an early click. This handler does
+  // NOT conjure its own state or instance: it defers entirely to the
+  // controller's openCurrent() (daily-streak.js), which fetches real faucet
+  // state fresh, decides pending/claimed/noposition, and opens the ticket with
+  // the real claim callbacks wired. Guests have no faucet state to show (the
+  // overlay is a pure claim-state renderer, not guest-aware), so a guest click
+  // routes to the existing login overlay instead of opening an empty/broken panel —
+  // mirrors how every other userOnly menu action degrades for guests.
+  // Auth-gated nav links (e.g. הישגים): the target page 302s guests back to
+  // /?overlay=login — a jarring full-reload + home bounce. Gate at the click
+  // instead: guests get the login overlay IN PLACE (no navigation, page kept);
+  // authed users navigate normally. The server 302 stays as the direct-URL backstop.
+  // CAPTURE phase + stopPropagation: the ClientRouter's own click listener was
+  // registered first, so a bubble-phase preventDefault runs too late — the router
+  // still soft-navigates into the 302 and re-renders the page under the overlay
+  // ("opens, then a quick refresh above it"). Capture beats the router (the
+  // documented shell pattern).
+  document.addEventListener('click', (event) => {
+    const gated = event.target.closest('[data-auth-gate]');
+    if (!gated) return;
+    if (document.documentElement.dataset.authHint === 'user') return;
+    event.preventDefault();
+    event.stopPropagation();
+    document
+      .querySelectorAll('[data-hamburger-menu].is-open, [data-cat-more].is-open')
+      .forEach((el) => el.classList.remove('is-open'));
+    window.NaviOverlays?.open?.('login');
+  }, true);
+
+  document.addEventListener('click', (event) => {
+    const trigger = event.target.closest('[data-streak-open]');
+    if (!trigger) return;
+    event.preventDefault();
+    document
+      .querySelectorAll('[data-hamburger-menu].is-open, [data-cat-more].is-open')
+      .forEach((el) => el.classList.remove('is-open'));
+    if (document.documentElement.dataset.authHint !== 'user') {
+      window.NaviOverlays?.open?.('login');
+      return;
+    }
+    // Resolved live (the daily-streak trio loads as separate deferred scripts,
+    // so the API may not exist yet on an early click). openCurrent() is the
+    // controller's live-truth entry point: it fetches real faucet state fresh
+    // (never a hardcoded/cached guess) and opens the ticket via the same
+    // instance the reminder path uses, with the real claim callbacks attached.
+    window.HZDailyStreakReminder?.openCurrent?.();
+  });
+
+  // Island 3 — logged-in search + mobile bottom-tab launcher. Kept small:
+  // open/close/tabs + backend market search, with legacy links normalized to
+  // clean Astro routes.
+  // Outside-click close — bound ONCE on document; queries the live wrap each click
+  // so it works across soft-nav header re-renders.
+  document.addEventListener('click', (event) => {
+    const wrap = document.querySelector('[data-search-wrap]');
+    if (!wrap || wrap.contains(event.target)) return;
+    wrap.classList.remove('is-open', 'is-mobile-open');
+  });
+
+  // Element-bound search wiring. Re-runs on every soft nav (the header — and thus
+  // the search box — is a fresh DOM each time); the per-wrap guard makes the
+  // initial-load + first astro:page-load double-call bind only once.
+  function initSearch() {
+    const wrap = document.querySelector('[data-search-wrap]');
+    if (!wrap || wrap.dataset.searchBound === '1') return;
+    wrap.dataset.searchBound = '1';
+    const input = wrap.querySelector('[data-search-input]');
+    const closeButton = wrap.querySelector('[data-search-close]');
+    const tabs = Array.from(wrap.querySelectorAll('[data-search-tab]') || []);
+    const panels = Array.from(wrap.querySelectorAll('[data-search-panel]') || []);
+    const marketsPanel = wrap.querySelector('[data-search-panel="markets"]');
+    const profilesPanel = wrap.querySelector('[data-search-panel="profiles"]');
+    let timer = null;
+    let activeRequest = 0;
+
+    function escapeHtml(value) {
+      return String(value || '').replace(/[&<>"']/g, (char) => ({
+        '&': '&amp;',
+        '<': '&lt;',
+        '>': '&gt;',
+        '"': '&quot;',
+        "'": '&#039;',
+      }[char]));
+    }
+
+    function activeKind() {
+      return tabs.find((tab) => tab.classList.contains('is-active'))?.dataset.searchTab || 'markets';
+    }
+
+    function panelFor(kind) {
+      return kind === 'profiles' ? profilesPanel : marketsPanel;
+    }
+
+    function emptyMessage(kind) {
+      return kind === 'profiles' ? 'התחל להקליד כדי לחפש משתמשים.' : 'התחל להקליד כדי לחפש שווקים.';
+    }
+
+    function noResultsMessage(kind) {
+      return kind === 'profiles' ? 'לא מצאנו משתמשים מתאימים.' : 'לא מצאנו שווקים מתאימים.';
+    }
+
+    function safeSearchHref(value) {
+      try {
+        const parsed = new URL(String(value || ''), window.location.origin);
+        if (parsed.origin !== window.location.origin) return '#';
+        return `${parsed.pathname}${parsed.search}${parsed.hash}` || '#';
+      } catch (_) {
+        return '#';
+      }
+    }
+
+    function setMessage(kind, message) {
+      const panel = panelFor(kind);
+      if (!panel) return;
+      panel.innerHTML = `<div class="hz-shell__search-empty">${escapeHtml(message)}</div>`;
+    }
+
+    function renderResults(kind, results) {
+      const panel = panelFor(kind);
+      if (!panel) return;
+      if (!results.length) {
+        setMessage(kind, noResultsMessage(kind));
+        return;
+      }
+      panel.innerHTML = results.map((result) => {
+        const href = safeSearchHref(result.href);
+        const title = escapeHtml(result.title);
+        const sub = escapeHtml(result.sub || '');
+        const isProfile = result.kind === 'profile';
+        const isEvent = result.kind === 'event';
+        // An event has no single probability — it's a grouping page, so it gets a
+        // tag instead of a chance figure.
+        const chance = isProfile || isEvent ? '' : escapeHtml(result.chanceLabel || result.volumeLabel || '—');
+        const eventTag = isEvent ? '<span class="hz-shell__search-result__evtag">אירוע</span>' : '';
+        const verified = isProfile && result.verifiedTier
+          ? '<span class="material-symbols-outlined hz-shell__search-result__verified" aria-label="משתמש מאומת" title="משתמש מאומת">verified</span>'
+          : '';
+        const subMarkup = sub
+          ? `<span class="hz-shell__search-result__sub">${sub}</span>`
+          : '';
+        const chanceMarkup = chance
+          ? `<span class="hz-shell__search-result__chance">${chance}</span>`
+          : '';
+        const thumb = result.thumbUrl
+          ? `<img src="${escapeHtml(result.thumbUrl)}" alt="" />`
+          : escapeHtml(result.thumbText || 'ח');
+        return `
+          <a class="hz-shell__search-result" href="${escapeHtml(href)}">
+            <span class="hz-shell__search-result__thumb">${thumb}</span>
+            <span>
+              <span class="hz-shell__search-result__title">${eventTag}${title}${verified}</span>
+              ${subMarkup}
+            </span>
+            ${chanceMarkup}
+          </a>
+        `;
+      }).join('');
+      // "see all results →" → the canonical /search page (deep, interactive).
+      const query = String(input?.value || '').trim();
+      if (query.length >= 2) {
+        // URLSearchParams encodes spaces as "+" (matches the results page's own
+        // links; encodeURIComponent would force %20 and desync the two paths).
+        const sp = new URLSearchParams({ q: query });
+        if (kind !== 'markets') sp.set('kind', kind);
+        panel.insertAdjacentHTML(
+          'beforeend',
+          `<a class="hz-shell__search-all" href="/search?${sp.toString()}">כל התוצאות<span class="material-symbols-outlined">chevron_left</span></a>`
+        );
+      }
+    }
+
+    async function runSearch() {
+      const query = String(input?.value || '').trim();
+      const kind = activeKind();
+      if (query.length < 2) {
+        setMessage(kind, emptyMessage(kind));
+        return;
+      }
+      const request = ++activeRequest;
+      try {
+        const url = new URL('/api/search', window.location.origin);
+        url.searchParams.set('q', query);
+        url.searchParams.set('kind', kind);
+        url.searchParams.set('limit', '5');
+        const response = await fetch(url, { credentials: 'include', cache: 'no-store' });
+        const payload = await response.json().catch(() => null);
+        if (request !== activeRequest) return;
+        if (!response.ok) throw new Error('search failed');
+        // Parent events lead the market lane — typing the race ("מונדיאל") should
+        // reach the grouping page, not only its child markets.
+        const results = kind === 'profiles'
+          ? (payload?.profiles || [])
+          : [...(payload?.events || []), ...(payload?.markets || payload?.results || [])];
+        renderResults(kind, results.slice(0, 5));
+      } catch (_) {
+        if (request === activeRequest) setMessage(kind, 'החיפוש לא זמין כרגע.');
+      }
+    }
+
+    function openSearch() {
+      if (!wrap) return;
+      wrap.classList.add('is-open');
+      window.clearTimeout(timer);
+      timer = window.setTimeout(runSearch, 160);
+    }
+
+    function closeSearch() {
+      if (!wrap) return;
+      wrap.classList.remove('is-open', 'is-mobile-open');
+    }
+
+    input?.addEventListener('focus', openSearch);
+    input?.addEventListener('click', openSearch);
+    input?.addEventListener('input', () => {
+      window.clearTimeout(timer);
+      timer = window.setTimeout(runSearch, 220);
+    });
+    input?.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') {
+        closeSearch();
+        input.blur();
+        return;
+      }
+      // Enter → the canonical /search results page for the current query + tab.
+      if (event.key === 'Enter') {
+        const query = String(input?.value || '').trim();
+        if (query.length >= 2) {
+          event.preventDefault();
+          const k = activeKind();
+          const sp = new URLSearchParams({ q: query });
+          if (k !== 'markets') sp.set('kind', k);
+          window.location.assign(`/search?${sp.toString()}`);
+        }
+      }
+    });
+    closeButton?.addEventListener('click', closeSearch);
+    tabs.forEach((tab) => {
+      tab.addEventListener('click', () => {
+        const which = tab.dataset.searchTab;
+        tabs.forEach((item) => {
+          const on = item === tab;
+          item.classList.toggle('is-active', on);
+          item.setAttribute('aria-selected', on ? 'true' : 'false');
+        });
+        panels.forEach((panel) => { panel.hidden = panel.dataset.searchPanel !== which; });
+        runSearch();
+      });
+    });
+    document.querySelectorAll('[data-shell-tab-search]').forEach((button) => {
+      button.addEventListener('click', (event) => {
+        event.stopPropagation();
+        if (!wrap) return;
+        wrap.hidden = false;
+        wrap.classList.add('is-mobile-open', 'is-open');
+        requestAnimationFrame(() => input?.focus());
+      });
+    });
+  }
+  initSearch();
+  document.addEventListener('astro:page-load', initSearch);
+
+  // Close the search dropdown on any soft navigation. "See all" and result-row
+  // clicks are ClientRouter soft-navs, so the persistent shell (and its open
+  // dropdown) survives the swap and would otherwise sit open over the new page.
+  // Bound once on document (survives header re-renders); acts on the live wrap.
+  if (!window.__naviSearchNavCloseBound) {
+    window.__naviSearchNavCloseBound = true;
+    document.addEventListener('astro:before-swap', () => {
+      document.querySelectorAll('[data-search-wrap]').forEach((w) => {
+        w.classList.remove('is-open', 'is-mobile-open');
+      });
+    });
+  }
+
+  // Island 4 — "/" focuses header search (F8-lite, desktop quick-find). Bound once on
+  // document (survives soft-nav re-renders of the header, same delegation idiom as
+  // Island 2/3 above — no per-page rebind needed). Skips when the user is already
+  // typing anywhere (input/textarea/select/contenteditable) or an overlay is open
+  // (body.overlay-open — the single refcounted owner from scroll-lock.js, already
+  // relied on elsewhere e.g. notifications.client.js). preventDefault so the
+  // browser's own quick-find ("/" in Firefox, though not Chrome) never fires.
+  // RTL/Hebrew-layout caution (desktop audit 3.3): "/" moves to a different physical
+  // key on the Hebrew layout, so this matches event.key === '/' (the LAYOUT-AWARE
+  // character), never a physical keycode — it fires correctly regardless of which
+  // physical key produces "/" under the active input language.
+  document.addEventListener('keydown', (event) => {
+    if (event.key !== '/') return;
+    if (event.metaKey || event.ctrlKey || event.altKey) return;
+    const target = event.target;
+    const tag = target?.tagName;
+    if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT' || target?.isContentEditable) return;
+    if (document.body.classList.contains('overlay-open')) return;
+    const wrap = document.querySelector('[data-search-wrap]');
+    const input = wrap?.querySelector('[data-search-input]');
+    if (!wrap || !input) return;
+    event.preventDefault();
+    wrap.classList.add('is-open');
+    input.focus();
+  });
+</script>

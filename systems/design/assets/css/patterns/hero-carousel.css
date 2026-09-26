@@ -1,0 +1,99 @@
+/* ──────────────────────────────────────────────────────────────
+   patterns/hero-carousel.css
+   Wraps an array of .hz-hero slides with scroll-snap + dot nav.
+   RTL-aware (handles negative scrollLeft). JS lives in
+   components/hero-carousel.js — this file is shape only.
+   ────────────────────────────────────────────────────────────── */
+
+
+
+  .hz-hero-carousel {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+
+  .hz-hero-carousel__track {
+    display: flex;
+    flex: 1;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+  .hz-hero-carousel__track::-webkit-scrollbar { display: none; }
+
+  .hz-hero-carousel__track > .hz-hero {
+    flex: 0 0 100%;
+    width: 100%;
+    scroll-snap-align: start;
+    margin: 0;
+  }
+
+  /* Dots float just below the hero card, RTL-end anchored.
+     Positioned on the OUTER .hz-hero-carousel (not on the card itself), so
+     the hero's `overflow: hidden` doesn't clip them. */
+  /* Nav row under the carousel: dots ride the RTL start (physical right); the
+     prev/next chip pair is pushed to the physical LEFT edge via space-between. */
+  .hz-hero-carousel__nav {
+    position: absolute;
+    top: 100%;
+    inset-inline: 0.25rem;
+    margin-top: 0.55rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--hz-space-3);
+  }
+  .hz-hero-carousel__chips {
+    display: flex;
+    align-items: center;
+    gap: var(--hz-space-3);
+    min-width: 0;
+  }
+  .hz-hero-carousel__dots {
+    display: flex;
+    gap: 0.4rem;
+    flex-shrink: 0;
+  }
+  .hz-hero-carousel__dot {
+    width: 0.42rem;
+    height: 0.42rem;
+    border-radius: var(--hz-radius-pill);
+    border: 0;
+    background: var(--hz-border);
+    cursor: pointer;
+    padding: 0;
+    transition: all var(--hz-motion);
+  }
+  .hz-hero-carousel__dot:hover { background: var(--hz-border-strong); }
+  .hz-hero-carousel__dot.is-active {
+    width: 1.3rem;
+    /* Dim-brand track + a full-brand fill that sweeps across over the auto-rotate
+       interval (stories-style progress) — so the active dot MOVES as time passes toward
+       the next slide instead of statically swapping. It ends as the solid-brand pill. */
+    background: rgb(var(--hz-brand-rgb) / 0.3);
+    position: relative;
+    overflow: hidden;
+  }
+  .hz-hero-carousel__dot.is-active::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: var(--hz-brand);
+    transform: scaleX(0);
+    transform-origin: right; /* RTL: fill from the leading (right) edge inward */
+    animation: hz-hero-dot-progress var(--hz-hero-rotate, 7000ms) linear forwards;
+  }
+  @keyframes hz-hero-dot-progress {
+    to { transform: scaleX(1); }
+  }
+  /* Pause the fill while the carousel is paused (hover) — matches the JS auto-rotate pause. */
+  [data-hero-carousel]:hover .hz-hero-carousel__dot.is-active::after {
+    animation-play-state: paused;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .hz-hero-carousel__dot.is-active { background: var(--hz-brand); }
+    .hz-hero-carousel__dot.is-active::after { display: none; }
+  }

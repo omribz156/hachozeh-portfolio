@@ -1,0 +1,57 @@
+/* ──────────────────────────────────────────────────────────────
+   patterns/avatar.css
+   Circular avatar — initials or photo — used wherever a user shows
+   up: comments, replies, composer, holders/positions tables.
+   Size variants:
+     --composer   — own-user input slot (2.5rem)
+     --comment    — top-level commenter (2.5rem)
+     --reply      — reply nested under a comment (2rem, smaller font)
+     --compact    — dense tabular use (2rem, even smaller font)
+   Bg variants:
+     base         — fallback gray surface
+     --composer   — gradient signature (you-are-the-author cue)
+     --reply      — info-blue tint (subordinate, indented)
+   Tones are layered on via getAvatarToneClass() in formatters.js —
+   their styles can be added here later when the palette is locked.
+   ────────────────────────────────────────────────────────────── */
+
+
+  .hz-avatar {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--hz-radius-pill);
+    background: var(--hz-bg-raised);
+    color: var(--hz-text-soft);
+    font-weight: 700;
+  }
+
+  .hz-avatar--composer,
+  .hz-avatar--comment {
+    width: 2.5rem;
+    height: 2.5rem;
+    font-size: 0.875rem;
+  }
+
+  .hz-avatar--comment {
+    font-size: 0.75rem;
+  }
+
+  .hz-avatar--reply {
+    width: 2rem;
+    height: 2rem;
+    background: var(--hz-info-soft);
+    color: var(--hz-info);
+    font-size: 10px;
+  }
+
+  .hz-avatar--compact {
+    width: 2rem;
+    height: 2rem;
+    font-size: 0.6875rem;
+  }
+
+  .hz-avatar--composer {
+    background: linear-gradient(135deg, var(--hz-info), #9333ea);
+    color: var(--hz-text);
+  }

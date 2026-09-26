@@ -1,0 +1,38 @@
+{
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "CodeQL",
+          "version": "0.0.0",
+          "rules": [
+            {
+              "id": "RL-1",
+              "properties": {
+                "security-severity": "2.1"
+              }
+            },
+            {
+              "id": "RL-2"
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleIndex": 0,
+          "message": {
+            "text": "Low severity fixture"
+          }
+        },
+        {
+          "ruleIndex": 1,
+          "message": {
+            "text": "Missing severity fixture"
+          }
+        }
+      ]
+    }
+  ]
+}

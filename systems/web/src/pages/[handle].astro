@@ -1,0 +1,99 @@
+---
+// /@<handle> — canonical profile route. Legacy /<handle> still resolves and
+// redirects here after lookup, while static routes (/, /terms, …) keep
+// winning over this root dynamic route. Accepts handle, @handle, or id.
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+import Layout from '../layouts/Layout.astro';
+import ProfileDossier from '../components/ProfileDossier.astro';
+import { BACKEND_INTERNAL_URL } from '../lib/backend.js';
+import { buildProfilePageJsonLd, buildCanonicalUrl } from '../lib/seo.js';
+import '../styles/pages/profile-kit.css';
+import '../styles/pages/profile-dossier.css';
+import '../styles/pages/profile-portfolio-tables.css';
+import '../styles/pages/profile.css';
+
+const { handle: paramId = '' } = Astro.params;
+const auth = Astro.locals.auth;
+const viewerAuthed = auth?.authenticated === true;
+
+const cookie = Astro.request.headers.get('cookie') || '';
+async function getJSON(path: string, withCookie = false) {
+  try {
+    const res = await fetch(new URL(path, BACKEND_INTERNAL_URL), {
+      headers: withCookie ? { cookie, accept: 'application/json' } : { accept: 'application/json' },
+      signal: AbortSignal.timeout(1800),
+    });
+    return res.ok ? await res.json().catch(() => null) : null;
+  } catch { return null; }
+}
+
+const enc = encodeURIComponent(paramId);
+// Fetch the profile + its sub-resources CONCURRENTLY — each depends only on the URL param,
+// not on one another, so the old 4 sequential awaits were ~4× the needed latency. `profile`
+// (public read WITH cookie) resolves viewerFollows + increments the view counter; the 404 gate
+// is applied after the wave (a discarded sub-fetch on an unknown handle is rare and still cheap).
+const [profile, trackRecord, pos, rec] = paramId
+  ? await Promise.all([
+      getJSON(`/api/social/users/${enc}`, true),
+      getJSON(`/api/social/users/${enc}/track-record`),
+      getJSON(`/api/social/users/${enc}/positions?limit=20`),
+      getJSON(`/api/social/users/${enc}/record?limit=20`),
+    ])
+  : [null, null, null, null];
+
+const notFound = !profile;
+if (notFound) {
+  const errorHtmlPath = [
+    join(process.cwd(), 'public/error.html'),
+    join(process.cwd(), 'systems/web/public/error.html'),
+  ].find((candidate) => existsSync(candidate));
+  const errorHtml = readFileSync(errorHtmlPath || join(process.cwd(), 'public/error.html'), 'utf8');
+  return new Response(errorHtml, {
+    status: 404,
+    statusText: 'Not Found',
+    headers: {
+      'content-type': 'text/html; charset=utf-8',
+    },
+  });
+}
+const isOwner = viewerAuthed && profile?.viewerIsOwner === true;
+const canonicalProfileKey = profile ? (profile?.handle || paramId).replace(/^@/, '') : '';
+const canonicalProfilePath = canonicalProfileKey ? `/@${encodeURIComponent(canonicalProfileKey)}` : '/';
+if (profile && Astro.url.pathname !== canonicalProfilePath) {
+  return Astro.redirect(canonicalProfilePath, 302);
+}
+const positions: any[] = Array.isArray(pos?.positions) ? pos.positions : [];
+const record: any[] = Array.isArray(rec?.items) ? rec.items : [];
+
+const pageName = profile?.displayName || 'העמוד לא נמצא';
+const ogImage = `/share/profiles/${encodeURIComponent(canonicalProfileKey)}.png`;
+
+// ProfilePage structured data — head-only, no visual change. Marks this page as ABOUT
+// a person (name + handle) rather than a generic WebPage. Optional stats included when
+// the payload provides them; missing ones are simply omitted by the builder.
+const profileStructuredData = buildProfilePageJsonLd({
+  name: pageName,
+  handle: canonicalProfileKey,
+  canonicalUrl: buildCanonicalUrl(canonicalProfilePath),
+  imageUrl: ogImage,
+  description: `הדוסייה של ${pageName} בהחוזה — דיוק, רקורד ופוזיציות.`,
+  followers: Number(profile?.followerCount ?? profile?.followers ?? profile?.stats?.followers ?? NaN),
+  predictions: Number(
+    trackRecord?.totalPredictions ?? trackRecord?.predictions ?? profile?.predictionCount ?? NaN
+  ),
+});
+---
+
+<Layout
+  title={`${pageName} · החוזה`}
+  description={`הדוסייה של ${pageName} בהחוזה — דיוק, רקורד ופוזיציות.`}
+  canonicalPath={canonicalProfilePath}
+  robots="index, follow"
+  image={ogImage}
+  ogType="profile"
+  twitterCard="summary_large_image"
+  structuredData={profileStructuredData}
+>
+  <ProfileDossier profile={profile} trackRecord={trackRecord} positions={positions} record={record} isOwner={isOwner} viewerAuthed={viewerAuthed} />
+</Layout>

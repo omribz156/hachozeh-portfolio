@@ -1,0 +1,149 @@
+/* ──────────────────────────────────────────────────────────────
+   patterns/date-rail.css
+   Horizontal scrollable strip of date pills (e.g. siblings of a
+   recurring market — "12 במאי", "13 במאי", today active).
+   Used on market-detail under the title today; reusable on any
+   surface that needs a quiet date-family selector.
+   BEM:
+     .hz-date-rail        — flex container, scrolls horizontally
+     .hz-date-pill        — base pill (anchor or button)
+     .hz-date-pill--muted — inactive sibling (default appearance)
+     .hz-date-pill--active— selected (highlight card, dark text)
+     .hz-date-pill--past  — completed/previous sibling
+   ────────────────────────────────────────────────────────────── */
+
+
+  .hz-date-rail {
+    display: flex;
+    align-items: center;
+    gap: 0.42rem;
+    flex-wrap: nowrap;
+    /* overflow-x: auto forces overflow-y to clip too, which eats the past
+       dropdown menu. The past-dropdown collapse already keeps the rail short
+       enough that horizontal scroll is rarely needed; if many future pills
+       are added back later, we'll need a different scroll strategy
+       (sub-container or position: fixed on the menu). */
+    overflow: visible;
+  }
+
+  .hz-date-pill {
+    border-radius: var(--hz-radius-pill);
+    border: 1px solid var(--hz-border-faint);
+    background: transparent;
+    padding: 0.24rem 0.68rem;
+    color: var(--hz-text-muted);
+    font-size: 0.7rem;
+    font-weight: 600;
+    white-space: nowrap;
+    transition: all var(--hz-motion);
+  }
+
+  .hz-date-pill--muted:hover {
+    background: rgb(255 255 255 / 0.03);
+    border-color: var(--hz-border-soft);
+    color: var(--hz-text);
+  }
+
+  .hz-date-pill--past {
+    border-color: var(--hz-border-faint);
+    color: var(--hz-text-faint);
+  }
+
+  /* `Past ▾` group — past pills collapse behind a single dropdown so they
+     stop competing with the active pill. Same UX move as Polymarket's
+     `Hide resolved` chevron. Backend sends `temporalStatus: "past"` on each
+     chain item; Front groups them into this <details>. */
+  .hz-date-rail__past-group {
+    position: relative;
+    display: inline-block;
+    /* Create a stacking context above sibling page elements (chart/hero/etc).
+       Without this, the absolute-positioned menu below — even with its own
+       high z-index — gets painted behind the probability-hero whose stacking
+       context sits higher in document order. */
+    z-index: 30;
+  }
+
+  .hz-date-rail__past-summary {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.32rem;
+    cursor: pointer;
+    list-style: none;
+  }
+  .hz-date-rail__past-summary::-webkit-details-marker {
+    display: none;
+  }
+
+  .hz-date-rail__past-summary::after {
+    content: "\25BE";
+    font-size: 0.95em;
+    line-height: 1;
+    color: rgb(103 232 177 / 0.9);
+    transition: transform var(--hz-motion);
+  }
+
+  .hz-date-rail__past-group[open] .hz-date-rail__past-summary::after {
+    transform: rotate(180deg);
+  }
+
+  .hz-date-rail__past-menu {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    inset-inline-start: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    padding: 0.6rem;
+    border-radius: 0.7rem;
+    border: 1px solid rgb(103 232 177 / 0.18);
+    background: var(--hz-surface-elevated, rgb(13 18 28 / 0.97));
+    backdrop-filter: blur(14px);
+    box-shadow:
+      0 14px 28px -16px rgb(0 0 0 / 0.7),
+      0 0 0 1px rgb(255 255 255 / 0.02) inset;
+    /* Sits above the probability-hero stacking context which otherwise eats
+       the dropdown when it overlaps with the chart/hero column. */
+    z-index: 50;
+    min-width: 8rem;
+  }
+
+  /* Items inside the dropdown get a `✓` accent before the date label so each
+     row reads as "settled / done" not "another inert pill", plus a slightly
+     more present text color and bigger padding so the dropdown feels alive
+     rather than ghostly. */
+  .hz-date-rail__past-menu .hz-date-pill {
+    text-align: start;
+    padding: 0.42rem 0.78rem;
+    font-size: 0.78rem;
+    color: var(--hz-text-muted);
+    border-color: var(--hz-border-soft);
+  }
+
+  .hz-date-rail__past-menu .hz-date-pill::before {
+    content: "\2713";
+    display: inline-block;
+    margin-inline-end: 0.4rem;
+    color: rgb(103 232 177 / 0.95);
+    font-size: 0.92em;
+    font-weight: 800;
+  }
+
+  .hz-date-rail__past-menu .hz-date-pill:hover {
+    background: rgb(103 232 177 / 0.06);
+    border-color: rgb(103 232 177 / 0.3);
+    color: var(--hz-text);
+  }
+
+  .hz-date-pill--active {
+    background: rgb(255 255 255 / 0.94);
+    border-color: transparent;
+    box-shadow: none;
+    color: var(--hz-text-inverse);
+  }
+
+  @media (max-width: 520px) {
+    .hz-date-pill {
+      padding-inline: 0.56rem;
+      font-size: 0.66rem;
+    }
+  }

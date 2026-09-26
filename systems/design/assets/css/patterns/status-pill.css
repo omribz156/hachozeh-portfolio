@@ -1,0 +1,40 @@
+/* ──────────────────────────────────────────────────────────────
+   patterns/status-pill.css
+   Lifecycle pill for a market — open / closed / resolved.
+   Used on market-detail's header today; reusable in discovery cards
+   and anywhere a market state needs to be visible at a glance.
+   Three variants — each tied to a platform semantic token so the
+   pill speaks the same color language as the rest of the action /
+   warning / info surfaces.
+   ────────────────────────────────────────────────────────────── */
+
+
+  .hz-status-pill {
+    display: inline-flex;
+    align-items: center;
+    border-radius: var(--hz-radius-pill);
+    border: 1px solid var(--hz-border-soft);
+    padding: 0.1rem 0.42rem;
+    font-size: 0.6rem;
+    font-weight: 900;
+    line-height: 1.2;
+    letter-spacing: 0.02em;
+  }
+
+  .hz-status-pill--open {
+    background: var(--hz-action-buy-soft);
+    border-color: rgb(var(--hz-action-buy-rgb) / 0.28);
+    color: var(--hz-action-buy-strong);
+  }
+
+  .hz-status-pill--closed {
+    background: var(--hz-warning-soft);
+    border-color: rgb(var(--hz-warning-rgb) / 0.28);
+    color: var(--hz-warning);
+  }
+
+  .hz-status-pill--resolved {
+    background: var(--hz-info-soft);
+    border-color: rgb(var(--hz-info-rgb) / 0.28);
+    color: var(--hz-info);
+  }

@@ -1,0 +1,41 @@
+{
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "CodeQL",
+          "version": "0.0.0",
+          "rules": [
+            {
+              "id": "RA-1",
+              "properties": {
+                "security-severity": "5.3"
+              }
+            },
+            {
+              "id": "RA-2",
+              "properties": {
+                "security-severity": "9.4"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleIndex": 0,
+          "message": {
+            "text": "Low severity from second file"
+          }
+        },
+        {
+          "ruleId": "RA-2",
+          "message": {
+            "text": "High severity via ruleId fallback in second file"
+          }
+        }
+      ]
+    }
+  ]
+}

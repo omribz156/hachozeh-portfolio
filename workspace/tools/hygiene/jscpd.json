@@ -1,0 +1,27 @@
+{
+  "$schema": "https://raw.githubusercontent.com/kucherenko/jscpd/master/schemas/jscpd.json",
+  "minLines": 8,
+  "minTokens": 70,
+  "threshold": 0,
+  "reporters": [
+    "console",
+    "json"
+  ],
+  "output": "workspace/reports/hygiene/jscpd",
+  "format": [
+    "typescript",
+    "javascript"
+  ],
+  "ignorePattern": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/coverage/**",
+    "workspace/archive/**",
+    "workspace/runtime/**",
+    "workspace/test/gauntlet/**",
+    "workspace/test/runs/**",
+    "workspace/reports/**",
+    "systems/design/**"
+  ]
+}

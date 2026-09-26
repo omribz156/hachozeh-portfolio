@@ -1,0 +1,762 @@
+[
+  {
+    "path": "systems/web/public/assets/brand/default-avatar-96.webp",
+    "replacement": "Hachozeh logo tile"
+  },
+  {
+    "path": "systems/web/public/assets/brand/default-avatar.png",
+    "replacement": "Hachozeh logo tile"
+  },
+  {
+    "path": "systems/web/public/assets/images/market-photos/gta-6-before-israel/airport.webp",
+    "replacement": "market-buckets/travel.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/market-photos/gta-6-before-israel/currency-down.webp",
+    "replacement": "market-buckets/economy.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/market-photos/gta-6-before-israel/election.webp",
+    "replacement": "market-buckets/politics.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/market-photos/gta-6-before-israel/iran-vs-israel.webp",
+    "replacement": "market-buckets/world.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/market-photos/gta-6-before-israel/kupa-rashit.webp",
+    "replacement": "market-buckets/entertainment.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/market-photos/gta-6-before-israel/microphone.webp",
+    "replacement": "market-buckets/entertainment.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/market-photos/gta-6-before-israel/plague.webp",
+    "replacement": "market-buckets/health.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/market-photos/gta-6-before-israel/transport.webp",
+    "replacement": "market-buckets/transportation.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/market-photos/gta-6-before-israel/what-will-happen.webp",
+    "replacement": "market-buckets/entertainment.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/market-photos/israeli-entertainment-stars/eden-ben-zaken.jpg",
+    "replacement": "market-buckets/entertainment.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/market-photos/israeli-entertainment-stars/idan-raichel.jpg",
+    "replacement": "market-buckets/entertainment.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/market-photos/israeli-entertainment-stars/noa-kirel.jpg",
+    "replacement": "market-buckets/entertainment.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/market-photos/israeli-entertainment-stars/static.jpg",
+    "replacement": "market-buckets/entertainment.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/market-photos/power-couple-israel-2026/asi-adi-buzaglo.webp",
+    "replacement": "market-buckets/entertainment.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/market-photos/power-couple-israel-2026/hanny-nahmias-yehuda-elias.webp",
+    "replacement": "market-buckets/entertainment.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/market-photos/power-couple-israel-2026/odeya-pinto-elior-sofer.webp",
+    "replacement": "market-buckets/entertainment.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/market-photos/power-couple-israel-2026/omri-dorin-kanada.webp",
+    "replacement": "market-buckets/entertainment.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/market-photos/power-couple-israel-2026/power-couple-show.webp",
+    "replacement": "market-buckets/entertainment.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/market-photos/power-couple-israel-2026/sharon-haziz-ronen-nof.webp",
+    "replacement": "market-buckets/entertainment.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/market-photos/power-couple-israel-2026/shir-taran-elad-turgeman.webp",
+    "replacement": "market-buckets/entertainment.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/market-photos/power-couple-israel-2026/uri-anna-banai.webp",
+    "replacement": "market-buckets/entertainment.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/market-photos/tennis-stars/alexander-zverev.webp",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/market-photos/tennis-stars/arthur-fery.webp",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/market-photos/tennis-stars/fery-zverev.webp",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/market-photos/tennis-stars/jannik-sinner.webp",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/market-photos/tennis-stars/novak-djokovic.webp",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/market-photos/tennis-stars/sinner-djokovic.webp",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/market-photos/tennis-stars/wimbledon-racket-ball.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/market-photos/the-voice-israel-season-6/the-voice-stage.svg",
+    "replacement": "market-buckets/entertainment.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/euroleague/anadolu-efes.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/euroleague/as-monaco.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/euroleague/asvel.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/euroleague/baskonia.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/euroleague/crvena-zvezda.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/euroleague/dubai-basketball.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/euroleague/fc-barcelona.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/euroleague/fc-bayern-munich.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/euroleague/fenerbahce.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/euroleague/hapoel-ibi-tel-aviv.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/euroleague/maccabi-tel-aviv.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/euroleague/olimpia-milano.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/euroleague/olympiacos.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/euroleague/panathinaikos.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/euroleague/paris-basketball.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/euroleague/partizan.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/euroleague/real-madrid.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/euroleague/valencia-basket.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/euroleague/virtus-bologna.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/euroleague/zalgiris.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/il-winner-league/bnei-herzliya.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/il-winner-league/elitzur-netanya.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/il-winner-league/hapoel-beer-sheva.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/il-winner-league/hapoel-galil-elyon.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/il-winner-league/hapoel-haemek.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/il-winner-league/hapoel-holon.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/il-winner-league/hapoel-jerusalem.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/il-winner-league/hapoel-tel-aviv.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/il-winner-league/ironi-kiryat-ata.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/il-winner-league/ironi-ness-ziona.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/il-winner-league/maccabi-raanana.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/il-winner-league/maccabi-ramat-gan.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/il-winner-league/maccabi-rishon-lezion.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/il-winner-league/maccabi-tel-aviv.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/nba/atlanta-hawks.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/nba/boston-celtics.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/nba/brooklyn-nets.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/nba/charlotte-hornets.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/nba/chicago-bulls.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/nba/cleveland-cavaliers.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/nba/dallas-mavericks.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/nba/denver-nuggets.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/nba/detroit-pistons.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/nba/golden-state-warriors.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/nba/houston-rockets.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/nba/indiana-pacers.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/nba/los-angeles-clippers.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/nba/los-angeles-lakers.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/nba/memphis-grizzlies.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/nba/miami-heat.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/nba/milwaukee-bucks.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/nba/minnesota-timberwolves.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/nba/new-orleans-pelicans.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/nba/new-york-knicks.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/nba/oklahoma-city-thunder.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/nba/orlando-magic.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/nba/philadelphia-76ers.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/nba/phoenix-suns.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/nba/portland-trail-blazers.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/nba/sacramento-kings.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/nba/san-antonio-spurs.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/nba/toronto-raptors.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/nba/utah-jazz.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/basketball/nba/washington-wizards.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/football/il-premier-league/beitar-jerusalem.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/football/il-premier-league/bnei-sakhnin.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/football/il-premier-league/bnei-yehuda.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/football/il-premier-league/fc-ashdod.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/football/il-premier-league/hapoel-beer-sheva.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/football/il-premier-league/hapoel-haifa.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/football/il-premier-league/hapoel-jerusalem.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/football/il-premier-league/hapoel-petah-tikva.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/football/il-premier-league/hapoel-tel-aviv.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/football/il-premier-league/ironi-kiryat-shmona.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/football/il-premier-league/ironi-tiberias.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/football/il-premier-league/maccabi-bnei-reineh.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/football/il-premier-league/maccabi-haifa.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/football/il-premier-league/maccabi-netanya.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/assets/images/sports/football/il-premier-league/maccabi-tel-aviv.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "systems/web/public/og-image.jpg",
+    "replacement": "Hachozeh logo tile"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/euroleague/anadolu-efes.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/euroleague/as-monaco.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/euroleague/asvel.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/euroleague/baskonia.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/euroleague/crvena-zvezda.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/euroleague/dubai-basketball.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/euroleague/fc-barcelona.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/euroleague/fc-bayern-munich.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/euroleague/fenerbahce.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/euroleague/hapoel-ibi-tel-aviv.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/euroleague/maccabi-tel-aviv.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/euroleague/olimpia-milano.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/euroleague/olympiacos.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/euroleague/panathinaikos.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/euroleague/paris-basketball.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/euroleague/partizan.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/euroleague/real-madrid.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/euroleague/valencia-basket.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/euroleague/virtus-bologna.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/euroleague/zalgiris.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/il-winner-league/bnei-herzliya.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/il-winner-league/elitzur-netanya.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/il-winner-league/hapoel-beer-sheva.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/il-winner-league/hapoel-galil-elyon.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/il-winner-league/hapoel-haemek.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/il-winner-league/hapoel-holon.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/il-winner-league/hapoel-jerusalem.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/il-winner-league/hapoel-tel-aviv.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/il-winner-league/ironi-kiryat-ata.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/il-winner-league/ironi-ness-ziona.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/il-winner-league/maccabi-raanana.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/il-winner-league/maccabi-ramat-gan.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/il-winner-league/maccabi-rishon-lezion.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/il-winner-league/maccabi-tel-aviv.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/nba/atlanta-hawks.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/nba/boston-celtics.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/nba/brooklyn-nets.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/nba/charlotte-hornets.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/nba/chicago-bulls.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/nba/cleveland-cavaliers.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/nba/dallas-mavericks.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/nba/denver-nuggets.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/nba/detroit-pistons.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/nba/golden-state-warriors.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/nba/houston-rockets.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/nba/indiana-pacers.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/nba/los-angeles-clippers.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/nba/los-angeles-lakers.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/nba/memphis-grizzlies.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/nba/miami-heat.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/nba/milwaukee-bucks.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/nba/minnesota-timberwolves.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/nba/new-orleans-pelicans.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/nba/new-york-knicks.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/nba/oklahoma-city-thunder.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/nba/orlando-magic.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/nba/philadelphia-76ers.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/nba/phoenix-suns.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/nba/portland-trail-blazers.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/nba/sacramento-kings.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/nba/san-antonio-spurs.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/nba/toronto-raptors.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/nba/utah-jazz.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/basketball/nba/washington-wizards.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/football/il-premier-league/beitar-jerusalem.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/football/il-premier-league/bnei-sakhnin.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/football/il-premier-league/bnei-yehuda.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/football/il-premier-league/fc-ashdod.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/football/il-premier-league/hapoel-beer-sheva.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/football/il-premier-league/hapoel-haifa.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/football/il-premier-league/hapoel-jerusalem.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/football/il-premier-league/hapoel-petah-tikva.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/football/il-premier-league/hapoel-tel-aviv.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/football/il-premier-league/ironi-kiryat-shmona.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/football/il-premier-league/ironi-tiberias.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/football/il-premier-league/maccabi-bnei-reineh.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/football/il-premier-league/maccabi-haifa.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/football/il-premier-league/maccabi-netanya.svg",
+    "replacement": "market-buckets/sports.svg"
+  },
+  {
+    "path": "workspace/assets/market-images/sports/football/il-premier-league/maccabi-tel-aviv.svg",
+    "replacement": "market-buckets/sports.svg"
+  }
+]

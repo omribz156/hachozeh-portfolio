@@ -1,0 +1,67 @@
+.DS_Store
+Thumbs.db
+
+node_modules/
+dist/
+build/
+coverage/
+playwright-report/
+test-results/
+.playwright-cli/
+workspace/browser-qa/.linux-debs/
+workspace/browser-qa/.linux-libs/
+
+.vscode/
+.idea/
+/.codex
+.claude/
+.superpowers/
+.wrangler/
+workspace/archive/
+systems/design/mockups/
+
+*.log
+*.log.*
+
+.bridge/
+# Local credentials, including new workspaces and environment variants.
+.env
+.env.*
+*.env
+!.env.example
+!*.env.example
+*.pem
+*.key
+*.dump
+*.dump.*
+systems/seer/state/
+systems/discovery/state/
+workspace/coordination/hermes/
+
+# Local gauntlet/runtime receipts. Keep durable summaries in coordination/docs
+# unless explicitly requested for a specific run.
+workspace/test/reports/*gauntlet*.md
+workspace/coordination/continuous-platform-sim.md
+workspace/test/reports/2026-06-continuous-platform-simulation-report.md
+workspace/test/gauntlet/
+workspace/test/runs/
+workspace/test/sim/continuous-platform/
+workspace/runtime/oracle-heartbeats/
+workspace/runtime/oracle-lifecycle-worker/
+workspace/runtime/seer-heartbeats/
+workspace/runtime/uploads/
+workspace/runtime/doctor/
+workspace/runtime/watchdog/
+workspace/runtime/*
+!workspace/runtime/.gitignore
+workspace/backups/*.sha256
+workspace/backups/seer-*-state-*/
+workspace/backups/seer-duplicate-cleanup-*/
+
+# Local Claude/Claire worktrees
+.claire/
+workspace/runtime/*.pid
+workspace/runtime/reboot-drill.armed
+
+# Edge maintenance toggle (runtime flag flipped by workspace/dev/maintenance.sh)
+workspace/dev/MAINTENANCE_ON

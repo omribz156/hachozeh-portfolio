@@ -1,0 +1,148 @@
+/* ──────────────────────────────────────────────────────────────
+   patterns/trust-fold.css
+   Sober accordion shape used for rules / timeline / prohibitions
+   on market-detail. Each fold is a section with a clickable toggle
+   row (title + subtitle + chevron) and a panel of body content.
+   Multiple folds stack inside a `.hz-trust-shell` with hairline
+   dividers — that grouping is part of the pattern so future surfaces
+   can drop a single shell + fold sequence anywhere.
+   BEM:
+     .hz-trust-shell                — stacked group of folds
+     .hz-trust-fold                 — one accordion section
+     .hz-trust-fold__toggle         — clickable header row
+     .hz-trust-fold__toggle-copy    — title + subtitle wrapper
+     .hz-trust-fold__title          — bold heading
+     .hz-trust-fold__subtitle       — quiet eyebrow
+     .hz-trust-fold__chevron        — caret; rotates with .is-open
+     .hz-trust-fold__panel          — collapsible body
+   State:
+     .is-open on the fold flips the chevron and tints it green
+   ────────────────────────────────────────────────────────────── */
+
+
+  .hz-trust-shell {
+    display: grid;
+    gap: 0.15rem;
+    max-width: min(100%, 58rem);
+    border-block: 1px solid var(--hz-border-soft);
+  }
+
+  .hz-trust-fold {
+    border-bottom: 1px solid var(--hz-border-soft);
+  }
+
+  .hz-trust-fold:last-child {
+    border-bottom: 0;
+  }
+
+  .hz-trust-incident {
+    display: grid;
+    gap: 0.62rem;
+    padding: 0.95rem 0;
+    border-bottom: 1px solid var(--hz-border-soft);
+  }
+
+  .hz-trust-incident__eyebrow {
+    color: var(--hz-warning, #d9a441);
+    font-size: 0.74rem;
+    font-weight: 800;
+  }
+
+  .hz-trust-incident__item {
+    display: grid;
+    gap: 0.45rem;
+  }
+
+  .hz-trust-incident__item p {
+    margin: 0;
+    color: var(--hz-text);
+    font-size: 0.94rem;
+    line-height: 1.65;
+  }
+
+  .hz-trust-incident__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem 0.75rem;
+    color: var(--hz-text-muted);
+    font-size: 0.75rem;
+    font-weight: 650;
+  }
+
+  .hz-trust-incident__meta a {
+    color: var(--hz-action-buy);
+    text-decoration: none;
+  }
+
+  .hz-trust-fold__toggle {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 1rem;
+    align-items: center;
+    width: 100%;
+    min-height: 3.42rem;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    text-align: inherit;
+    cursor: pointer;
+  }
+
+  .hz-trust-fold__toggle-copy {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+
+  .hz-trust-fold__title {
+    color: var(--hz-text);
+    font-size: 1.02rem;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+
+  .hz-trust-fold__subtitle {
+    color: var(--hz-text-muted);
+    font-size: 0.74rem;
+    font-weight: 600;
+  }
+
+  .hz-trust-fold__chevron {
+    color: var(--hz-text-muted);
+    font-size: 1rem;
+    transition:
+      transform 160ms ease,
+      color 160ms ease;
+  }
+
+  .hz-trust-fold:not(.is-open) .hz-trust-fold__chevron {
+    transform: rotate(180deg);
+  }
+
+  .hz-trust-fold.is-open .hz-trust-fold__chevron {
+    color: var(--hz-action-buy);
+  }
+
+  .hz-trust-fold__panel {
+    display: grid;
+    gap: 0.85rem;
+    padding: 0.18rem 0 1.2rem;
+  }
+
+  .hz-trust-fold__panel[hidden] {
+    display: none;
+  }
+
+  @media (max-width: 767px) {
+    .hz-trust-fold__toggle {
+      min-height: 3.55rem;
+    }
+
+    .hz-trust-fold__toggle-copy {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      gap: 0.18rem;
+    }
+  }

@@ -1,0 +1,62 @@
+/*
+ * global.css — platform CSS spine for the Astro app.
+ * Ported from systems/front/assets/css/base.css.
+ *
+ * Layer order (lowest → highest priority among layered rules):
+ *   hz.tailwind < hz.tokens < hz.reset < hz.primitives < hz.compat
+ * Un-layered patterns/ + pages/ CSS (added later) sit above all layered rules.
+ *
+ * Note: @import statements must precede non-import rules, so the base layers
+ * are imported first, then Tailwind's @tailwind block expands into hz.tailwind.
+ * Google Fonts are loaded via <link> in the Layout head, not @import here.
+ */
+
+/* @layer order statement + @import MUST come first. CSS spec: @import is only
+   valid before any non-import/non-layer rule. Putting an @font-face or a plain
+   rule above these silently INVALIDATES every @import below → tokens/reset/
+   primitives/compat never load → the whole site renders unstyled (var(--hz-*)
+   all undefined). The font-face + icon-cap below therefore come AFTER the imports. */
+@layer hz.tailwind, hz.tokens, hz.reset, hz.primitives, hz.compat;
+
+@import './base/tokens.css' layer(hz.tokens);
+@import './base/reset.css' layer(hz.reset);
+@import './base/primitives.css' layer(hz.primitives);
+@import './base/compat.css' layer(hz.compat);
+
+/* ───── Metric-matched font fallbacks ─────
+   Unlayered (after the imports) so it sits above layered rules. At first paint
+   (before Google Fonts arrive) the stack falls through to 'Arimo-fallback' — Arial
+   with metric overrides tuned to match Arimo's rendered width — so the swap is
+   invisible. @font-face registers regardless of position; it just must be AFTER the
+   @imports (see the ordering note above).
+   Overrides from Arimo's font tables (ascent=1854, descent=434, lineGap=67,
+   unitsPerEm=2048) + size-adjust=110% empirically tuned on Hebrew header strings
+   to land within 0–2px of Arimo widths. Best single value across Hebrew+Latin. */
+@font-face {
+  font-family: 'Arimo-fallback';
+  src: local('Arial'), local('Helvetica Neue'), local('sans-serif');
+  ascent-override: 90.53%;
+  descent-override: 21.19%;
+  line-gap-override: 3.27%;
+  size-adjust: 110%;
+}
+
+/* Lock every Material Symbols icon to its glyph advance (1em). Until the icon font
+   loads (font-display:block period), each <span> renders its ligature NAME as wide
+   fallback text (e.g. "school", "notifications"), then collapses to the 1-glyph
+   width when the font lands — a width change that reflows the header sideways (the
+   guest "jump", and the bell before it). Capping width + clipping the overflow text
+   makes the box the same before and after the swap. `width`/`overflow` aren't set by
+   Google's Material Symbols CSS, so this is conflict-free; it supersedes the old
+   bell-only cap in site-shell.css. */
+.material-symbols-outlined {
+  display: inline-block;
+  width: 1em;
+  overflow: hidden;
+}
+
+@layer hz.tailwind {
+  @tailwind base;
+  @tailwind components;
+  @tailwind utilities;
+}

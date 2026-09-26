@@ -1,0 +1,14 @@
+---
+// Thin Astro wrapper — hands all props to the Preact island.
+// Static computation (active/resolved split, rowData, pct) now lives in
+// EventLadder.jsx; this file only forwards the raw children array + the
+// initial selected market id so the JSX can hydrate with the right selection.
+import EventLadderJSX from './EventLadder.jsx';
+const { children = [], selectedMarketId } = Astro.props;
+---
+
+<EventLadderJSX
+  client:load
+  items={children}
+  selectedMarketId={selectedMarketId}
+/>

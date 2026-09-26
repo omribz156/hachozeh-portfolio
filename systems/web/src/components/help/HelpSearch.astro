@@ -1,0 +1,105 @@
+---
+// Help Center search block + island. The article index is built at request
+// time from the content collection (see lib/help-content.buildSearchIndex) and
+// injected into the island via define:vars — no network call, no backend.
+// Mirrors the design handoff's help-search.js behavior, namespaced to hz-help-*.
+const {
+  articles = [],
+  placeholder = 'חפשו במרכז העזרה',
+} = Astro.props;
+---
+
+<div class="hz-help-search" data-help-search>
+  <svg class="hz-help-search__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+    <circle cx="11" cy="11" r="7"></circle>
+    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+  </svg>
+  <input
+    type="text"
+    class="hz-help-search__input"
+    data-help-search-input
+    placeholder={placeholder}
+    autocomplete="off"
+    spellcheck="false"
+    aria-label="חיפוש במרכז העזרה"
+  />
+  <button type="button" class="hz-help-search__clear" data-help-search-clear aria-label="נקה חיפוש">✕</button>
+  <div class="hz-help-search__results" data-help-search-results role="listbox"></div>
+</div>
+
+<script define:vars={{ HZ_HELP_ARTICLES: articles }}>
+  (function () {
+    const ARTICLES = HZ_HELP_ARTICLES || [];
+
+    const escapeHtml = (s) =>
+      String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+    const highlight = (text, q) => {
+      if (!q) return text;
+      const re = new RegExp('(' + q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + ')', 'gi');
+      return text.replace(re, '<mark>$1</mark>');
+    };
+
+    // Re-wire on initial load AND every ClientRouter soft-nav. The search input is a fresh
+    // element on each /help re-entry, so a one-shot binding went dead after navigating away
+    // and back. The per-root flag stops double-wiring the same element.
+    function initHelpSearch() {
+      const root = document.querySelector('[data-help-search]');
+      if (!root || root.__hzSearchWired) return;
+      root.__hzSearchWired = true;
+      const input = root.querySelector('[data-help-search-input]');
+      const clear = root.querySelector('[data-help-search-clear]');
+      const results = root.querySelector('[data-help-search-results]');
+      if (!input || !clear || !results) return;
+
+      const render = (raw) => {
+        const query = raw.trim().toLowerCase();
+        if (!query) {
+          results.innerHTML = '';
+          root.classList.remove('has-query');
+          return;
+        }
+        root.classList.add('has-query');
+        const matches = ARTICLES.filter((a) =>
+          a.q.toLowerCase().includes(query) ||
+          (a.kw || '').toLowerCase().includes(query) ||
+          a.topic.toLowerCase().includes(query)
+        ).slice(0, 7);
+
+        if (matches.length === 0) {
+          results.innerHTML = '<div class="hz-help-search__empty">לא נמצאו תוצאות עבור "' + escapeHtml(raw) + '"</div>';
+          return;
+        }
+        results.innerHTML = matches.map((a) =>
+          '<a href="' + escapeHtml(a.url) + '" class="hz-help-search__result">' +
+            '<span class="hz-help-search__result-tag">' + escapeHtml(a.topic) + '</span>' +
+            '<span class="hz-help-search__result-q">' + highlight(escapeHtml(a.q), query) + '</span>' +
+          '</a>'
+        ).join('');
+      };
+
+      input.addEventListener('input', () => render(input.value));
+      input.addEventListener('focus', () => root.classList.add('is-focused'));
+      input.addEventListener('blur', () => setTimeout(() => root.classList.remove('is-focused'), 150));
+      clear.addEventListener('click', () => { input.value = ''; render(''); input.focus(); });
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') { input.value = ''; render(''); input.blur(); return; }
+        // Enter opens the top matching article — Help has no separate results
+        // page, so the dropdown's first row is the sane default destination.
+        if (e.key === 'Enter') {
+          const topResult = results.querySelector('.hz-help-search__result');
+          if (topResult instanceof HTMLAnchorElement) {
+            e.preventDefault();
+            window.location.assign(topResult.href);
+          }
+        }
+      });
+    }
+
+    if (!window.__hzHelpSearchBound) {
+      window.__hzHelpSearchBound = true;
+      document.addEventListener('astro:page-load', initHelpSearch);
+    }
+    initHelpSearch();
+  })();
+</script>

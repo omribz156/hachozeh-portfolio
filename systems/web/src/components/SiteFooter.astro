@@ -1,0 +1,114 @@
+---
+// Site footer — fully static, server-rendered. Ported from site-shell.js
+// renderFooter().
+import { categoryBrowsePath } from '../lib/category-hubs.js';
+
+const HELP = '/help';
+
+const SECTIONS = [
+  {
+    title: 'שווקים לפי קטגוריה',
+    links: [
+      { label: 'פוליטיקה', sub: 'ישראל · בחירות · ממשלה', href: categoryBrowsePath('politics') },
+      { label: 'ספורט', sub: 'ליגת העל · NBA · אירופה', href: categoryBrowsePath('sports') },
+      { label: 'כלכלה', sub: 'מדדים · חוזים · נדל"ן', href: categoryBrowsePath('economy') },
+      { label: 'בידור', sub: 'תרבות · טלוויזיה · סלבס', href: categoryBrowsePath('entertainment') },
+    ],
+  },
+  {
+    title: 'תמיכה',
+    links: [
+      { label: 'פנה אלינו', sub: 'hachozeh@gmail.com', href: 'mailto:hachozeh@gmail.com' },
+      { label: 'דיוק תחזיות והיסטוריה', sub: 'בקרוב', href: '' },
+      { label: 'סטטוס מערכת', href: '/status', newTab: true, live: true },
+    ],
+  },
+  {
+    title: 'מוצר',
+    links: [
+      { label: 'מרכז עזרה', sub: 'איך זה עובד', href: HELP, newTab: true },
+      { label: 'כל השווקים', sub: 'פתוחים ומוכרעים', href: '/markets' },
+      { label: 'סוחרים', sub: 'פרופילים ציבוריים', href: '/traders' },
+      { label: 'API למפתחים', sub: 'בקרוב', href: '' },
+    ],
+  },
+];
+
+const SOCIALS = [
+  { label: 'X (Twitter)', svg: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>' },
+  { label: 'טלגרם', svg: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M21.198 4.295L2.434 11.61c-1.243.499-1.236 1.193-.227 1.502l4.81 1.502 1.135 3.604c.193.534.097.745.66.745.434 0 .626-.198.867-.434l2.094-2.04 4.357 3.221c.802.443 1.38.214 1.578-.745l2.857-13.466c.293-1.176-.448-1.71-1.367-1.204z"/></svg>' },
+  { label: 'דיסקורד', svg: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M20.317 4.37a19.79 19.79 0 00-4.885-1.515.074.074 0 00-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 00-5.487 0 12.64 12.64 0 00-.617-1.25.077.077 0 00-.079-.037A19.736 19.736 0 003.677 4.37a.07.07 0 00-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 00.031.057 19.9 19.9 0 005.993 3.03.078.078 0 00.084-.028 14.09 14.09 0 001.226-1.994.076.076 0 00-.041-.106 13.107 13.107 0 01-1.872-.892.077.077 0 01-.008-.128 10.2 10.2 0 00.372-.292.074.074 0 01.077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 01.078.01c.12.098.246.198.373.292a.077.077 0 01-.006.127 12.299 12.299 0 01-1.873.892.077.077 0 00-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 00.084.028 19.839 19.839 0 006.002-3.03.077.077 0 00.032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 00-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg>' },
+];
+
+// Wired by the legal lane (2026-06-09) — Hebrew draft pages under src/pages/{terms,privacy,cookies}.
+const LEGAL = [
+  { label: 'תנאי שימוש', href: '/terms' },
+  { label: 'מדיניות פרטיות', href: '/privacy' },
+  { label: 'עוגיות', href: '/cookies' },
+  { label: 'הצהרת נגישות', href: '/accessibility' },
+];
+---
+
+<footer class="hz-footer">
+  <div class="hz-footer__inner">
+    <div class="hz-footer__brand">
+      <a class="hz-footer__brand-link hz-brand" href="/">
+        <span class="hz-brand__mark" aria-hidden="true"></span>
+        <span class="hz-brand__name">החוזה</span>
+      </a>
+      <p class="hz-footer__tagline">פלטפורמת חיזוי השווקים של ישראל.</p>
+      <div class="hz-footer__socials" aria-label="ערוצים חברתיים">
+        {SOCIALS.map((s) => (
+          <a class="hz-footer__social is-pending" href="#" aria-disabled="true" aria-label={s.label} title={`${s.label} — בקרוב`} set:html={s.svg} />
+        ))}
+      </div>
+    </div>
+
+    <div class="hz-footer__cols">
+      {SECTIONS.map((section) => (
+        <div>
+          <h2 class="hz-footer__col-title">{section.title}</h2>
+          <ul class="hz-footer__col-links">
+            {section.links.map((link) => (
+              <li>
+                {link.href ? (
+                  <a class="hz-footer__col-link" href={link.href} target={(link as any).newTab ? '_blank' : undefined} rel={(link as any).newTab ? 'noopener noreferrer' : undefined}>
+                    {(link as any).live && <span class="hz-footer__status-dot" aria-hidden="true"></span>}{link.label}
+                    {link.sub && <span class="hz-footer__col-link-sub">{link.sub}</span>}
+                  </a>
+                ) : (
+                  <span class="hz-footer__col-link" aria-disabled="true">
+                    {(link as any).live && <span class="hz-footer__status-dot" aria-hidden="true"></span>}{link.label}
+                    {link.sub && <span class="hz-footer__col-link-sub">{link.sub}</span>}
+                  </span>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ))}
+    </div>
+
+    <p class="hz-footer__about">
+      <strong>החוזה הוא שוק התחזיות של ישראל.</strong> המחיר של כל שוק הוא ההסתברות שהקהל נותן לאירוע לקרות, מפוליטיקה ועד ספורט, כלכלה ותרבות. קנה פוזיציה על מה שאתה צופה שיקרה, וראה אם קראת את המציאות נכון.
+    </p>
+
+    <p class="hz-footer__regulatory">
+      <strong>החוזה היא פלטפורמת חיזוי שווקים במטבע וירטואלי.</strong>
+      שקל וירטואלי (V₪) הוא יחידת חשבון פנימית בלבד, ללא ערך כספי, ואינו ניתן למשיכה.
+      הפלטפורמה אינה הימור כספי ואינה מציעה רווח כספי על תחזיות. כל פעילות נעשית
+      במטבע וירטואלי הניתן למשתמשים במסגרת המשחק. השימוש כפוף לתנאי השימוש.
+    </p>
+
+    <div class="hz-footer__bottom">
+      <div class="hz-footer__copyright">&copy; 2026 החוזה. כל הזכויות שמורות.</div>
+      <div class="hz-footer__legal">
+        {LEGAL.map((l) => l.href ? (
+          <a class="hz-footer__legal-link" href={l.href} target="_blank" rel="noopener noreferrer">{l.label}</a>
+        ) : (
+          <span class="hz-footer__legal-link" aria-disabled="true">{l.label}</span>
+        ))}
+      </div>
+    </div>
+  </div>
+</footer>

@@ -1,0 +1,1552 @@
+/* ──────────────────────────────────────────────────────────────
+   patterns/site-shell.css
+   Shared header + footer chrome. Token-driven via --hz-*.
+   Pairs with assets/js/components/site-shell.js.
+   Unlayered (see base/css-base-contract.md — Tailwind preflight
+   is unlayered, so component CSS stays unlayered to beat it on
+   specificity).
+
+   Mounted by 8 pages (see site-shell.md "Supported Header Variants").
+   ────────────────────────────────────────────────────────────── */
+
+/* ── shell-internal layout tokens ──────────────────────────
+   These are not in base/tokens.css — they're implementation
+   details of the shell's own geometry.
+
+   Breakpoint legend (CSS @media can't use var() in conditions):
+     640px  = sm   (mobile top bar taller + bottom tabs appear)
+     768px  = md   (footer cols, search width)
+     1024px = lg   (wallet appears, search narrows)
+     1280px = xl   (wallet labels drop)
+   ────────────────────────────────────────────────────────── */
+:root {
+  /* Where downstream sticky content (sticky page headers, sticky rails)
+     should anchor their `top`. Includes a small breathing buffer
+     past the chrome's actual painted edge so headlines / sidebars
+     don't have their top edge clipped by the bar+nav. Combined with
+     `min-height: var(--hz-shell-spacer)` on `.hz-shell-wrap`, the
+     buffer is painted solid by the wrap's own background — no body
+     atmosphere bleed. */
+  --hz-shell-spacer: 7.5rem;   /* bar 4rem + nav ~3rem + ~0.5rem breathing */
+  /* Mobile bottom-tab bar content height (excludes safe-area inset,
+     which the bar adds on its own). The bar's `height` reads this
+     token so downstream surfaces sitting above the bar (e.g. market-
+     detail's mobile trade launcher's `bottom` offset) land flush. */
+  --hz-shell-bottom-tabs-h: 5rem;
+}
+@media (max-width: 640px) {
+  :root { --hz-shell-spacer: 9rem; } /* taller bar 4.75rem + nav + breathing */
+}
+
+/* ── shell mount + wrapper ──────────────────────────────────
+   Astro mounts [data-site-shell] and .hz-shell-wrap on the same element.
+   Keep it as a real box so position: sticky has geometry to pin. */
+[data-site-shell] {
+  display: block;
+}
+
+/* Sticky, not fixed. Sticky moves with the page during overscroll /
+   pull-to-refresh / iOS gesture overlays — no dark-rectangle artifact
+   from a fixed element staying glued to viewport while content
+   translates underneath. Polymarket / Kalshi do the same. */
+.hz-shell-wrap {
+  position: sticky;
+  top: 0;
+  z-index: 80;
+  /* Paint solid through the wrap's full footprint so the body's
+     page-atmosphere gradient can't bleed into seams between the
+     bar + nav children, or into a gap between the wrap's bottom
+     and any downstream sticky element that sticks at
+     `top: var(--hz-shell-spacer)`. The bar + nav children paint
+     their own backgrounds on top of this — no visual change to
+     the chrome itself; this is purely defense against future
+     calibration drift. */
+  background: var(--hz-bg);
+  min-height: var(--hz-shell-spacer);
+}
+
+/* .hz-shell-spacer rule retired 2026-05-31 — sticky wrap takes flow
+   space directly, the dedicated spacer div is no longer needed.
+   Any leftover renderer that still emits the div is harmless (the
+   div has zero height with no rule) but should be cleaned up. */
+
+/* solid bg, no backdrop-blur — steal #5 */
+.hz-shell__bar {
+  background: var(--hz-bg);
+}
+
+.hz-shell__inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  height: 4rem;
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+/* brand sits on the side, then search takes the centre */
+.hz-shell__lead {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  flex: 1;
+  min-width: 0;
+}
+
+/* ── brand component — shared across header + footer ─────────
+   Generic mark + wordmark anchor. Size is driven by two CSS
+   custom properties so each mounting context (header desktop,
+   header mobile, footer) can override without redefining the
+   component. The JS emits both .hz-brand and the context class
+   on the same element, e.g. class="hz-shell__brand hz-brand". */
+.hz-brand {
+  --hz-brand-mark-size: 2rem;
+  --hz-brand-name-size: 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  text-decoration: none;
+  color: var(--hz-text);
+  transition: color var(--hz-motion);
+}
+.hz-brand:hover { color: var(--hz-brand); }
+
+/* Real logo mark — the traced tile (amber rounded square + navy figure
+   baked in, self-contained on any background). Sized by
+   --hz-brand-mark-size so header/mobile/footer share one rule. */
+.hz-brand__mark {
+  display: inline-block;
+  width: var(--hz-brand-mark-size);
+  height: var(--hz-brand-mark-size);
+  flex-shrink: 0;
+  background-image: url("/assets/brand/logo-tile.svg");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  transition: filter var(--hz-motion);
+}
+.hz-brand:hover .hz-brand__mark { filter: brightness(1.08); }
+
+.hz-brand__name {
+  font-size: var(--hz-brand-name-size);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  line-height: 1;
+}
+
+/* ── brand: header mounting context ──────────────────────────
+   Desktop defaults match the generic (.hz-brand) — nothing to
+   override. Mobile overrides live in the @media (max-width: 640px)
+   block below. */
+.hz-shell__brand {
+  flex-shrink: 0;
+}
+
+/* ── search (wider, centre-ish) — steal #3 ──────────────────── */
+.hz-shell__search {
+  display: none;
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  max-width: 38rem;
+}
+.hz-shell__search[hidden] {
+  display: none;
+}
+@media (min-width: 768px) {
+  .hz-shell__search { display: block; }
+  .hz-shell__search[hidden] { display: none; }
+}
+
+/* "איך זה עובד?" walkthrough CTA — paired with the search in the lead.
+   Subtle bordered pill (a sibling affordance to the search field, not a loud
+   button). Desktop-only, matching the search's ≥768px gate; mobile reaches the
+   walkthrough via the hamburger. Guest-only via the [data-hiw-nav] gate in Layout. */
+.hz-shell__hiw-link {
+  display: none;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+  padding: 0.45rem 0.85rem;
+  border-radius: var(--hz-radius-pill);
+  border: 1px solid var(--hz-border-soft);
+  background: transparent;
+  color: var(--hz-text-muted);
+  text-decoration: none;
+  font-size: 0.875rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: color var(--hz-motion), background var(--hz-motion);
+}
+@media (min-width: 768px) {
+  .hz-shell__hiw-link { display: inline-flex; }
+}
+.hz-shell__hiw-link:hover {
+  color: var(--hz-text);
+  background: var(--hz-surface-soft);
+}
+.hz-shell__hiw-link-icon { font-size: 1.05rem; line-height: 1; }
+/* Tight tablet band (768–1023): keep the field roomy, drop the label to icon-only. */
+@media (min-width: 768px) and (max-width: 1023px) {
+  .hz-shell__hiw-link-label { display: none; }
+  .hz-shell__hiw-link { padding: 0.45rem 0.55rem; }
+}
+
+.hz-shell__search-icon {
+  position: absolute;
+  inset-inline-end: 0.875rem;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--hz-text-faint);
+  font-size: 1.125rem;
+  pointer-events: none;
+}
+
+/* input.class + appearance:none beats the Tailwind `forms` plugin reset */
+input.hz-shell__search-input {
+  width: 100%;
+  appearance: none;
+  background: var(--hz-surface-1);
+  border: 1px solid var(--hz-border-faint);
+  border-radius: var(--hz-radius-sm);
+  padding: 0.5rem 2.75rem 0.5rem 1rem;
+  font: inherit;
+  font-size: 0.875rem;
+  color: var(--hz-text);
+  box-shadow: none;
+  transition: background var(--hz-motion), border-color var(--hz-motion);
+}
+input.hz-shell__search-input::placeholder { color: var(--hz-text-faint); opacity: 1; }
+input.hz-shell__search-input:focus {
+  outline: none;
+  background: var(--hz-surface-2);
+  border-color: rgba(var(--hz-brand-rgb), 0.5);
+  box-shadow: none;
+}
+
+/* close button is only meaningful inside the mobile overlay; hidden everywhere
+   else. The @media (max-width: 640px) block overrides display when the wrap
+   carries .is-mobile-open. */
+.hz-shell__search-close { display: none; }
+
+/* ── shared overlay surface ─────────────────────────────────
+   All three dropdown/popover surfaces share the same tone.
+   Rule order: this shared block must come before the individual
+   rules so per-selector overrides can win without extra specificity. */
+.hz-shell__search-dropdown,
+.hz-shell__menu,
+.hz-shell__cat-dropdown {
+  background: var(--hz-bg-raised);
+  border: 1px solid var(--hz-border-soft);
+  border-radius: var(--hz-radius-md);
+  box-shadow: var(--hz-shadow-overlay);
+}
+
+/* ── search dropdown (steal #4) ────────────────────────────── */
+.hz-shell__search-dropdown {
+  position: absolute;
+  top: calc(100% + 0.5rem);
+  inset-inline: 0;
+  padding: 0.5rem;
+  display: none;
+  flex-direction: column;
+  gap: 0.25rem;
+  z-index: 90;
+  max-height: 70vh;
+  overflow-y: auto;
+}
+.hz-shell__search.is-open .hz-shell__search-dropdown { display: flex; }
+
+.hz-shell__search-tabs {
+  display: flex;
+  gap: 0.25rem;
+  padding: 0.25rem 0.25rem 0.5rem;
+  border-bottom: 1px solid var(--hz-border-faint);
+  margin-bottom: 0.25rem;
+}
+.hz-shell__search-tab {
+  background: transparent;
+  border: 0;
+  padding: 0.375rem 0.75rem;
+  border-radius: var(--hz-radius-xs);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--hz-text-muted);
+  cursor: pointer;
+  transition: color var(--hz-motion), background var(--hz-motion);
+}
+.hz-shell__search-tab:hover { color: var(--hz-text); }
+.hz-shell__search-tab.is-active {
+  color: var(--hz-text);
+  background: var(--hz-surface-soft);
+}
+
+.hz-shell__search-result {
+  display: grid;
+  grid-template-columns: 2rem 1fr auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.5rem;
+  border-radius: var(--hz-radius-sm);
+  color: var(--hz-text);
+  text-decoration: none;
+  transition: background var(--hz-motion);
+}
+.hz-shell__search-result:hover { background: var(--hz-surface-soft); }
+.hz-shell__search-result[aria-disabled="true"] {
+  cursor: default;
+}
+.hz-shell__search-result[aria-disabled="true"]:hover {
+  background: transparent;
+}
+.hz-shell__search-result__thumb {
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--hz-radius-xs);
+  background: var(--hz-surface-2);
+  display: grid;
+  place-items: center;
+  font-size: 0.875rem;
+  color: var(--hz-text-muted);
+  overflow: hidden;
+}
+.hz-shell__search-result__thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.hz-shell__search-result__title {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.875rem;
+  line-height: 1.25;
+  color: var(--hz-text);
+}
+.hz-shell__search-result__verified {
+  font-size: 1rem;
+  line-height: 1;
+  color: var(--hz-accent);
+}
+.hz-shell__search-result__sub {
+  font-size: 0.75rem;
+  color: var(--hz-text-muted);
+  margin-top: 0.125rem;
+}
+.hz-shell__search-result__chance {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--hz-text);
+  font-variant-numeric: tabular-nums;
+}
+.hz-shell__search-footer-link {
+  display: block;
+  text-align: center;
+  padding: 0.625rem;
+  font-size: 0.8125rem;
+  color: var(--hz-text-muted);
+  text-decoration: none;
+  border-top: 1px solid var(--hz-border-faint);
+  margin-top: 0.25rem;
+  transition: color var(--hz-motion);
+}
+.hz-shell__search-footer-link:hover { color: var(--hz-brand); }
+
+/* ── nav row (feeds + categories) — solid bg, masked overflow ─── */
+.hz-shell__nav {
+  background: var(--hz-bg);
+  border-bottom: 1px solid var(--hz-border-faint);
+}
+
+/* New container hierarchy:
+     .hz-shell__nav-inner   — flex row, 1440 max-width + padding
+       .hz-shell__nav-track — scrolling area (feeds + categories), masked
+       .hz-shell__nav-end   — the "+ עוד" button, stays sharp
+   The mask fades the scroll's inline-end so overflow disappears smoothly
+   instead of being chopped mid-word. The עוד button sits outside the mask. */
+.hz-shell__nav-inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.hz-shell__nav-track {
+  flex: 1;
+  min-width: 0;
+  padding: 0.5rem 0;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  overflow-x: auto;
+  scrollbar-width: none;
+  /* Fade at the inline-end so cut-off content tapers instead of clipping.
+     Direction-aware: in RTL the overflow side is the left edge. The fade
+     zone is ~4rem so the taper is clearly visible at the edge. */
+  -webkit-mask-image: linear-gradient(to right, black 0, black calc(100% - 4rem), transparent 100%);
+  mask-image: linear-gradient(to right, black 0, black calc(100% - 4rem), transparent 100%);
+}
+[dir="rtl"] .hz-shell__nav-track {
+  -webkit-mask-image: linear-gradient(to left, black 0, black calc(100% - 4rem), transparent 100%);
+  mask-image: linear-gradient(to left, black 0, black calc(100% - 4rem), transparent 100%);
+}
+.hz-shell__nav-track::-webkit-scrollbar { display: none; }
+
+.hz-shell__nav-end {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.5rem 0;
+}
+
+.hz-shell__nav-divider {
+  flex-shrink: 0;
+  width: 1px;
+  height: 1rem;
+  background: var(--hz-border-faint);
+  margin: 0 0.5rem;
+}
+
+/* ── feed items — tightened pill (icons + labels, compact spacing) ── */
+.hz-shell__feed-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.3rem 0.5rem;
+  border-radius: var(--hz-radius-pill);
+  font-size: 0.875rem;
+  color: var(--hz-text-muted);
+  white-space: nowrap;
+  text-decoration: none;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  transition: color var(--hz-motion), background var(--hz-motion);
+}
+.hz-shell__feed-item:hover { color: var(--hz-text); }
+.hz-shell__feed-item.is-active {
+  color: var(--hz-text);
+  background: var(--hz-surface-soft);
+}
+
+.hz-shell__feed-icon {
+  font-size: 0.9rem;
+  line-height: 1;
+}
+.hz-shell__feed-icon--hot     { color: var(--hz-signal-hot); }
+.hz-shell__feed-icon--warning { color: var(--hz-warning); }
+.hz-shell__feed-icon--new     { color: var(--hz-signal-new); }
+
+/* ── live: dot + count (steal #2 — the beat) ───────────────── */
+.hz-shell__feed-live {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+.hz-shell__feed-dot--live {
+  width: 0.45rem;
+  height: 0.45rem;
+  border-radius: 9999px;
+  background: var(--hz-live);
+  box-shadow: 0 0 0 0 rgba(var(--hz-live-rgb), 0.55);
+  animation: hz-live-pulse 1.8s ease-in-out infinite;
+}
+@keyframes hz-live-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(var(--hz-live-rgb), 0.55); }
+  50%      { box-shadow: 0 0 0 6px rgba(var(--hz-live-rgb), 0); }
+}
+.hz-shell__feed-count {
+  display: inline-flex;
+  align-items: baseline;
+  padding: 0.05rem 0.4rem;
+  margin-inline-start: 0.1rem;
+  border-radius: 9999px;
+  background: rgba(var(--hz-live-rgb), 0.14);
+  color: var(--hz-live);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.02em;
+}
+/* Number-only changes on tick. No colour shift, no scale — the pulsing
+   dot already carries the "live" signal; the digits just update. */
+
+.hz-shell__cat-item {
+  padding: 0.375rem 0.5rem;
+  font-size: 0.875rem;
+  color: var(--hz-text-muted);
+  white-space: nowrap;
+  text-decoration: none;
+  transition: color var(--hz-motion);
+}
+.hz-shell__cat-item:hover,
+.hz-shell__cat-item.is-active { color: var(--hz-text); }
+
+/* ── "+ עוד" categories dropdown ───────────────────────────── */
+.hz-shell__cat-more-wrap {
+  position: relative;
+  display: inline-flex;
+  flex-shrink: 0;
+}
+.hz-shell__cat-more {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.7rem;
+  border-radius: var(--hz-radius-pill);
+  font-size: 0.875rem;
+  color: var(--hz-text-muted);
+  white-space: nowrap;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  transition: color var(--hz-motion), background var(--hz-motion);
+}
+.hz-shell__cat-more:hover { color: var(--hz-text); }
+.hz-shell__cat-more-wrap.is-open .hz-shell__cat-more {
+  color: var(--hz-text);
+  background: var(--hz-surface-soft);
+}
+.hz-shell__cat-more-icon { font-size: 1rem; line-height: 1; }
+
+.hz-shell__cat-dropdown {
+  /* position: fixed lets the dropdown escape the nav-track's overflow-x:auto.
+     Coordinates set in JS via wireCategoryMore to anchor under the trigger. */
+  position: fixed;
+  top: 0;
+  left: 0;
+  padding: 0.75rem;
+  display: none;
+  flex-direction: column;
+  z-index: 90;
+  min-width: 22rem;
+  max-width: calc(100vw - 2rem);
+}
+.hz-shell__cat-more-wrap.is-open .hz-shell__cat-dropdown { display: flex; }
+
+/* "עוד" dropdown — teaser panel for upcoming features.
+   Distinct from the search dropdown shape so it's clearly a different lane. */
+.hz-shell__more-header {
+  padding: 0.25rem 0.5rem 0.75rem;
+  border-bottom: 1px solid var(--hz-border-faint);
+  margin-bottom: 0.5rem;
+}
+.hz-shell__more-eyebrow {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.35;
+  color: var(--hz-brand);
+}
+.hz-shell__more-lede {
+  font-size: 0.8125rem;
+  color: var(--hz-text-soft);
+  margin: 0.35rem 0 0;
+  line-height: 1.4;
+}
+.hz-shell__more-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.125rem;
+}
+.hz-shell__more-item {
+  display: grid;
+  grid-template-columns: 1.5rem 1fr auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.625rem 0.5rem;
+  border-radius: var(--hz-radius-sm);
+  /* informational only — no hover affordance until real */
+}
+/* live (real-link) more-item — gets a hover affordance + a go chevron */
+.hz-shell__more-item--live { text-decoration: none; color: inherit; cursor: pointer; transition: background var(--hz-motion); }
+.hz-shell__more-item--live:hover { background: var(--hz-surface-hover); }
+.hz-shell__more-item--live:hover .hz-shell__more-label { color: var(--hz-brand-strong); }
+.hz-shell__more-go { color: var(--hz-text-faint); font-size: 1.05rem; }
+.hz-shell__more-icon {
+  color: var(--hz-text-muted);
+  font-size: 1.125rem;
+}
+.hz-shell__more-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.hz-shell__more-label {
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--hz-text);
+}
+.hz-shell__more-sub {
+  font-size: 0.75rem;
+  color: var(--hz-text-muted);
+  margin-top: 0.15rem;
+}
+.hz-shell__more-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  color: var(--hz-brand);
+  background: var(--hz-brand-soft);
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--hz-radius-pill);
+  white-space: nowrap;
+}
+.hz-shell__more-cta {
+  display: block;
+  text-align: center;
+  padding: 0.75rem;
+  font-size: 0.8125rem;
+  color: var(--hz-text-muted);
+  text-decoration: none;
+  border-top: 1px solid var(--hz-border-faint);
+  margin-top: 0.5rem;
+  transition: color var(--hz-motion);
+}
+.hz-shell__more-cta:hover { color: var(--hz-brand); }
+
+/* ── actions cluster ───────────────────────────────────────── */
+.hz-shell__actions {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  flex-shrink: 0;
+}
+
+.hz-shell__actions-group {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.hz-shell__actions-group[hidden],
+.hz-shell__menu[hidden] {
+  display: none !important;
+}
+
+.hz-shell__cta {
+  padding: 0.5rem 1.25rem;
+  border-radius: var(--hz-radius-sm);
+  font-size: 0.875rem;
+  font-weight: 700;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background var(--hz-motion), color var(--hz-motion);
+}
+.hz-shell__cta--primary {
+  background: var(--hz-brand);
+  color: var(--hz-text-inverse);
+}
+.hz-shell__cta--primary:hover { background: var(--hz-brand-strong); }
+
+.hz-shell__cta--ghost {
+  background: transparent;
+  color: var(--hz-text-soft);
+  font-weight: 500;
+}
+.hz-shell__cta--ghost:hover { color: var(--hz-text); }
+
+.hz-shell__link-muted {
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  color: var(--hz-text-muted);
+  font-size: 0.875rem;
+  font-weight: 500;
+  text-decoration: none;
+  transition: color var(--hz-motion);
+}
+.hz-shell__link-muted:hover { color: var(--hz-text); }
+.hz-shell__link-muted--lg-only { display: none; }
+@media (min-width: 1024px) {
+  .hz-shell__link-muted--lg-only { display: inline-block; }
+}
+
+/* ── wallet summary ────────────────────────────────────────── */
+.hz-shell__wallet {
+  /* shown at all widths for signed-in users (it lives in the authed-only
+     actions group). Was desktop-only (display:none + min-width:1024 flip);
+     now the balance is always visible, incl. mobile. */
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 0.5rem 0.75rem;
+  margin: -0.5rem 0;
+  border-inline-end: 1px solid var(--hz-border-faint);
+  padding-inline-end: 1.25rem;
+  border-radius: var(--hz-radius-sm);
+  text-decoration: none;
+  transition: background var(--hz-motion);
+}
+.hz-shell__wallet:hover { background: var(--hz-surface-soft); }
+/* brief pop when a credit lands (daily-streak claim → `wallet:credited`, wired in
+   header-session.client.js). The celebration itself lives in the overlay. */
+.hz-shell__wallet.is-pop { animation: hz-wallet-pop 680ms cubic-bezier(0.2, 0.9, 0.25, 1.25); }
+@keyframes hz-wallet-pop { 0% { transform: scale(1); } 40% { transform: scale(1.08); } 100% { transform: scale(1); } }
+.hz-shell__wallet-cell { display: flex; flex-direction: column; align-items: flex-end; }
+.hz-shell__wallet-label {
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0;
+  line-height: 1.25;
+  color: var(--hz-text-muted);
+}
+.hz-shell__wallet-value {
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--hz-text);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── bell + avatar ─────────────────────────────────────────── */
+.hz-shell__bell {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  color: var(--hz-text-muted);
+  transition: color var(--hz-motion);
+  flex-shrink: 0;
+}
+/* Lock the bell icon to its glyph advance (1em). Without this the icon span sizes
+   to its content, so during the Material Symbols font-display:block period the
+   INVISIBLE "notifications" ligature text reserves ~text width (~143px), ballooning
+   the bell ~102px; when the font lands it collapses to the glyph and the wallet
+   snaps left — the header "jump" (avatar is held by display:contents above). */
+.hz-shell__bell .material-symbols-outlined {
+  width: 1em;
+  overflow: hidden;
+}
+.hz-shell__bell:hover { color: var(--hz-text); }
+.hz-shell__bell-dot {
+  position: absolute;
+  top: 0.375rem;
+  inset-inline-end: 0.375rem;
+  width: 0.375rem;
+  height: 0.375rem;
+  background: var(--hz-live);
+  border-radius: 9999px;
+}
+
+/* Social/community link — lives in the nav row's end slot, paired with
+   the "+ עוד" button. Padding/gap/radius harmonized with .hz-shell__cat-more
+   so the two read as a matched set of platform destinations. */
+.hz-shell__social-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.7rem;
+  border-radius: var(--hz-radius-pill);
+  background: transparent;
+  color: var(--hz-text-muted);
+  text-decoration: none;
+  font-size: 0.875rem;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: color var(--hz-motion), background var(--hz-motion);
+}
+.hz-shell__social-link:hover {
+  color: var(--hz-text);
+  background: var(--hz-surface-soft);
+}
+.hz-shell__social-link[aria-disabled="true"] {
+  cursor: default;
+}
+.hz-shell__social-link[aria-disabled="true"]:hover {
+  color: var(--hz-text-muted);
+  background: transparent;
+}
+.hz-shell__social-link-icon {
+  font-size: 1rem;
+  line-height: 1;
+}
+
+
+/* Astro wraps the avatar island in an <astro-island> custom element; until the
+   client runtime UPGRADES it, Chromium collapses an undefined custom element's
+   subtree (and explicit sizing on the custom element itself is unreliable), so the
+   avatar paints at 0 width, the wallet/bell shift left, then snap back when it
+   hydrates (~60ms later) — the header "jump". A plain <div> SLOT around the island
+   has no custom-element quirk and reserves its box at first paint unconditionally;
+   the avatar fills it. (min-* so it settles to the exact avatar size, no shift.) */
+.hz-shell__avatar-slot {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  min-width: 2.25rem;
+  min-height: 2.25rem;
+}
+.hz-shell__actions-group astro-island,
+.hz-shell__menu-user-row astro-island { display: contents; }
+
+/* Avatar — now structured for future frames + verified badge.
+   .hz-shell__avatar         : positioning shell, can host overlay glyphs
+   .hz-shell__avatar-frame   : the circle that holds the image
+                               (real SVG frames will overlay here)
+   .hz-shell__avatar-img     : the photo
+   .hz-shell__avatar-presence: online dot (bottom-left, physical)
+   .hz-shell__avatar-badge   : verified glyph (bottom-right, physical)
+*/
+.hz-shell__avatar {
+  position: relative;
+  display: inline-block;
+  flex-shrink: 0;
+  line-height: 0;
+  /* When the avatar is a <button> (user mode hamburger trigger), strip
+     native button chrome but keep it interactive. */
+  background: transparent;
+  border: 0;
+  padding: 0;
+}
+/* Hover affordance on the trigger variant — subtle ring brightening so it
+   reads as interactive without the chevron clutter. */
+.hz-shell__avatar--trigger { cursor: pointer; }
+.hz-shell__avatar--trigger:hover .hz-shell__avatar-frame,
+.hz-shell__avatar--trigger[aria-expanded="true"] .hz-shell__avatar-frame {
+  border-color: rgba(var(--hz-brand-rgb), 0.75);
+}
+.hz-shell__avatar-frame {
+  display: block;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 9999px;
+  border: 1px solid rgba(var(--hz-brand-rgb), 0.4);
+  overflow: hidden;
+  position: relative;
+  background: var(--hz-surface-1);
+}
+.hz-shell__avatar-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.hz-shell__avatar-img[data-default-avatar] {
+  object-fit: contain;
+}
+.hz-shell__avatar-initial {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  color: var(--hz-brand);
+  font-size: 0.95rem;
+  font-weight: 900;
+  line-height: 1;
+}
+/* Corner decorations on the circular avatar — physical sides on purpose.
+   Doctrine (site-shell.md): presence dot at bottom-left, verified badge at
+   bottom-right, REGARDLESS of reading direction. The circle has no inline
+   direction, only physical corners. */
+.hz-shell__avatar-presence {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0.625rem;
+  height: 0.625rem;
+  background: var(--hz-action-buy);
+  border-radius: 9999px;
+  border: 2px solid var(--hz-bg);
+}
+/* Verified badge — only visible when avatar has .hz-shell__avatar--verified */
+.hz-shell__avatar-badge {
+  display: none;
+  position: absolute;
+  bottom: -2px;
+  right: -2px;
+  font-size: 14px;
+  color: var(--hz-brand);
+  /* knock a tiny donut hole through the avatar frame so the glyph reads */
+  background: var(--hz-bg);
+  border-radius: 9999px;
+  line-height: 1;
+  /* Material Symbols visual tuning — same rule used in primitives.css */
+  font-variation-settings: 'FILL' 1, 'wght' 700;
+}
+.hz-shell__avatar--verified .hz-shell__avatar-badge { display: block; }
+
+.hz-shell__avatar--tier-gray .hz-shell__avatar-badge {
+  color: #c7ced9;
+}
+
+.hz-shell__avatar--tier-gold .hz-shell__avatar-badge {
+  color: var(--hz-brand);
+}
+
+.hz-shell__avatar--tier-diamond .hz-shell__avatar-badge {
+  color: #7fd5ff;
+}
+
+.hz-shell__verification-upgrade {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 2.25rem;
+  padding: 0.42rem 0.8rem;
+  border: 1px solid rgba(var(--hz-brand-rgb) / 0.74);
+  border-radius: 0.65rem;
+  background:
+    linear-gradient(135deg, rgba(var(--hz-brand-rgb) / 0.16), rgba(255 255 255 / 0.025)),
+    var(--hz-surface-1);
+  color: var(--hz-text);
+  text-decoration: none;
+  box-shadow: 0 0 0 1px rgba(var(--hz-brand-rgb) / 0.08), 0 10px 24px rgba(0 0 0 / 0.16);
+}
+
+.hz-shell__verification-upgrade[hidden] {
+  display: none;
+}
+
+.hz-shell__verification-upgrade-kicker {
+  color: var(--hz-brand);
+  font-size: 0.74rem;
+  font-weight: 900;
+}
+
+.hz-shell__verification-upgrade-label {
+  color: var(--hz-text);
+  font-size: 0.84rem;
+  font-weight: 900;
+  direction: rtl;
+  unicode-bidi: isolate;
+}
+
+.hz-shell__verification-upgrade-money {
+  display: inline-block;
+  direction: ltr;
+  unicode-bidi: isolate;
+  white-space: nowrap;
+  font-family: var(--hz-font-mono);
+}
+
+/* ── hamburger trigger ─────────────────────────────────────── */
+.hz-shell__hamburger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+  background: transparent;
+  border: 0;
+  color: var(--hz-text-muted);
+  cursor: pointer;
+  transition: color var(--hz-motion), background var(--hz-motion);
+  border-radius: var(--hz-radius-sm);
+}
+.hz-shell__hamburger:hover { color: var(--hz-text); }
+.hz-shell__hamburger[aria-expanded="true"] {
+  color: var(--hz-text);
+  background: var(--hz-surface-soft);
+}
+
+/* ── hamburger panel ───────────────────────────────────────── */
+/* Lives appended to <body>, position:fixed; JS sets top/left to anchor
+   under the trigger. Hidden until .is-open is added. */
+.hz-shell__menu {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 20rem;
+  max-width: calc(100vw - 2rem);
+  z-index: 95;
+  display: none;
+  flex-direction: column;
+  padding: 0.5rem;
+  transform-origin: top left;
+}
+.hz-shell__menu.is-open { display: flex; }
+
+/* account header row — profile link + settings gear, side by side.
+   The row owns the bottom hairline; the inner profile/settings elements are
+   each their own hover targets. */
+.hz-shell__menu-user-row {
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding-bottom: 0.6rem;
+  border-bottom: 1px solid var(--hz-border-faint);
+  margin-bottom: 0.5rem;
+}
+
+/* profile anchor: avatar + name + rank → /portfolio */
+.hz-shell__menu-user {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.4rem 0.5rem;
+  text-decoration: none;
+  color: inherit;
+  border-radius: var(--hz-radius-sm);
+  transition: background var(--hz-motion);
+}
+.hz-shell__menu-user:hover { background: var(--hz-surface-soft); }
+
+/* settings gear sits at the row's inline-end (LEFT in RTL) */
+.hz-shell__menu-settings {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.4rem;
+  border-radius: var(--hz-radius-sm);
+  color: var(--hz-text-muted);
+  text-decoration: none;
+  transition: color var(--hz-motion), background var(--hz-motion);
+}
+.hz-shell__menu-settings:hover {
+  color: var(--hz-text);
+  background: var(--hz-surface-soft);
+}
+.hz-shell__menu-settings[aria-disabled="true"] {
+  cursor: default;
+}
+.hz-shell__menu-settings[aria-disabled="true"]:hover {
+  color: var(--hz-text-muted);
+  background: transparent;
+}
+.hz-shell__menu-user-text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.hz-shell__menu-user-name {
+  font-size: 0.9375rem;
+  font-weight: 700;
+  color: var(--hz-text);
+  line-height: 1.2;
+}
+.hz-shell__menu-user-sub {
+  font-size: 0.75rem;
+  color: var(--hz-text-muted);
+  margin-top: 0.15rem;
+}
+
+.hz-shell__menu-body {
+  display: flex;
+  flex-direction: column;
+}
+
+.hz-shell__menu-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.05rem;
+  padding: 0.25rem 0;
+}
+.hz-shell__menu-group-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.35;
+  color: var(--hz-text-muted);
+  padding: 0.5rem 0.5rem 0.35rem;
+}
+.hz-shell__menu-divider {
+  height: 1px;
+  background: var(--hz-border-faint);
+  margin: 0.25rem 0;
+}
+
+.hz-shell__menu-item {
+  display: grid;
+  grid-template-columns: 1.25rem 1fr auto;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.55rem 0.65rem;
+  border-radius: var(--hz-radius-sm);
+  font-size: 0.875rem;
+  color: var(--hz-text-soft);
+  text-decoration: none;
+  transition: color var(--hz-motion), background var(--hz-motion);
+}
+.hz-shell__menu-item:hover {
+  color: var(--hz-text);
+  background: var(--hz-surface-soft);
+}
+.hz-shell__menu-item.is-disabled {
+  cursor: default;
+}
+.hz-shell__menu-item.is-disabled:hover {
+  color: var(--hz-text-soft);
+  background: transparent;
+}
+.hz-shell__menu-icon {
+  color: var(--hz-text-muted);
+  font-size: 1.15rem;
+  line-height: 1;
+}
+.hz-shell__menu-item:hover .hz-shell__menu-icon { color: var(--hz-text-soft); }
+.hz-shell__menu-label { min-width: 0; }
+.hz-shell__menu-meta {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: var(--hz-text-muted);
+  font-variant-numeric: tabular-nums;
+}
+.hz-shell__menu-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  color: var(--hz-brand);
+  background: var(--hz-brand-soft);
+  padding: 0.2rem 0.5rem;
+  border-radius: var(--hz-radius-pill);
+  white-space: nowrap;
+}
+/* emphasis variant — for the "מטבע וירטואלי" explainer in guest mode */
+.hz-shell__menu-item--emphasis,
+.hz-shell__menu-item--emphasis .hz-shell__menu-icon {
+  color: var(--hz-brand);
+}
+.hz-shell__menu-item--emphasis:hover {
+  background: var(--hz-brand-soft);
+}
+
+/* logout — destructive, separated, full-width row at bottom */
+.hz-shell__menu-logout {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem;
+  margin-top: 0.5rem;
+  border-top: 1px solid var(--hz-border-faint);
+  border-left: 0;
+  border-right: 0;
+  border-bottom: 0;
+  background: transparent;
+  color: var(--hz-action-sell);
+  font: inherit;
+  font-size: 0.875rem;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: start;
+  transition: color var(--hz-motion), background var(--hz-motion);
+}
+.hz-shell__menu-logout:hover {
+  color: var(--hz-action-sell-strong);
+  background: rgba(var(--hz-action-sell-rgb), 0.08);
+}
+.hz-shell__menu-logout .hz-shell__menu-icon { color: inherit; }
+
+/* ── footer ────────────────────────────────────────────────── */
+.hz-footer {
+  margin-top: 6rem;
+  padding: 3.5rem 0 2.5rem;
+  background: var(--hz-bg-soft);
+  border-top: 1px solid var(--hz-border-faint);
+}
+.hz-footer__inner {
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+/* Brand block — anchors the footer top (Poly/Kalshi pattern). Stacks
+   vertically at mobile, sits as a left-column at desktop. Socials are
+   proper icon buttons, not text rows. */
+.hz-footer__brand {
+  margin-bottom: 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1rem;
+}
+/* Footer mounting context — larger mark, slightly smaller wordmark */
+.hz-footer__brand-link {
+  --hz-brand-mark-size: 2.25rem;
+  --hz-brand-name-size: 1.375rem;
+}
+.hz-footer__tagline {
+  font-size: 0.875rem;
+  color: var(--hz-text-muted);
+  margin: 0;
+  max-width: 28rem;
+}
+.hz-footer__socials {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.hz-footer__social {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.25rem;
+  height: 2.25rem;
+  border-radius: 9999px;
+  background: var(--hz-surface-1);
+  color: var(--hz-text-muted);
+  text-decoration: none;
+  transition: color var(--hz-motion), background var(--hz-motion);
+}
+.hz-footer__social svg {
+  width: 1rem;
+  height: 1rem;
+}
+.hz-footer__social:hover {
+  color: var(--hz-text);
+  background: var(--hz-surface-2);
+}
+.hz-footer__social.is-pending {
+  opacity: 0.55;
+  cursor: default;
+}
+.hz-footer__social.is-pending:hover {
+  color: var(--hz-text-muted);
+  background: var(--hz-surface-1);
+}
+
+.hz-footer__cols {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.75rem;
+}
+@media (min-width: 768px) {
+  .hz-footer__cols { grid-template-columns: repeat(3, 1fr); gap: 2.5rem; }
+}
+@media (min-width: 1024px) {
+  .hz-footer__cols { gap: 5rem; }
+}
+
+.hz-footer__col-title {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  line-height: 1.35;
+  color: var(--hz-text-muted);
+  margin-bottom: 1.25rem;
+}
+.hz-footer__col-links {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+.hz-footer__col-link {
+  display: block;
+  font-size: 0.875rem;
+  color: var(--hz-text);
+  text-decoration: none;
+  transition: color var(--hz-motion);
+  line-height: 1.25;
+}
+.hz-footer__col-link:hover { color: var(--hz-brand); }
+.hz-footer__col-link[aria-disabled="true"] {
+  color: var(--hz-text-muted);
+  cursor: default;
+}
+.hz-footer__col-link[aria-disabled="true"]:hover {
+  color: var(--hz-text-muted);
+}
+
+/* sub-label under the main link, Polymarket-style — steal #6 */
+.hz-footer__col-link-sub {
+  display: block;
+  margin-top: 0.2rem;
+  font-size: 0.75rem;
+  color: var(--hz-text-muted);
+}
+
+/* At mobile the links inside each section split into 2 columns so the
+   footer reads as compact and anchored, not airy and tall (matches Poly's
+   mobile shape). Reverts to 1 column inside each section at ≥768px since
+   the sections themselves are already side-by-side then. Placed after the
+   base .hz-footer__col-links rule so it actually wins the cascade. */
+@media (max-width: 767px) {
+  .hz-footer__col-links {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0.85rem 1.25rem;
+  }
+  .hz-footer__col-link { font-size: 0.8125rem; }
+  .hz-footer__col-link-sub { font-size: 0.6875rem; }
+  .hz-footer__col-title { margin-bottom: 0.85rem; }
+}
+
+/* virtual-currency clarity paragraph — steal #7 */
+.hz-footer__regulatory {
+  margin-top: 4rem;
+  padding-top: 1.5rem;
+  border-top: 1px solid var(--hz-border-faint);
+  font-size: 0.75rem;
+  color: var(--hz-text-muted);
+  line-height: 1.6;
+  max-width: 56rem;
+}
+.hz-footer__regulatory strong {
+  color: var(--hz-text-soft);
+  font-weight: 700;
+}
+
+.hz-footer__bottom {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+@media (min-width: 768px) {
+  .hz-footer__bottom { flex-direction: row; align-items: center; }
+}
+.hz-footer__copyright {
+  font-size: 0.75rem;
+  color: var(--hz-text-faint);
+}
+.hz-footer__legal { display: flex; gap: 1.5rem; }
+.hz-footer__legal-link {
+  font-size: 0.75rem;
+  color: var(--hz-text-faint);
+  text-decoration: none;
+  transition: color var(--hz-motion);
+}
+.hz-footer__legal-link:hover { color: var(--hz-text-soft); }
+
+/* ──────────────────────────────────────────────────────────────
+   Responsive compaction
+   Brand mark + active feed + primary CTA stay at every width.
+   Items drop in increasing-importance order as the viewport shrinks.
+
+     ≤1280  · wallet labels drop (numbers stay)
+     ≤1024  · wallet collapses to single cell · search narrows
+     ≤768   · categories strip hidden — "+ עוד" still reaches them all
+     ≤640   · search hides · wallet hides · feed labels hide
+              · brand wordmark hides (mark only)
+   ────────────────────────────────────────────────────────────── */
+
+@media (max-width: 1280px) {
+  .hz-shell__wallet-label { display: none; }
+  .hz-shell__wallet { gap: 0.85rem; padding-inline-end: 1rem; }
+}
+
+@media (max-width: 1024px) {
+  .hz-shell__wallet .hz-shell__wallet-cell:nth-child(2) { display: none; }
+  .hz-shell__search { max-width: 22rem; }
+}
+
+@media (max-width: 768px) {
+  /* drop the inline category strip; "+ עוד" (in nav-end) still reaches all */
+  .hz-shell__nav-track > .hz-shell__cat-item,
+  .hz-shell__nav-track > .hz-shell__nav-divider {
+    display: none;
+  }
+  .hz-shell__search { max-width: 16rem; }
+  .hz-shell__inner { gap: 1rem; }
+  .hz-shell__nav-inner { padding: 0 1rem; }
+}
+
+@media (max-width: 640px) {
+  /* Mobile top row contract (2026-05-26):
+       right (start): mark + wordmark
+       left  (end)  : user → wallet · avatar · bell · deposit
+                      guest → ☰ · הרשמה · התחברות
+     Search/link-muted drop out (search lives in the menu). The wallet balance
+     now STAYS on mobile (2026-06-19) — number-only, same compact treatment as
+     ≤1280 — so the user always sees their balance, not only on desktop.
+     The whole row scales up at mobile so it reads as primary chrome, not
+     a shrunken desktop. */
+  .hz-shell__search,
+  .hz-shell__link-muted {
+    display: none;
+  }
+  /* mobile balance chip — a refined gold pill (gold value + soft gold fill +
+     hairline gold border) so the balance reads as a deliberate, premium element
+     standing on its own, not a bare number floating by the bell/avatar */
+  .hz-shell__wallet {
+    gap: 0;
+    margin: 0;
+    padding: 0.3rem 0.6rem;
+    border-inline-end: none;
+    border: 1px solid rgb(var(--hz-brand-rgb) / 0.3);
+    background: var(--hz-brand-soft);
+    border-radius: var(--hz-radius-pill);
+  }
+  .hz-shell__wallet:hover { background: var(--hz-brand-soft); }
+  /* gold value is mobile-only — desktop keeps its off-white --hz-text */
+  .hz-shell__wallet .hz-shell__wallet-value { color: var(--hz-brand-strong); }
+  /* Search overlay (invoked from the bottom-tab search slot). Top-anchored,
+     not full-viewport — leaves the rest of the page reachable. The explicit
+     X button (rendered absolute, top-inline-start) is the only close
+     affordance; we don't bind tap-outside because the overlay's small
+     footprint makes "outside" hard to target intentionally on a phone. */
+  .hz-shell__search.is-mobile-open {
+    display: block;
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: 95;
+    background: var(--hz-bg);
+    border-bottom: 1px solid var(--hz-border-faint);
+    padding: 1rem 3rem 1rem 1rem;
+    padding-top: calc(1rem + env(safe-area-inset-top));
+    max-width: none;
+  }
+  .hz-shell__search.is-mobile-open .hz-shell__search-dropdown {
+    position: static;
+    top: auto;
+    max-height: 60vh;
+    margin-top: 0.75rem;
+  }
+  .hz-shell__search.is-mobile-open .hz-shell__search-input {
+    font-size: 1rem;
+    padding-block: 0.75rem;
+  }
+  /* close button — only visible inside the mobile overlay */
+  .hz-shell__search-close {
+    display: none;
+    position: absolute;
+    inset-inline-start: 0.5rem;
+    top: 0.85rem;
+    background: transparent;
+    border: 0;
+    color: var(--hz-text-muted);
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 9999px;
+    z-index: 1;
+  }
+  .hz-shell__search-close:hover { color: var(--hz-text); }
+  .hz-shell__search-close .material-symbols-outlined { font-size: 1.5rem; }
+  .hz-shell__search.is-mobile-open .hz-shell__search-close { display: inline-flex; }
+  /* Mobile nav row contract (2026-05-26):
+     One scrollable strip = feeds + categories together, text labels on
+     everything, mask-fade taper at the inline-end (already armed for desktop,
+     just reused here). "+ עוד" hides — categories are reachable by scroll,
+     so the dropdown is redundant at mobile width. חברתי stays in nav-end as
+     the sticky end-cap, outside the scroll, so it always reads as a platform
+     destination rather than another filter.
+     Items scale up at mobile to match the top-row weight — the row should
+     read as a primary chrome lane, not a thin secondary strip. Target: at
+     390px viewport, four feed pills sit solid (טרנדי / לייב·N / מתפרץ /
+     חדש) and the fifth (פוליטיקה) is the one tapering into the fade —
+     that's the swipe affordance. */
+  .hz-shell__feed-item { padding: 0.55rem 0.7rem; font-size: 1rem; gap: 0.35rem; }
+  .hz-shell__nav-track { gap: 0.3rem; padding: 0.65rem 0; }
+  .hz-shell__nav-track > .hz-shell__cat-item { display: inline-flex; }
+  .hz-shell__nav-track > .hz-shell__nav-divider { display: block; height: 1.25rem; }
+  .hz-shell__cat-item { padding: 0.55rem 0.7rem; font-size: 1rem; }
+  .hz-shell__cat-more-wrap { display: none; }
+  /* At mobile, חברתי lives inside the hamburger (top of "מעורבות") — pulling
+     it out of nav-end frees the whole row for the scrolling strip. עוד is
+     redundant for the same reason: categories are reachable inline now. */
+  .hz-shell__social-link { display: none; }
+  .hz-shell__nav-end { display: none; }
+  /* shorter fade zone at mobile so the first cat reads as "faded label"
+     rather than disappearing entirely behind the mask */
+  .hz-shell__nav-track,
+  [dir="rtl"] .hz-shell__nav-track {
+    -webkit-mask-image: linear-gradient(to left, black 0, black calc(100% - 2.5rem), transparent 100%);
+    mask-image: linear-gradient(to left, black 0, black calc(100% - 2.5rem), transparent 100%);
+  }
+  /* shrink the nav-end padding so the sticky חברתי end-cap doesn't crowd */
+  .hz-shell__nav-inner { gap: 0.35rem; padding: 0 0.75rem; }
+  /* taller bar, tighter padding, slightly wider gap between brand + actions */
+  .hz-shell__inner { height: 4.75rem; gap: 0.75rem; padding: 0 1rem; }
+  /* brand: wordmark + mark both step up so the brand cluster anchors the row */
+  .hz-shell__brand {
+    --hz-brand-mark-size: 2.25rem;
+    --hz-brand-name-size: 1.75rem;
+    gap: 0.65rem;
+  }
+  /* deposit / signup pill: bigger touch target, bigger type */
+  .hz-shell__cta { padding: 0.65rem 1rem; font-size: 1rem; }
+  /* bell: bigger icon, bigger touch area, dot follows */
+  .hz-shell__bell { padding: 0.625rem; }
+  .hz-shell__bell .material-symbols-outlined { font-size: 1.625rem; }
+  .hz-shell__bell-dot { top: 0.5rem; inset-inline-end: 0.5rem; width: 0.5rem; height: 0.5rem; }
+  /* avatar: 36 → 44px so it reads as a thumb target */
+  .hz-shell__avatar-frame { width: 2.75rem; height: 2.75rem; }
+  /* keep the slot's reserved box in step with the bigger mobile avatar */
+  .hz-shell__avatar-slot { min-width: 2.75rem; min-height: 2.75rem; }
+  /* hamburger trigger (guest): bigger icon to match the row */
+  .hz-shell__hamburger .material-symbols-outlined { font-size: 1.75rem; }
+  /* spacer height is driven by --hz-shell-spacer, redefined in :root above */
+}
+
+/* ── bottom tabs (mobile-only thumb-zone nav) ────────────────────────── */
+/* Hidden at desktop. Mounted as the third sibling under [data-site-shell].
+   Slots: בית · חיפוש · חברתי · תיק. The bar is solid-bg, top-bordered,
+   safe-area-aware so it sits flush above the iPhone home indicator. */
+.hz-shell__tabs {
+  display: none;
+}
+
+@media (max-width: 640px) {
+  .hz-shell__tabs {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: 80;
+    display: flex;
+    align-items: stretch;
+    /* Token-as-source-of-truth: the bar respects `--hz-shell-bottom-tabs-h`
+       so downstream consumers (market-detail mobile launcher's `bottom`
+       offset, body's `padding-bottom` reserve) land flush against it.
+       Previously the bar sized to natural content (~62px) while the token
+       reserved 5rem (~65px), leaving a 2-3px gap where the body atmosphere
+       showed through between the launcher and the bar. */
+    height: var(--hz-shell-bottom-tabs-h);
+    background: var(--hz-bg);
+    border-top: 1px solid var(--hz-border-faint);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  /* push page content above the bar so the last item stays reachable */
+  body:has([data-site-shell]) {
+    padding-bottom: calc(var(--hz-shell-bottom-tabs-h) + env(safe-area-inset-bottom));
+  }
+  .hz-shell__tab {
+    flex: 1;
+    display: inline-flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0.2rem;
+    padding: 0.55rem 0.25rem 0.6rem;
+    background: transparent;
+    border: 0;
+    text-decoration: none;
+    color: var(--hz-text-muted);
+    cursor: pointer;
+    position: relative;
+    transition: color var(--hz-motion);
+  }
+  .hz-shell__tab:hover { color: var(--hz-text); }
+  .hz-shell__tab-icon { font-size: 1.5rem; line-height: 1; }
+  .hz-shell__tab-label { font-size: 0.75rem; font-weight: 500; line-height: 1; }
+  .hz-shell__tab.is-active {
+    color: var(--hz-brand);
+  }
+  .hz-shell__tab.is-active .hz-shell__tab-label { font-weight: 700; }
+  .hz-shell__tab.is-active::after {
+    /* slim amber rail at the top of the active slot — mirrors the way the
+       feed-nav active pill reads in the upper row */
+    content: "";
+    position: absolute;
+    top: 0; left: 25%; right: 25%;
+    height: 2px;
+    background: var(--hz-brand);
+    border-radius: 0 0 var(--hz-radius-xs) var(--hz-radius-xs);
+  }
+  .hz-shell__tab--disabled {
+    opacity: 0.55;
+    cursor: default;
+    pointer-events: none;
+  }
+  .hz-shell__tab-flag {
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0;
+    color: var(--hz-text-faint);
+    text-transform: none;
+    margin-top: 0.1rem;
+  }
+}

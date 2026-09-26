@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="legislation market image">
+  <defs>
+    <linearGradient id="g" x1="58" y1="58" x2="456" y2="458" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#2c3446"/>
+      <stop offset=".6" stop-color="#171d2b"/>
+      <stop offset="1" stop-color="#0b111b"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#g)"/>
+  <path d="M154 118h180l42 42v234H154V118Z" fill="none" stroke="#e7edf4" stroke-width="24" stroke-linejoin="round"/>
+  <path d="M334 120v58h58M194 222h142M194 276h142M194 330h92" stroke="#f7c66a" stroke-width="18" stroke-linecap="round"/>
+  <path d="m318 326 22 22 46-58" fill="none" stroke="#6ee7b7" stroke-width="20" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

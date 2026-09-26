@@ -1,0 +1,119 @@
+/* ─────────────────────────────────────────────────────────────────────────────
+   Hachozeh — community route styles (LIVE)
+   Scope: ONLY the parked /community coming-soon surface (.cm-page + .cm-soon*).
+   The seeded community island styles were split out to community-island.css,
+   which this route does NOT import. Re-import it when the real island ships.
+   ───────────────────────────────────────────────────────────────────────────── */
+
+.cm-page { max-width: 1240px; margin: 0 auto; padding: var(--hz-space-6) var(--hz-space-8) var(--hz-space-12); }
+.cm-page.narrow { max-width: 860px; }
+
+/* Parked community route — honest coming-soon surface, not the seeded preview. */
+.cm-soon-page {
+  min-height: min(38rem, calc(100dvh - var(--hz-shell-spacer, 7.5rem)));
+  display: grid;
+  place-items: center;
+}
+.cm-soon {
+  width: min(42rem, 100%);
+  display: grid;
+  justify-items: center;
+  gap: var(--hz-space-6);
+  padding-block: clamp(3rem, 10vh, 6rem);
+  text-align: center;
+}
+.cm-soon__icon {
+  width: 4.2rem;
+  height: 4.2rem;
+  display: grid;
+  place-items: center;
+  border-radius: var(--hz-radius-xl);
+  background:
+    radial-gradient(circle at 50% 24%, rgb(var(--hz-brand-rgb) / 0.22), transparent 62%),
+    var(--hz-surface-soft);
+  border: 1px solid var(--hz-border-soft);
+  color: var(--hz-brand-strong);
+}
+.cm-soon__icon .material-symbols-outlined {
+  font-size: 2rem;
+  font-variation-settings: 'FILL' 0, 'wght' 500, 'opsz' 32;
+}
+.cm-soon__copy {
+  display: grid;
+  gap: var(--hz-space-3);
+}
+.cm-soon__eyebrow {
+  margin: 0;
+  color: var(--hz-brand-strong);
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.cm-soon__title {
+  margin: 0;
+  color: var(--hz-text);
+  font-size: clamp(2rem, 5vw, 3.15rem);
+  font-weight: 800;
+  line-height: 1.08;
+  text-wrap: balance;
+}
+.cm-soon__text {
+  max-width: 38rem;
+  margin: 0 auto;
+  color: var(--hz-text-muted);
+  font-size: 1rem;
+  line-height: 1.75;
+  text-wrap: pretty;
+}
+.cm-soon__actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--hz-space-3);
+}
+.cm-soon__primary,
+.cm-soon__secondary {
+  min-height: 2.72rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--hz-radius-lg);
+  padding: 0.72rem 1.1rem;
+  font-size: 0.92rem;
+  font-weight: 800;
+  text-decoration: none;
+  transition: transform var(--hz-motion), border-color var(--hz-motion), background var(--hz-motion);
+}
+.cm-soon__primary {
+  background: var(--hz-brand);
+  color: var(--hz-text-inverse);
+}
+.cm-soon__secondary {
+  border: 1px solid var(--hz-border-soft);
+  background: var(--hz-surface-soft);
+  color: var(--hz-text-soft);
+}
+@media (hover: hover) {
+  .cm-soon__primary:hover,
+  .cm-soon__secondary:hover {
+    transform: translateY(-1px);
+  }
+}
+
+@media (max-width: 640px) {
+  .cm-soon-page {
+    min-height: calc(100dvh - var(--hz-shell-spacer, 7.5rem) - 4.5rem);
+    padding-inline: var(--hz-space-5);
+  }
+  .cm-soon {
+    align-content: center;
+    gap: var(--hz-space-5);
+    padding-block: var(--hz-space-8);
+  }
+  .cm-soon__actions,
+  .cm-soon__primary,
+  .cm-soon__secondary {
+    width: 100%;
+  }
+}

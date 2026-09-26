@@ -1,0 +1,174 @@
+:root {
+  color-scheme: dark;
+
+  /* ───── Root scale (viewport-coupled) ─────
+     Every rem on the platform scales from here.
+     At ≥1100px viewport we sit at design baseline (~16px).
+     Below that, the whole page compacts together — type,
+     spacing, gaps move in formation. No per-component clamps. */
+  font-size: clamp(13px, calc(0.4vw + 11.5px), 17px);
+
+  /* ───── Typography ───── */
+  --hz-font-ui: "Arimo", "Arimo-fallback", "Noto Sans Hebrew", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --hz-font-number: "Arimo", "Arimo-fallback", "Noto Sans Hebrew", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --hz-font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+  /* ───── Surfaces (warm-neutral dark) ───── */
+  --hz-bg: #13141a;
+  --hz-bg-soft: #16171d;
+  --hz-bg-raised: #1a1c24;
+  --hz-bg-muted: #1f212a;
+
+  --hz-surface-1: rgba(26, 28, 36, 0.86);
+  --hz-surface-2: rgba(34, 37, 47, 0.94);
+  --hz-surface-3: rgba(45, 48, 60, 0.96);
+  --hz-surface-soft: rgba(255, 248, 232, 0.035);
+  --hz-surface-hover: rgba(255, 248, 232, 0.055);
+
+  /* ───── Hairlines (warm-tinted, not blue) ───── */
+  --hz-border-faint: rgba(255, 248, 232, 0.065);
+  --hz-border-soft: rgba(255, 248, 232, 0.12);
+  --hz-border: rgba(255, 248, 232, 0.18);
+  --hz-border-strong: rgba(255, 248, 232, 0.28);
+
+  /* ───── Text (warm key, not cool white) ───── */
+  --hz-text: #f6f4ef;
+  --hz-text-soft: #d7d3c8;
+  --hz-text-muted: #9a958a;
+  --hz-text-faint: #5e5a52;
+  --hz-text-inverse: #1a1407;
+
+  /* ───── Brand (amber, the one that walks in the room) ───── */
+  --hz-brand: #e8b257;
+  --hz-brand-rgb: 232 178 87;
+  --hz-brand-strong: #f5c771;
+  --hz-brand-soft: rgba(232, 178, 87, 0.14);
+  --hz-brand-dim: rgba(232, 178, 87, 0.55);
+
+  /* ───── Info (chart secondary / links; was the old lead "market-blue") ───── */
+  --hz-info: #7aaee6;
+  --hz-info-rgb: 122 174 230;
+  --hz-info-soft: rgba(122, 174, 230, 0.14);
+
+  /* Legacy alias — keeps existing files compiling.
+     New code should use --hz-info or --hz-brand instead.
+     Slated for removal in a later sweep. */
+  --hz-market-blue: var(--hz-info);
+  --hz-market-blue-rgb: var(--hz-info-rgb);
+  --hz-market-blue-soft: var(--hz-info-soft);
+
+  /* ───── Action (buy/sell, yes/no) ───── */
+  --hz-action-buy: #5dd39e;
+  --hz-action-buy-rgb: 93 211 158;
+  --hz-action-buy-strong: #76e6b1;
+  --hz-action-buy-soft: rgba(93, 211, 158, 0.14);
+  --hz-action-sell: #e77a8a;
+  --hz-action-sell-rgb: 231 122 138;
+  --hz-action-sell-strong: #f29aa7;
+  --hz-action-sell-soft: rgba(231, 122, 138, 0.14);
+
+  /* ───── State accents ───── */
+  --hz-live: #ff5b68;
+  --hz-live-rgb: 255 91 104;
+  --hz-warning: #e89a3a;
+  --hz-warning-rgb: 232 154 58;
+  --hz-warning-soft: rgba(232, 154, 58, 0.14);
+  --hz-neutral: #9a958a;
+
+  /* ───── Signal language (trending / breaking / new / live moods) ───── */
+  --hz-signal-live: #ff5b68;
+  --hz-signal-live-rgb: 255 91 104;
+  --hz-signal-live-soft: rgba(255, 91, 104, 0.14);
+  --hz-signal-hot: #ff8a3d;
+  --hz-signal-hot-rgb: 255 138 61;
+  --hz-signal-hot-soft: rgba(255, 138, 61, 0.14);
+  --hz-signal-closing: #e84c3d;
+  --hz-signal-closing-rgb: 232 76 61;
+  --hz-signal-closing-soft: rgba(232, 76, 61, 0.14);
+  --hz-signal-new: #72dcff;
+  --hz-signal-new-rgb: 114 220 255;
+  --hz-signal-new-soft: rgba(114, 220, 255, 0.14);
+  --hz-signal-leading: #67f2ad;
+  --hz-signal-leading-rgb: 103 242 173;
+  --hz-signal-leading-soft: rgba(103, 242, 173, 0.14);
+  --hz-signal-rising: #7aaee6;
+  --hz-signal-rising-rgb: 122 174 230;
+  --hz-signal-rising-soft: rgba(122, 174, 230, 0.14);
+  --hz-signal-falling: #e77a8a;
+  --hz-signal-falling-rgb: 231 122 138;
+  --hz-signal-falling-soft: rgba(231, 122, 138, 0.14);
+
+  /* ───── Radius ───── */
+  --hz-radius-xs: 0.35rem;
+  --hz-radius-sm: 0.55rem;
+  --hz-radius-md: 0.82rem;
+  --hz-radius-lg: 1rem;
+  --hz-radius-xl: 1.35rem;
+  --hz-radius-2xl: 1.75rem;
+  --hz-radius-pill: 9999px;
+
+  /* ───── Space (0.25rem rhythm) ───── */
+  --hz-space-1: 0.25rem;
+  --hz-space-2: 0.5rem;
+  --hz-space-3: 0.75rem;
+  --hz-space-4: 1rem;
+  --hz-space-5: 1.25rem;
+  --hz-space-6: 1.5rem;
+  --hz-space-8: 2rem;
+  --hz-space-10: 2.5rem;
+  --hz-space-12: 3rem;
+
+  /* ───── Shadow ───── */
+  --hz-shadow-soft: 0 18px 42px rgba(0, 0, 0, 0.24);
+  --hz-shadow-rail: 0 26px 70px rgba(0, 0, 0, 0.42);
+  --hz-shadow-overlay: 0 30px 80px rgba(0, 0, 0, 0.52);
+  --hz-focus-ring: 0 0 0 3px rgba(232, 178, 87, 0.32);
+
+  /* ───── Motion ───── */
+  --hz-motion-fast: 140ms ease;
+  --hz-motion: 180ms ease;
+  --hz-motion-slow: 260ms ease;
+
+  /* ───── Breakpoints ─────
+     Named reference values. CSS @media conditions can't use var(), so these
+     exist for any context that CAN use var() (JS, sizing, positioning).
+     For @media usage, see the legend in patterns/site-shell.css. */
+  --hz-bp-sm: 640px;
+  --hz-bp-md: 768px;
+  --hz-bp-lg: 1024px;
+  --hz-bp-xl: 1280px;
+
+  /* ───── Probability-chart line palette (Lift) ─────
+     Used by the L2 chart wrapper (market-detail-chart.js) via getComputedStyle.
+     Designed to read against the dark surface; mint replaces a pure green to
+     keep red/green semantics off, pink replaces a second blue to keep the
+     brand-gold lane clear. Locked in spec 2026-05-26-market-detail-chart-redesign. */
+  --chart-line-1: #4a98ff;
+  --chart-line-2: #ff7e5c;
+  --chart-line-3: #2dd2a0;
+  --chart-line-4: #ff5fa3;
+  /* Chart-internal surface tokens — bridge between the chart patterns and
+   * the platform `--hz-*` system. The chart files were authored against
+   * stage-local short names; rather than rewrite all rules, alias them
+   * here to the production tokens that already carry the right values. */
+  /* Grid sits at border (not border-faint): the dotted dash (1px on / 3px off)
+   * reads ~half as present as a solid line at the same alpha, so the faint and
+   * even soft steps disappeared on our dark stage. border (0.18) keeps the grid
+   * a clear-but-quiet reference behind the data. */
+  --chart-grid: var(--hz-border);
+  --chart-axis-text: var(--hz-text-muted);
+  --chart-crosshair: var(--hz-border-strong);
+
+  /* Single-series sparkline color — used by HzPnlSparklineRenderer
+     (assets/js/components/pnl-sparkline-renderer.js) on the portfolio
+     PnL card. Aliased to chart-line-1 (the same cool blue the multi-
+     outcome chart uses for its first line) so the page's "data" voice
+     stays consistent. Hero number alone carries buy/sell tone. */
+  --chart-line-info: var(--chart-line-1);
+
+  /* ───── Page atmosphere (warm dusk: amber top-right, cool info bottom-left) ───── */
+  --hz-page-atmosphere:
+    radial-gradient(circle at 78% 0%, rgba(232, 178, 87, 0.08), transparent 36rem),
+    radial-gradient(circle at 12% 18%, rgba(122, 174, 230, 0.04), transparent 30rem),
+    linear-gradient(180deg, var(--hz-bg-soft) 0%, var(--hz-bg) 70%, #0a0b10 100%);
+}

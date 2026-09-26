@@ -1,0 +1,21 @@
+{
+  "ignoreDirs": [
+    "node_modules",
+    "dist",
+    "build",
+    "coverage",
+    "workspace/archive",
+    "workspace/runtime",
+    "workspace/deploy",
+    "workspace/reports",
+    "workspace/test/gauntlet",
+    "workspace/test/runs",
+    "systems/design/mockups",
+    "systems/design"
+  ],
+  "ignores": [
+    "dependency-cruiser",
+    "react",
+    "@types/node"
+  ]
+}

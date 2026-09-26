@@ -1,0 +1,44 @@
+---
+import FeedPage from '../../components/FeedPage.astro';
+import { getCategoryHub, categoryHubPath } from '../../lib/category-hubs.js';
+import { fetchCategoryTags } from '../../lib/tag-page.js';
+
+const categoryKey = Astro.params.categoryKey;
+const hub = getCategoryHub(categoryKey);
+
+if (!hub) {
+  return Astro.redirect(`/?category=${encodeURIComponent(categoryKey || '')}`);
+}
+
+// Entity tag hubs within this category → crawlable /t/ cross-links. Drop the category's
+// own mirror tag and thin tags (would 302 to /search), cap the strip.
+let topicChips = [];
+try {
+  topicChips = (await fetchCategoryTags(hub.key))
+    .filter((t) => t?.slug && (t.count ?? 0) >= 3 && !getCategoryHub(t.slug))
+    .slice(0, 12)
+    .map((t) => ({ label: t.label, href: `/t/${encodeURIComponent(t.slug)}` }));
+} catch (e) {
+  console.error('[topics] category tags fetch failed', hub.key, e);
+}
+---
+
+<FeedPage
+  feed="trending"
+  category={hub.key}
+  title={hub.title}
+  description={hub.description}
+  activePage="trending"
+  canonicalPath={categoryHubPath(hub.key)}
+  heading={hub.heading}
+  intro={hub.intro}
+  eyebrow="שווקים לפי קטגוריה"
+  topicChips={topicChips}
+  showSocialGameBox={false}
+  showFilters={false}
+  breadcrumbItems={[
+    { name: 'החוזה', href: '/' },
+    { name: 'טרנדי', href: '/' },
+    { name: hub.label, href: categoryHubPath(hub.key) },
+  ]}
+/>

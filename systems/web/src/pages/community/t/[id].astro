@@ -1,0 +1,49 @@
+---
+// /community/t/:id — discussion thread detail. The opening post + comment tree +
+// market context are resolved server-side; unknown ids 404. Threads deliberately
+// remain noindex until a quality gate exists, but links may still be followed.
+import Layout from '../../../layouts/Layout.astro';
+import CommunityThread from '../../../components/community/CommunityThread.jsx';
+import { fetchCommunityThread } from '../../../lib/community.js';
+import { clampSeoText } from '../../../lib/seo.js';
+import '../../../styles/pages/community.css';
+import '../../../styles/pages/community-island.css';
+
+const { id } = Astro.params;
+const cookie = Astro.request.headers.get('cookie');
+const thread = await fetchCommunityThread(id, { cookie });
+
+if (!thread) {
+  return new Response(null, { status: 404, statusText: 'Not Found' });
+}
+
+const auth = Astro.locals.auth;
+const payload = auth?.payload as any;
+const u = payload?.currentUser?.user ?? null;
+const viewer = {
+  authenticated: Boolean(auth?.authenticated),
+  name: u?.displayName || u?.handle || 'אתה',
+  handle: u?.handle || null,
+  avatarUrl: u?.avatarUrl || null,
+};
+
+const heading = thread?.opening?.q || 'דיון קהילה';
+const openingBody = Array.isArray(thread?.opening?.body)
+  ? thread.opening.body.flat(Infinity).filter(Boolean).join(' ')
+  : '';
+const threadDescription = clampSeoText(
+  openingBody,
+  160,
+  'דיון בקהילת החוזה — תחזיות, נימוקים ותגובות סביב שוק פעיל.'
+);
+---
+
+<Layout
+  title={`${heading} · קהילה · החוזה`}
+  description={threadDescription}
+  canonicalPath={`/community/t/${id}`}
+  image="/share/pages/community.png"
+  robots="noindex, follow"
+>
+  <CommunityThread client:load thread={thread} viewer={viewer} />
+</Layout>

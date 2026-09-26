@@ -1,0 +1,106 @@
+---
+// Event-mode chart island. Reuses the same self-contained chart modules as
+// ChartIsland (HzProbabilityChartRenderer L1 + HzMarketDetailChart L2), but
+// feeds them the event-history endpoint: one line per child market (that child's
+// "Yes" probability over time). Mounts in multi-outcome mode (canonicalOutcomeId
+// null) so the line-picker lets the viewer toggle which candidates show — the
+// Poly/Kalshi event-chart shape. Rendered only when the operator set the event's
+// showGraph flag; in event mode ChartIsland is not on the page, so this island
+// loads the chart scripts itself (they're mutually exclusive — event vs focused
+// child).
+import { ASSET_VERSION } from '../../lib/asset-version.js';
+const { eventKey, seed = null, volumeLabel } = Astro.props;
+import { serializeJsonForHtmlScript } from '../../lib/json-script.js';
+---
+
+<div
+  class="market-detail-stage-chart"
+  data-md-event-chart
+  data-market-key={eventKey}
+  data-volume={volumeLabel || ''}
+></div>
+
+{seed && (
+  <script type="application/json" data-md-event-chart-seed set:html={serializeJsonForHtmlScript(seed)} />
+)}
+
+<!-- L1 renderer, then L2 wrapper (classic scripts → window globals, in order).
+     Identical loading to ChartIsland; window globals persist across soft nav. -->
+<script is:inline src={`/scripts/probability-chart-renderer.js?v=${ASSET_VERSION}`}></script>
+<script is:inline src={`/scripts/market-detail-chart.js?v=${ASSET_VERSION}`}></script>
+<script is:inline>
+  (function () {
+    function initEventChart(attempt) {
+      attempt = typeof attempt === 'number' ? attempt : 0;
+      var host = document.querySelector('[data-md-event-chart]');
+      if (!host) return;
+      if (host.dataset.chartInit === '1') return;
+      // Renderer srcs re-inject async on soft nav — poll for the global instead
+      // of bailing (which would leave the chart blank). ~1.5s ceiling.
+      if (!window.HzMarketDetailChart) {
+        if (attempt < 50) setTimeout(function () { initEventChart(attempt + 1); }, 30);
+        return;
+      }
+      host.dataset.chartInit = '1';
+
+      var eventKey = host.dataset.marketKey;
+      var palette = [1, 2, 3, 4].map(function (i) {
+        return getComputedStyle(document.documentElement).getPropertyValue('--chart-line-' + i).trim();
+      });
+
+      // One line per child: the event-history endpoint returns the same
+      // `seriesByOutcome` shape (each entry keyed on a child marketId), so the
+      // renderer + line-picker consume it unchanged.
+      async function fetchHistory(mk, range) {
+        try {
+          var r = await fetch('/api/markets/' + encodeURIComponent(mk) + '/event-history?range=' + encodeURIComponent(range), { credentials: 'include', cache: 'no-store' });
+          if (!r.ok) return { seriesByOutcome: [] };
+          var d = await r.json();
+          return { seriesByOutcome: Array.isArray(d.seriesByOutcome) ? d.seriesByOutcome : [] };
+        } catch (_e) {
+          return { seriesByOutcome: [] };
+        }
+      }
+
+      var initialData = null;
+      var seedEl = document.querySelector('[data-md-event-chart-seed]');
+      if (seedEl) {
+        try { initialData = JSON.parse(seedEl.textContent); } catch (_e) { /* degrade to fetch */ }
+      }
+
+      var chartHandle = window.HzMarketDetailChart.mount(host, {
+        marketKey: eventKey,
+        palette: palette,
+        fetchHistory: fetchHistory,
+        initialData: initialData,
+        marketMeta: {
+          volume: host.dataset.volume || null,
+          closeDate: null,
+          statusLabel: null,
+          openedAtMs: null,
+          // null = multi-outcome mode: one polyline per series, no binary collapse.
+          canonicalOutcomeId: null,
+          isResolved: false,
+          winnerOutcomeId: null,
+          namedOpponents: false,
+          outcomeColors: {},
+        },
+      });
+
+      // Push-to-refresh: any child snapshot can move a line. The per-child SSE
+      // events carry child keys (not the event key), so refresh on any
+      // market.snapshot, debounced.
+      var refreshTimer = null;
+      window.addEventListener('hz:market-live-fetch', function (event) {
+        if (event.detail && event.detail.type !== 'market.snapshot') return;
+        window.clearTimeout(refreshTimer);
+        refreshTimer = window.setTimeout(function () {
+          chartHandle.refresh();
+        }, 200);
+      });
+    }
+
+    initEventChart();
+    document.addEventListener('astro:page-load', initEventChart);
+  })();
+</script>

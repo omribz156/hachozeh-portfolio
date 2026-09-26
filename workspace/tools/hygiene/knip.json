@@ -1,0 +1,67 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "ignore": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/build/**",
+    "**/coverage/**",
+    "workspace/archive/**",
+    "workspace/runtime/**",
+    "workspace/test/gauntlet/**",
+    "workspace/test/runs/**",
+    "workspace/reports/**",
+    "systems/design/**"
+  ],
+  "ignoreBinaries": [
+    "tsc"
+  ],
+  "workspaces": {
+    "systems/back": {
+      "entry": [
+        "src/server.ts",
+        "src/scripts/**/*.ts",
+        "test/**/*.ts"
+      ],
+      "project": [
+        "src/**/*.ts",
+        "test/**/*.ts"
+      ]
+    },
+    "systems/oracle": {
+      "entry": [
+        "src/**/*.ts"
+      ],
+      "project": [
+        "src/**/*.ts"
+      ]
+    },
+    "systems/seer": {
+      "entry": [
+        "src/main.ts",
+        "src/**/*.ts"
+      ],
+      "project": [
+        "src/**/*.ts"
+      ]
+    },
+    "systems/web": {
+      "entry": [
+        "src/**/*.js",
+        "scripts/**/*.mjs"
+      ],
+      "project": [
+        "src/**/*.js",
+        "scripts/**/*.mjs"
+      ]
+    },
+    "workspace/browser-qa": {
+      "entry": [
+        "tests/**/*.mjs"
+      ],
+      "project": [
+        "*.mjs",
+        "tests/**/*.mjs"
+      ]
+    }
+  }
+}

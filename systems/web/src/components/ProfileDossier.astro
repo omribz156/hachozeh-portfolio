@@ -1,0 +1,377 @@
+---
+// Shared profile dossier — the ONE source for both the owner view
+// (/profile → /u/<own-id>) and the public view (/u/:id). Pages fetch the raw
+// public-read + track-record + positions + record and hand them here; this
+// component derives + renders. `isOwner` flips edit affordances (edit button +
+// overlay + category picker) vs the public Follow button.
+import { ASSET_VERSION } from '../lib/asset-version.js';
+import { safeHttpsUrl } from '../lib/safe-url.js';
+import { vshekelSymbolHtml } from '../lib/vshekel';
+import { categoryBrowsePath } from '../lib/category-hubs.js';
+import {
+  nf, compact, priceTag, money, signed, pct1, relTime,
+  buildJoinedLabel, buildRecencyLabel, tierLabelOf, deriveTrackRecord,
+} from '../lib/profile-format.js';
+
+// UX audit 1.3 (decided floor): below 5, a raw count reads as "nobody's here".
+// Checked PER COUNT — each stat only shows once it clears the floor on its own.
+const PROFILE_COUNT_FLOOR = 5;
+
+interface Props {
+  profile: any;            // GET /api/social/users/:id
+  trackRecord?: any;       // GET /api/social/users/:id/track-record
+  positions?: any[];
+  record?: any[];
+  isOwner?: boolean;
+  viewerAuthed?: boolean;
+}
+const { profile, trackRecord = null, positions = [], record = [], isOwner = false, viewerAuthed = false } = Astro.props as Props;
+
+const DEFAULT_AVATAR_URL = '/assets/brand/default-avatar-96.webp';
+const vshekelTextHtml = (value: unknown) => String(value ?? '').replace(/V[\u200e\u200f]?\u20aa/g, vshekelSymbolHtml());
+const handle: string = profile?.handle || '';
+const profilePath = handle ? `/@${encodeURIComponent(handle)}` : '/profile';
+const displayName: string = profile?.displayName || 'חוֹזֶה';
+const bio: string = profile?.bio || '';
+const avatarUrl: string = profile?.avatarUrl || '';
+const isDefaultAvatar = !avatarUrl;
+const xUrl: string = safeHttpsUrl(profile?.socialLinks?.x?.url || '') || '';
+const tier: string | null = profile?.verifiedTier ?? null;
+const tierLabel = tierLabelOf(tier);
+const isVerified = Boolean(tier);
+const joinedLabel = buildJoinedLabel(profile?.createdAt);
+const recencyLabel = buildRecencyLabel(profile?.createdAt);
+
+const followerCount = profile?.followerCount ?? null;
+const followingCount = profile?.followingCount ?? null;
+const profileViewCount = profile?.profileViewCount ?? null;
+// Each count clears the floor independently — a well-followed but rarely-viewed
+// profile still gets to show its follower number. Only when EVERY count is still
+// under the floor do we have "nothing to brag about" and swap the whole row for
+// the recency line — a lone "0 צפיות" next to two real numbers would just be a
+// second cold-start leak we invented while fixing the first.
+const followerAboveFloor = typeof followerCount === 'number' && followerCount >= PROFILE_COUNT_FLOOR;
+const followingAboveFloor = typeof followingCount === 'number' && followingCount >= PROFILE_COUNT_FLOOR;
+const viewsAboveFloor = typeof profileViewCount === 'number' && profileViewCount >= PROFILE_COUNT_FLOOR;
+const showCounts = followerAboveFloor || followingAboveFloor || viewsAboveFloor;
+const viewerFollows = profile?.viewerFollows === true;
+const showcaseCategories: string[] = Array.isArray(profile?.showcaseCategories) ? profile.showcaseCategories : [];
+
+const { accuracyPct, resolvedCount, allCats, breakdown, longestWinStreak, biggestWin } = deriveTrackRecord(trackRecord, showcaseCategories);
+
+function marketHref(marketKey: string): string {
+  return marketKey ? `/markets/${encodeURIComponent(marketKey)}` : '/';
+}
+
+function marketInitial(title: string): string {
+  return (title || '').trim().charAt(0) || '•';
+}
+---
+
+<div class="hz-profile">
+  <div class="db-wrap" data-screen-label="פרופיל">
+    <div class="db-grid">
+
+      <!-- identity header -->
+      <header class="db-identity">
+        <div class="pk-avatar-wrap" style="width:96px;height:96px;flex:none;">
+          <div class="avatar" style="width:96px;height:96px;" data-profile-avatar>
+            {isDefaultAvatar
+              ? <img src={DEFAULT_AVATAR_URL} alt="" class="avatar-photo" data-profile-default-avatar />
+              : <img src={avatarUrl} alt="" class="avatar-photo" data-profile-avatar-photo />}
+          </div>
+          {isVerified && (
+            <span class="pk-badge-dot pk-verified pk-seal" title="חשבון מאומת"><span class="material-symbols-outlined">verified</span></span>
+          )}
+        </div>
+        <div class="db-identity-text">
+          <div class="db-name-row">
+            <h1 class="db-id-name" data-profile-name>{displayName}</h1>
+            <a class="db-social-x" href={xUrl || '#'} target="_blank" rel="noopener" title="X" aria-label="X" data-profile-x style={xUrl ? '' : 'display:none'}>
+              <svg class="db-social-x__icon" width="16" height="16" viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24h-6.66l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+            </a>
+          </div>
+          <div class="db-id-meta">
+            <span class="db-id-tier">◆ {tierLabel}</span>
+          </div>
+        </div>
+        <div class="db-identity-actions">
+          {isOwner ? (
+            <button class="db-edit-btn" id="editProfileBtn" title="ערוך פרופיל" aria-label="ערוך פרופיל"><span class="material-symbols-outlined">edit</span><span class="db-edit-label">ערוך פרופיל</span></button>
+          ) : (
+            <span class="db-follow-wrap">
+              <button class={`db-follow-btn${viewerFollows ? ' is-following' : ''}`} data-follow-btn data-user-id={handle} data-following={viewerFollows ? 'true' : 'false'} data-viewer-authed={viewerAuthed ? 'true' : 'false'} aria-pressed={viewerFollows ? 'true' : 'false'}>
+                {viewerFollows && <span class="material-symbols-outlined" data-follow-icon>check</span>}
+                <span class="db-follow-label" data-follow-label>{viewerFollows ? 'עוקב' : 'עקוב'}</span>
+              </button>
+              <span class="db-follow-status" data-follow-status aria-live="polite"></span>
+            </span>
+          )}
+          <button
+            class="db-share-stub"
+            title="שתף פרופיל"
+            aria-label="שתף פרופיל"
+            data-profile-share
+            data-hz-share="profile"
+            data-share-kind="profile"
+            data-share-title={`${displayName} · החוזה`}
+            data-share-text={accuracyPct !== null && resolvedCount > 0
+              ? `הרקורד של ${displayName} בהחוזה: דיוק ${accuracyPct}% על ${resolvedCount.toLocaleString('en-US')} שווקים שהוכרעו.`
+              : `הרקורד של ${displayName} בהחוזה.`}
+            data-share-url={profilePath}
+            data-share-image={`/share/profiles/${encodeURIComponent(handle)}.png`}
+          ><span class="material-symbols-outlined">ios_share</span></button>
+        </div>
+      </header>
+
+      <!-- credential rail -->
+      <aside class="db-rail">
+        <div class="db-card">
+          <div class="db-acc">
+            <div class="l">דיוק כולל</div>
+            {accuracyPct !== null ? (
+              <>
+                <div class="n">{accuracyPct}<span class="pct">%</span></div>
+                <div class="bar"><i style={`width:${accuracyPct}%`}></i></div>
+                <div class="cap">מתוך <b>{resolvedCount.toLocaleString('en-US')}</b> תחזיות מוכרעות</div>
+              </>
+            ) : (
+              <>
+                <div class="n" style="color:var(--hz-text-faint)">—</div>
+                <div class="cap">אין עדיין תחזיות מוכרעות</div>
+              </>
+            )}
+          </div>
+
+          <!-- badges — no achievements backend yet → בקרוב -->
+          <div class="db-cardbadges"><span class="db-soon">תגים · בקרוב</span></div>
+
+          {breakdown.length > 0 && (
+            <div class="db-cardbreak">
+              <div class="h">פירוק דיוק <span class="sub">שווקים מוכרעים</span></div>
+              {breakdown.map((b, i) => (
+                <div class={`cb-row${i === 0 ? ' feat' : ''}`}>
+                  <div class="cb-line"><span class="cb-nm">{b.label}</span><span class="cb-pct">{b.pct}<span class="s">%</span></span></div>
+                  <div class="cb-track"><i style={`width:${b.pct}%`}></i></div>
+                </div>
+              ))}
+            </div>
+          )}
+
+        </div>
+      </aside>
+
+      <!-- proof column -->
+      <div class="db-main">
+        <section class="db-sect db-bio-sect" data-screen-label="אודות">
+          <p class="db-about-text"><span class="db-bio-text" data-profile-bio>{bio}</span></p>
+          <div class="db-bio-meta" data-counts-shown={showCounts ? 'true' : 'false'} data-count-floor={PROFILE_COUNT_FLOOR}>
+            {showCounts ? (
+              <>
+                {joinedLabel && <span class="bm-item bm-joined"><span class="material-symbols-outlined">calendar_today</span>{joinedLabel}</span>}
+                <span class="bm-item"><b data-follower-count>{followerCount == null ? '—' : compact(followerCount)}</b> עוקבים</span>
+                <span class="bm-item"><b>{followingCount == null ? '—' : compact(followingCount)}</b> במעקב</span>
+                <span class="bm-item"><b>{profileViewCount == null ? '—' : compact(profileViewCount)}</b> צפיות</span>
+              </>
+            ) : (
+              /* Below-floor cold start (audit 1.3): identity + recency, not three zeros.
+                 Hidden data-follower-count still swapped in below so profile-follow.js's
+                 optimistic 4→5 crossing has a node to reveal into (see that file). */
+              <>
+                <span class="bm-item bm-joined"><span class="material-symbols-outlined">calendar_today</span>{recencyLabel || joinedLabel}</span>
+                <span class="bm-item" data-follower-item hidden><b data-follower-count>{followerCount == null ? '—' : compact(followerCount)}</b> עוקבים</span>
+              </>
+            )}
+          </div>
+          <div class="db-statstrip">
+            <div class="ss ss--rank"><div class="ss-v rank soon">בקרוב</div><div class="ss-k">דירוג החודש</div></div>
+            {/* longestWinStreak/biggestWin == null is a REAL absence (no resolved markets yet),
+                not a stubbed feature — it must never look like the "בקרוב" rank cell above it.
+                .empty gets its own quiet dash, not the "soon" treatment. */}
+            <div class="ss"><div class={`ss-v${longestWinStreak == null ? ' empty' : ''}`}>{longestWinStreak == null ? '—' : longestWinStreak.toLocaleString('en-US')}</div><div class="ss-k">הרצף הארוך</div></div>
+            {/* Overall accuracy — mobile only, sits next to "הרווח הגדול" so the two headline
+                numbers read together (desktop keeps it in the rail card + the בקרוב rank cell). */}
+            <div class="ss ss--acc"><div class={`ss-v${accuracyPct === null ? ' empty' : ''}`}>{accuracyPct === null ? '—' : (<>{accuracyPct}<span class="s">%</span></>)}</div><div class="ss-k">דיוק כולל</div></div>
+            <div class="ss"><div class={`ss-v${biggestWin == null ? ' empty' : ''}`} set:html={biggestWin == null ? '—' : vshekelTextHtml(money(biggestWin))}></div><div class="ss-k">הרווח הגדול</div></div>
+          </div>
+
+          <!-- Mobile-only accuracy band (Direction B, mobile audit 1.9): the desktop
+               rail card (.db-rail) is hidden ≤920px via CSS; this is separate markup,
+               not a CSS-reordered version of the card, because the anatomy is genuinely
+               different (one line vs hero card). SSR'd from the same deriveTrackRecord
+               output, so no extra fetch and no state divergence from the rail. -->
+          {breakdown.length > 0 && (
+            <div class="db-acc-band">
+              <span class="db-acc-band-k db-acc-band-k--chips">דיוק לפי תחום</span>
+              <span class="db-acc-band-chips">
+                {breakdown.map((b) => (
+                  b.key ? (
+                    <a class="db-acc-chip" href={categoryBrowsePath(b.key)}>{b.label}{Number.isFinite(b.pct) && <span class="db-acc-chip-pct">{b.pct}%</span>}</a>
+                  ) : (
+                    <span class="db-acc-chip is-static">{b.label}{Number.isFinite(b.pct) && <span class="db-acc-chip-pct">{b.pct}%</span>}</span>
+                  )
+                ))}
+              </span>
+            </div>
+          )}
+        </section>
+
+        <section class="db-sect" data-screen-label="פוזיציות ורקורד">
+          <div class="pf-depth">
+            <div class="pf-depth-bar">
+              <div class="pf-tablist" role="tablist">
+                <button id="pf-tab-positions" class="pf-tab is-active" data-tab="positions" type="button" role="tab" aria-selected="true" aria-controls="pf-panel-positions">פוזיציות פתוחות <span class="pf-tab-count">{positions.length}</span></button>
+                <button id="pf-tab-history" class="pf-tab" data-tab="history" type="button" role="tab" aria-selected="false" aria-controls="pf-panel-history">רקורד מוכרע <span class="pf-tab-count">{record.length}</span></button>
+              </div>
+              <div class="pf-depth-search">
+                <span class="pf-depth-search-icon" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><path d="M21 21l-4.3-4.3"></path></svg></span>
+                <input data-pf-search aria-label="חיפוש בפעילות" placeholder="חפש לפי שוק, תוצאה..." type="search" />
+              </div>
+            </div>
+            <div class="pf-depth-body">
+              <div id="pf-panel-positions" class="pf-tabpanel is-active" role="tabpanel" aria-labelledby="pf-tab-positions" data-panel="positions">
+                {positions.length === 0 ? (
+                  <p class="db-about-text" style="padding:var(--hz-space-6) 0">אין פוזיציות פתוחות כרגע.</p>
+                ) : (
+                  <div class="pf-positions" data-sort-table="positions">
+                    <div class="pf-positions-head" role="row">
+                      <button class="pf-position-header" data-sort="title" data-default="asc" role="columnheader">שוק <span class="pf-sort-icon" aria-hidden="true">⇅</span></button>
+                      <button class="pf-position-header" data-sort="avg" data-default="desc" role="columnheader">ממוצע <span class="pf-sort-icon" aria-hidden="true">⇅</span></button>
+                      <button class="pf-position-header" data-sort="current" data-default="desc" role="columnheader">נוכחי <span class="pf-sort-icon" aria-hidden="true">⇅</span></button>
+                      <button class="pf-position-header is-active" data-sort="value" data-default="desc" data-dir="desc" role="columnheader">שווי <span class="pf-sort-icon pf-sort-icon--active" aria-hidden="true">▼</span></button>
+                    </div>
+                    <ul class="pf-positions-list">
+                      {positions.map((p) => (
+                        <li class="pf-position-row" data-title={p.title} data-avg={Number(p.avgPrice) || 0} data-current={Number(p.currentPrice) || 0} data-value={Number(p.value) || 0}>
+                          <div class="pf-position-market">
+                            <a class="pf-position-market-link" href={marketHref(p.marketKey)}>
+                              <span class="pf-market-thumb" aria-hidden="true">
+                                {p.image?.src
+                                  ? <img src={p.image.src} alt="" loading="lazy" />
+                                  : <span class="pf-market-thumb-initial">{marketInitial(p.title)}</span>}
+                              </span>
+                              <span class="pf-position-market-text">
+                                <span class="pf-position-title">{p.title}</span>
+                                <span class="pf-position-sub"><span class={`pf-state-chip pf-tone-${p.contractSide === 'yes' ? 'buy' : 'sell'}`}>{p.outcomeLabel}</span><span class="pf-position-quantity">{nf(p.contracts)} חוזים</span></span>
+                              </span>
+                            </a>
+                          </div>
+                          <div class="pf-position-numeric" set:html={vshekelTextHtml(priceTag(p.avgPrice))}></div>
+                          <div class="pf-position-numeric" set:html={vshekelTextHtml(priceTag(p.currentPrice))}></div>
+                          <div class="pf-position-numeric"><span set:html={vshekelTextHtml(money(p.value))}></span><div class={`pf-position-pnl-sub pf-tone-${Number(p.pnlPct) >= 0 ? 'buy' : 'sell'}`}>{pct1(p.pnlPct)}</div></div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+              <div id="pf-panel-history" class="pf-tabpanel" role="tabpanel" aria-labelledby="pf-tab-history" data-panel="history">
+                {record.length === 0 ? (
+                  <p class="db-about-text" style="padding:var(--hz-space-6) 0">אין עדיין רקורד מוכרע.</p>
+                ) : (
+                  <div class="pf-history" data-sort-table="history">
+                    <div class="pf-history-head" role="row">
+                      <button class="pf-position-header" data-sort="type" data-default="asc" role="columnheader">סוג <span class="pf-sort-icon" aria-hidden="true">⇅</span></button>
+                      <button class="pf-position-header" data-sort="title" data-default="asc" role="columnheader">שוק <span class="pf-sort-icon" aria-hidden="true">⇅</span></button>
+                      <button class="pf-position-header is-active" data-sort="time" data-default="desc" data-dir="desc" role="columnheader">סכום <span class="pf-sort-icon pf-sort-icon--active" aria-hidden="true">▼</span></button>
+                    </div>
+                    <ul class="pf-history-list">
+                      {record.map((r) => (
+                        <li class="pf-history-row" data-type={r.verdict === 'correct' ? 'נכון' : 'שגוי'} data-title={r.title} data-amount={Number(r.realizedPnl) || 0} data-time={(() => { try { return new Date(r.resolvedAt).getTime(); } catch { return 0; } })()}>
+                          <div class="pf-history-cell pf-history-cell--type"><span class={`pf-state-chip pf-tone-${r.verdict === 'correct' ? 'buy' : 'sell'}`}>{r.verdict === 'correct' ? 'נכון' : 'שגוי'}</span></div>
+                          <div class="pf-history-cell pf-history-cell--market">
+                            <a class="pf-history-market-link" href={marketHref(r.marketKey)}>
+                              <span class="pf-market-thumb" aria-hidden="true">
+                                {r.image?.src
+                                  ? <img src={r.image.src} alt="" loading="lazy" />
+                                  : <span class="pf-market-thumb-initial">{marketInitial(r.title)}</span>}
+                              </span>
+                              <span class="pf-history-market-text"><span class="pf-history-market-title">{r.title}</span><span class="pf-history-market-sub"><span class="pf-state-chip pf-tone-info">{r.outcomeLabel}</span></span></span>
+                            </a>
+                          </div>
+                          <div class="pf-history-cell pf-history-cell--amount"><span class={`pf-history-amount pf-tone-${Number(r.realizedPnl) >= 0 ? 'buy' : 'sell'}`}>{signed(r.realizedPnl)}</span><span class="pf-history-time">{relTime(r.resolvedAt)}</span></div>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+
+    </div>
+  </div>
+
+  {isOwner && (
+    /* edit-profile overlay (owner only) */
+    <div class="edit-overlay" id="editOverlay" hidden>
+      <div class="edit-backdrop" data-close></div>
+      <div class="edit-modal" role="dialog" aria-modal="true" aria-labelledby="editTitle">
+        <header class="edit-modal-head">
+          <h2 id="editTitle">עריכת פרופיל</h2>
+          <button class="edit-close" data-close aria-label="סגירה"><span class="material-symbols-outlined">close</span></button>
+        </header>
+        <div class="edit-modal-body">
+          <div class="edit-avatar-row">
+            <div class="pk-avatar-wrap" style="width:84px;height:84px;flex:none;">
+              <div class="avatar" id="editAvatarPrev" style="width:84px;height:84px;">
+                {isDefaultAvatar
+                  ? <img src={DEFAULT_AVATAR_URL} alt="" class="avatar-photo" data-profile-default-avatar />
+                  : <img src={avatarUrl} alt="" class="avatar-photo" data-profile-avatar-photo />}
+              </div>
+            </div>
+            <div class="edit-avatar-actions">
+              <label class="edit-file-btn"><span class="material-symbols-outlined">photo_camera</span>החלף תמונה<input type="file" accept="image/*" id="editAvatarInput" hidden /></label>
+              <button class="edit-link-btn" id="editAvatarReset" type="button">אפס לברירת מחדל</button>
+            </div>
+          </div>
+
+          <label class="edit-field">
+            <span class="edit-label">שם תצוגה</span>
+            <input type="text" id="editName" maxlength="40" value={displayName} />
+          </label>
+
+          <label class="edit-field">
+            <span class="edit-label">ביו</span>
+            <div class="edit-bio-wrap">
+              <textarea id="editBio" rows="1" maxlength="100">{bio}</textarea>
+              <span class="edit-bio-count"><span id="editBioCount">{bio.length}</span> / 100</span>
+            </div>
+          </label>
+
+          <label class="edit-field">
+            <span class="edit-label">קישור X</span>
+            <input type="text" id="editX" dir="ltr" placeholder="https://x.com/username" value={xUrl} />
+          </label>
+
+          {allCats.length > 0 && (
+            <div class="edit-field">
+              <span class="edit-label">קטגוריות מוצגות <span class="edit-label-sub">בחרו עד 3</span></span>
+              <div class="edit-cats" id="editCats">
+                {allCats.map((c) => (
+                  <label class="edit-cat">
+                    <input type="checkbox" name="showcaseCat" value={c.key} checked={showcaseCategories.includes(c.key)} />
+                    <span class="edit-cat-nm">{c.label}</span>
+                    <span class="edit-cat-pct">{c.pct}<span class="s">%</span></span>
+                  </label>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <p class="edit-error" id="editError">השמירה נכשלה. נסו שוב.</p>
+        </div>
+        <footer class="edit-modal-foot">
+          <button class="btn" data-close type="button">ביטול</button>
+          <button class="btn primary" id="editSave" type="button">שמירת שינויים</button>
+        </footer>
+      </div>
+    </div>
+  )}
+</div>
+
+<!-- profile.js: tables tabs/sort/search + share for everyone; edit overlay + picker self-gate on #editOverlay -->
+<script is:inline data-astro-rerun src={`/scripts/profile/profile.js?v=${ASSET_VERSION}`}></script>
+{!isOwner && <script is:inline data-astro-rerun src={`/scripts/profile/profile-follow.js?v=${ASSET_VERSION}`}></script>}

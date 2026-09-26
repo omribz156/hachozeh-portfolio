@@ -1,0 +1,512 @@
+/* Ported from systems/design/to-integrate/notifications/dist/patterns/notifications.css
+   (design mirror, signed off 2026-06-26). Keep in sync on re-drop. */
+/* ───────────────────────────────────────────────────────────────
+   notifications.css — bell notifications surface
+   Pattern CSS for the shell's bell panel. Token-driven via --hz-*.
+   Pairs with patterns/site-shell.css — shares the overlay surface tone
+   (bg-raised + border-soft + radius-md + shadow-overlay) so it reads as
+   one family with search / "+ עוד".
+   Deboxed: rows separated by hover + a hairline rhythm, not cards.
+   RTL throughout; logical properties only.
+
+   Layer: hz.patterns  ·  Live use: rendered by components/notifications.js
+   ─────────────────────────────────────────────────────────────── */
+@layer hz.patterns {
+
+/* anchor wrapper around the bell so the panel hangs under the cluster */
+.hz-notif-anchor {
+  position: relative;
+  display: inline-flex;
+}
+
+/* ── panel shell ─────────────────────────────────────────────── */
+.hz-notif {
+  position: fixed;
+  top: 3.6rem;
+  inset-inline-end: 1rem;
+  width: 25rem;
+  max-width: calc(100vw - 1.5rem);
+  z-index: 95;
+  display: none;
+  flex-direction: column;
+  background: var(--hz-bg-raised);
+  border: 1px solid var(--hz-border-soft);
+  border-radius: var(--hz-radius-md);
+  box-shadow: var(--hz-shadow-overlay);
+  overflow: hidden;
+  /* entrance: settle down + fade. base state is visible (print/reduced safe) */
+  transform-origin: top left;
+}
+.hz-notif.is-open {
+  display: flex;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hz-notif.is-open { animation: none; }
+}
+@keyframes hz-notif-in {
+  from { opacity: 0; transform: translateY(-0.4rem) scale(0.985); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* tiny pointer notch reaching up to the bell (start edge — bell sits near
+   the panel's inline-start in RTL since the actions cluster is left-aligned) */
+.hz-notif::before {
+  content: "";
+  position: absolute;
+  top: -0.4rem;
+  inset-inline-start: 1.4rem;
+  width: 0.8rem;
+  height: 0.8rem;
+  background: var(--hz-bg-raised);
+  border-inline-start: 1px solid var(--hz-border-soft);
+  border-block-start: 1px solid var(--hz-border-soft);
+  transform: rotate(45deg);
+}
+
+/* ── header ──────────────────────────────────────────────────── */
+.hz-notif__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.95rem 1.1rem 0.8rem;
+}
+.hz-notif__title {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  color: var(--hz-text);
+  letter-spacing: -0.01em;
+}
+.hz-notif__count {
+  font-family: var(--hz-font-mono);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  line-height: 1;
+  padding: 0.2rem 0.42rem;
+  border-radius: var(--hz-radius-pill);
+  background: var(--hz-brand-soft);
+  color: var(--hz-brand);
+  font-variant-numeric: tabular-nums;
+  transform: translateY(-0.08rem);
+}
+.hz-notif__count[data-zero="true"] { display: none; }
+
+.hz-notif__markall {
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--hz-text-muted);
+  white-space: nowrap;
+  padding: 0.2rem 0;
+  transition: color var(--hz-motion);
+}
+@media (hover: hover) {
+  .hz-notif__markall:hover { color: var(--hz-text); }
+}
+.hz-notif__markall:disabled { opacity: 0.4; cursor: default; }
+
+/* ── scroll region ───────────────────────────────────────────── */
+.hz-notif__scroll {
+  display: flex;
+  flex-direction: column;
+  max-height: min(28rem, 65vh);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-width: thin;
+  scrollbar-color: var(--hz-border) transparent;
+}
+.hz-notif__scroll::-webkit-scrollbar { width: 8px; }
+.hz-notif__scroll::-webkit-scrollbar-thumb {
+  background: var(--hz-border);
+  border-radius: 9999px;
+  border: 2px solid var(--hz-bg-raised);
+}
+
+/* ── time group ──────────────────────────────────────────────── */
+.hz-notif__group-label {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 0.55rem 1.1rem 0.35rem;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--hz-text-faint);
+  background: linear-gradient(var(--hz-bg-raised) 70%, transparent);
+}
+
+/* ── row wrapper + row ───────────────────────────────────────── */
+/* .hz-notif__row-wrap is a position:relative shell that hosts the row <button>
+   and the absolutely-positioned dismiss <button> as siblings — avoiding the
+   invalid <button>-inside-<button> nesting that would result from putting the
+   dismiss inside the row. Visually identical to the previous <div> layout. */
+.hz-notif__row-wrap {
+  position: relative;
+}
+.hz-notif__row-wrap + .hz-notif__row-wrap { box-shadow: inset 0 1px 0 var(--hz-border-faint); }
+
+/* button reset — keeps display:grid / width:100% so the row spans the panel
+   exactly as the div did. appearance:none strips UA button chrome. */
+.hz-notif__row {
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  display: grid;
+  grid-template-columns: 2.35rem 1fr;
+  align-items: start;
+  gap: 0.8rem;
+  width: 100%;
+  margin: 0;
+  text-align: start;
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  cursor: pointer;
+  padding: 0.7rem 1.1rem 0.7rem 1.1rem;
+  font: inherit;
+  color: var(--hz-text);
+  transition: background var(--hz-motion-fast);
+}
+@media (hover: hover) {
+  .hz-notif__row:hover { background: var(--hz-surface-hover); }
+}
+
+/* unread: warm-raised bed + an amber gutter dot. read rows go quiet. */
+.hz-notif__row.is-unread { background: rgba(var(--hz-brand-rgb), 0.05); }
+@media (hover: hover) {
+  .hz-notif__row.is-unread:hover { background: rgba(var(--hz-brand-rgb), 0.08); }
+}
+.hz-notif__row.is-unread::before {
+  content: "";
+  position: absolute;
+  inset-inline-start: 0.45rem;
+  top: 1.5rem;
+  width: 0.42rem;
+  height: 0.42rem;
+  border-radius: 9999px;
+  background: var(--hz-brand);
+}
+.hz-notif__row.hz-notif__row--no-marker::before {
+  content: none;
+}
+/* unread-marker variant: a rail instead of a dot */
+.hz-notif[data-marker="rail"] .hz-notif__row.is-unread::before {
+  inset-inline-start: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  height: auto;
+  border-radius: 0;
+}
+
+.hz-notif__row.is-read .hz-notif__text { color: var(--hz-text-soft); }
+.hz-notif__row.is-read .hz-notif__icon { opacity: 0.7; }
+
+/* leading slot — icon disc OR market thumb */
+.hz-notif__icon {
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: var(--hz-radius-sm);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.hz-notif__icon .material-symbols-outlined {
+  font-size: 1.25rem;
+  font-variation-settings: 'FILL' 1, 'wght' 500;
+}
+.hz-notif__icon--win   { background: var(--hz-action-buy-soft);   color: var(--hz-action-buy-strong); }
+.hz-notif__icon--loss  { background: var(--hz-action-sell-soft);  color: var(--hz-action-sell-strong); }
+.hz-notif__icon--rise  { background: var(--hz-signal-rising-soft);color: var(--hz-signal-rising); }
+.hz-notif__icon--fall  { background: var(--hz-signal-falling-soft);color: var(--hz-signal-falling); }
+.hz-notif__icon--streak{ background: var(--hz-brand-soft);        color: var(--hz-brand); }
+.hz-notif__icon--rank  { background: var(--hz-brand-soft);        color: var(--hz-brand-strong); }
+.hz-notif__icon--reply { background: var(--hz-surface-2);         color: var(--hz-text-soft); }
+.hz-notif__icon--close { background: var(--hz-warning-soft);      color: var(--hz-warning); }
+.hz-notif__icon--system{ background: var(--hz-info-soft);         color: var(--hz-info); }
+
+/* market thumbnail (tweak: thumbnails on) — topic-tinted placeholder.
+   Accent comes from the row's --thumb-accent (set inline per market). */
+.hz-notif__thumb {
+  width: 2.35rem;
+  height: 2.35rem;
+  border-radius: var(--hz-radius-sm);
+  flex-shrink: 0;
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  background:
+    linear-gradient(150deg,
+      color-mix(in oklab, var(--thumb-accent, var(--hz-text-muted)) 26%, var(--hz-surface-2)),
+      color-mix(in oklab, var(--thumb-accent, var(--hz-text-muted)) 6%, var(--hz-surface-1)));
+  border: 1px solid var(--hz-border-faint);
+}
+/* real market image (the SVG/photo cards use) — clipped to the rounded tile */
+.hz-notif__thumb-img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+.hz-notif__thumb-glyph.material-symbols-outlined {
+  font-size: 1.3rem;
+  color: var(--thumb-accent, var(--hz-text-soft));
+  opacity: 0.92;
+  font-variation-settings: 'FILL' 0, 'wght' 500;
+}
+.hz-notif__thumb-badge {
+  position: absolute;
+  inset-block-end: 0;
+  inset-inline-end: 0;
+  display: grid;
+  place-items: center;
+  width: 1.05rem;
+  height: 1.05rem;
+  border-start-start-radius: var(--hz-radius-xs);
+  background: var(--hz-bg-raised);
+}
+.hz-notif__thumb-badge .material-symbols-outlined {
+  font-size: 0.8rem;
+  font-variation-settings: 'FILL' 1, 'wght' 600;
+}
+
+/* body */
+.hz-notif__body { min-width: 0; display: flex; flex-direction: column; gap: 0.28rem; }
+.hz-notif__text {
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: var(--hz-text);
+  text-wrap: pretty;
+}
+.hz-notif__text b { font-weight: 700; }
+.hz-notif__text .hz-notif__q {
+  font-weight: 600;
+  color: var(--hz-text);
+}
+
+.hz-notif__meta {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  flex-wrap: wrap;
+  font-size: 0.75rem;
+  color: var(--hz-text-muted);
+}
+.hz-notif__meta-sep { color: var(--hz-text-faint); }
+.hz-notif__time { color: var(--hz-text-muted); white-space: nowrap; }
+
+/* per-row dismiss (X) — removes the notification. Appears on row hover; faint
+   on touch (no hover). Sits in the top inline-end corner over the row. */
+.hz-notif__dismiss {
+  position: absolute;
+  top: 0.4rem;
+  inset-inline-end: 0.5rem;
+  display: grid;
+  place-items: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 0;
+  border-radius: var(--hz-radius-pill);
+  background: var(--hz-surface-2);
+  color: var(--hz-text-muted);
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity var(--hz-motion-fast), color var(--hz-motion), background var(--hz-motion);
+}
+.hz-notif__dismiss .material-symbols-outlined { font-size: 0.95rem; }
+@media (hover: hover) {
+  .hz-notif__row:hover .hz-notif__dismiss,
+  .hz-notif__row-wrap:hover .hz-notif__dismiss { opacity: 1; }
+}
+@media (hover: hover) {
+  .hz-notif__dismiss:hover { color: var(--hz-text); background: var(--hz-surface-hover); }
+}
+@media (hover: none) {
+  .hz-notif__dismiss { opacity: 0.55; }
+}
+
+.hz-notif__amount {
+  font-family: var(--hz-font-mono);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
+}
+.hz-notif__amount--pos { color: var(--hz-action-buy); }
+.hz-notif__amount--neg { color: var(--hz-action-sell); }
+.hz-notif__amount--rise { color: var(--hz-signal-rising); }
+.hz-notif__amount--fall { color: var(--hz-signal-falling); }
+
+/* inline claim (streak / faucet) — a compact chip that must NOT grow the meta
+   line; its box height is kept ~= the amount/time text line so the date stays on
+   the same baseline across every row (no taller "claim" rows). */
+.hz-notif__claim {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font: inherit;
+  font-family: var(--hz-font-mono);
+  font-size: 0.75rem;
+  line-height: 1;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.12rem 0.6rem;
+  border-radius: var(--hz-radius-pill);
+  border: 1px solid rgba(var(--hz-brand-rgb), 0.5);
+  background: var(--hz-brand-soft);
+  color: var(--hz-brand-strong);
+  font-variant-numeric: tabular-nums;
+  transition: background var(--hz-motion), color var(--hz-motion);
+}
+.hz-notif__claim--action {
+  font-family: var(--hz-font-ui);
+  font-size: 0.78rem;
+  letter-spacing: 0;
+}
+@media (hover: hover) {
+  .hz-notif__claim:hover { background: var(--hz-brand); color: var(--hz-text-inverse); }
+}
+.hz-notif__claim.is-claimed {
+  border-color: var(--hz-border-soft);
+  background: transparent;
+  color: var(--hz-action-buy);
+  cursor: default;
+  pointer-events: none;
+}
+
+/* ── empty state ─────────────────────────────────────────────── */
+.hz-notif__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 3.2rem 1.5rem 3.4rem;
+  text-align: center;
+}
+/* compact the panel when there's nothing to show (no sub-text, no footer) */
+.hz-notif--empty .hz-notif__empty {
+  padding: 1.6rem 1.5rem 1.8rem;
+  gap: 0.45rem;
+}
+.hz-notif__empty .material-symbols-outlined {
+  font-size: 2.1rem;
+  color: var(--hz-text-faint);
+  font-variation-settings: 'FILL' 0, 'wght' 300;
+}
+.hz-notif__empty-title { font-size: 0.95rem; font-weight: 600; color: var(--hz-text-soft); }
+.hz-notif__empty-sub { font-size: 0.8125rem; color: var(--hz-text-muted); max-width: 17rem; line-height: 1.45; }
+
+/* ── footer ──────────────────────────────────────────────────── */
+.hz-notif__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.5rem 0.65rem 0.5rem 1.1rem;
+  border-top: 1px solid var(--hz-border-faint);
+}
+.hz-notif__foot-link {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: var(--hz-text-soft);
+  text-decoration: none;
+  padding: 0.45rem 0.55rem;
+  border-radius: var(--hz-radius-xs);
+  transition: color var(--hz-motion), background var(--hz-motion);
+}
+@media (hover: hover) {
+  .hz-notif__foot-link:hover { color: var(--hz-brand); background: var(--hz-surface-soft); }
+}
+.hz-notif__settings {
+  display: inline-grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  background: transparent;
+  border-radius: var(--hz-radius-xs);
+  color: var(--hz-text-muted);
+  cursor: pointer;
+  transition: color var(--hz-motion), background var(--hz-motion);
+}
+@media (hover: hover) {
+  .hz-notif__settings:hover { color: var(--hz-text); background: var(--hz-surface-soft); }
+}
+.hz-notif__settings .material-symbols-outlined { font-size: 1.2rem; }
+
+/* compact density tweak */
+.hz-notif[data-density="compact"] .hz-notif__row { padding-block: 0.5rem; }
+.hz-notif[data-density="compact"] .hz-notif__body { gap: 0.18rem; }
+.hz-notif[data-density="compact"] .hz-notif__icon,
+.hz-notif[data-density="compact"] .hz-notif__thumb { width: 2rem; height: 2rem; }
+.hz-notif[data-density="compact"] .hz-notif__row { grid-template-columns: 2rem 1fr; }
+
+/* scrim — desktop has none (matches shell dropdowns); mobile turns it on */
+.hz-notif-scrim { display: none; }
+
+/* ── mobile sheet (≤640px) — top-anchored, like the search overlay ─── */
+@media (max-width: 640px) {
+  .hz-notif__dismiss {
+    display: none;
+  }
+  .hz-notif-scrim.is-open {
+    display: block;
+    position: fixed;
+    inset: 0;
+    z-index: 94;
+    background: rgba(8, 9, 13, 0.55);
+  }
+  .hz-notif {
+    position: fixed;
+    top: calc(var(--hz-shell-spacer, 9rem) + 1rem);
+    inset-inline: 0.5rem;
+    width: auto;
+    max-width: none;
+    max-height: calc(100dvh - var(--hz-shell-spacer, 9rem) - 1.5rem);
+    border-radius: var(--hz-radius-lg);
+  }
+  .hz-notif::before { display: none; }
+  .hz-notif.is-open { animation: hz-notif-sheet-in 200ms ease; }
+  @keyframes hz-notif-sheet-in {
+    from { opacity: 0; transform: translateY(-0.8rem); }
+    to   { opacity: 1; transform: none; }
+  }
+  .hz-notif__scroll { max-height: none; flex: 1; }
+  .hz-notif__head { padding: 1.1rem 1.15rem 0.85rem; }
+  .hz-notif__title { font-size: 1.15rem; }
+  /* explicit close affordance on mobile */
+  .hz-notif__close { display: inline-grid; }
+  .hz-notif__row { padding-block: 0.95rem; }   /* fatter thumb targets */
+  /* keep generous horizontal tap width on touch, but hold the vertical box near
+     the meta line so the date doesn't drift on mobile either. */
+  .hz-notif__claim { padding: 0.2rem 0.85rem; font-size: 0.8125rem; }
+}
+
+/* close button — only meaningful in the mobile sheet */
+.hz-notif__close {
+  display: none;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border: 0;
+  background: transparent;
+  border-radius: var(--hz-radius-xs);
+  color: var(--hz-text-muted);
+  cursor: pointer;
+}
+@media (hover: hover) {
+  .hz-notif__close:hover { color: var(--hz-text); background: var(--hz-surface-soft); }
+}
+.hz-notif__close .material-symbols-outlined { font-size: 1.35rem; }
+
+} /* @layer hz.patterns */

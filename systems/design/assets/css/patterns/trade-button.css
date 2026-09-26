@@ -1,0 +1,58 @@
+/* Outcome-row trade buttons. Ported from the legacy market-detail pattern so
+   multi-outcome rows keep the same action grammar in Astro. */
+
+.hz-trade-button {
+  display: inline-flex;
+  flex: 1 1 0%;
+  min-width: 0;
+  height: 2.58rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  border: 1px solid transparent;
+  border-radius: var(--hz-radius-md);
+  background: rgb(255 255 255 / 0.012);
+  color: var(--hz-text-soft);
+  font-size: 0.86rem;
+  font-weight: 700;
+  white-space: nowrap;
+  transition: all var(--hz-motion);
+}
+
+.hz-trade-button > span:first-child {
+  flex: 0 0 auto;
+  font-size: 0.88rem;
+}
+
+.hz-trade-button > span:last-child {
+  flex: 0 0 auto;
+  font-family: var(--hz-font-mono);
+  font-size: 0.82rem;
+  opacity: 0.9;
+}
+
+.hz-trade-button:disabled,
+.hz-trade-button--disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.hz-trade-button--yes {
+  background: var(--hz-action-buy-soft);
+  color: var(--hz-action-buy);
+}
+
+.hz-trade-button--no {
+  background: var(--hz-action-sell-soft);
+  color: var(--hz-action-sell);
+}
+
+.hz-trade-button--yes:hover,
+.hz-trade-button--no:hover {
+  background: rgb(255 255 255 / 0.045);
+}
+
+.hz-trade-button--selected {
+  background: rgb(255 255 255 / 0.055);
+  box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.14);
+}

@@ -1,0 +1,657 @@
+---
+import Layout from '../layouts/Layout.astro';
+import MarketCard from './MarketCard.astro';
+import HeroCarousel from './HeroCarousel.astro';
+import SocialGameBox from './SocialGameBox.astro';
+import { fetchFeed } from '../lib/discovery.js';
+import { buildBreadcrumbJsonLd, buildCanonicalUrl, buildMarketItemListJsonLd, buildWebPageJsonLd } from '../lib/seo.js';
+import '../styles/pages/trending-stage.css';
+import '../styles/patterns/market-card.css';
+import '../styles/patterns/hero-card.css';
+import '../styles/patterns/hero-carousel.css';
+import '../styles/patterns/social-game-box.css';
+
+const {
+  feed = 'trending',
+  title = 'טרנדי · החוזה',
+  description = 'שווקים מובילים בהחוזה — שוק התחזיות של ישראל',
+  activePage = 'trending',
+  canonicalPath = '/trending',
+  shareImagePath,
+  descriptionMaxLength,
+  category = null,
+  heading = '',
+  intro = '',
+  eyebrow = '',
+  topicChips = [],
+  showSocialGameBox = feed === 'trending',
+  showFilters = true,
+  feedLinks,
+  breadcrumbItems = [
+    { name: 'החוזה', href: '/' },
+    { name: 'טרנדי', href: canonicalPath },
+  ],
+} = Astro.props;
+
+const FEED_PAGE_SIZE = 16;
+const FEED_DESKTOP_PAGE_SIZE = 24;
+const FEED_MOBILE_PREFETCH_MARGIN_PX = 1100;
+const FEED_DESKTOP_PREFETCH_MARGIN_PX = 1600;
+const HERO_ITEM_LIMIT = 10;
+let items = [];
+let heroItems = [];
+let error = null;
+let pagination = null;
+try {
+  const data = await fetchFeed(feed, category, { limit: FEED_PAGE_SIZE });
+  items = Array.isArray(data?.items) ? data.items : [];
+  heroItems = Array.isArray(data?.heroItems) ? data.heroItems : items.slice(0, HERO_ITEM_LIMIT);
+  pagination = data?.pagination || null;
+} catch (e) {
+  // Authored copy only — never surface the raw exception to users.
+  console.error('[FeedPage] fetchFeed failed', e);
+  error = 'לא הצלחנו לטעון את השווקים. נסו שוב בעוד רגע.';
+}
+
+const catMap = new Map();
+for (const m of items) {
+  const c = m?.category;
+  if (c?.key && !catMap.has(c.key)) catMap.set(c.key, c.label || c.key);
+}
+const chips = [...catMap.entries()].map(([key, label]) => ({ key, label }));
+const canonicalUrl = buildCanonicalUrl(canonicalPath);
+const shareImage = category
+  ? `/share/pages/topics/${encodeURIComponent(category)}.png`
+  : shareImagePath || `/share/pages/${canonicalPath.replace(/^\//, '')}.png`;
+const structuredData = [
+  buildWebPageJsonLd({
+    title,
+    description,
+    canonicalUrl,
+    imageUrl: buildCanonicalUrl(shareImage),
+    type: 'CollectionPage',
+  }),
+  buildBreadcrumbJsonLd({ items: breadcrumbItems }),
+  buildMarketItemListJsonLd({
+    name: heading || title,
+    items,
+  }),
+];
+const layoutFeedLinks = feedLinks || [
+  {
+    title: `${heading || title} RSS`,
+    href: category ? `/feeds/topics/${encodeURIComponent(category)}.xml` : '/feeds/trending.xml',
+  },
+];
+---
+
+<Layout
+  title={title}
+  description={description}
+  activePage={activePage}
+  canonicalPath={canonicalPath}
+  image={shareImage}
+  twitterCard="summary_large_image"
+  structuredData={structuredData}
+  feedLinks={layoutFeedLinks}
+  descriptionMaxLength={descriptionMaxLength}
+>
+  <div
+    class="hz-trending"
+    data-trending-stage
+    data-feed={feed}
+    data-category={category || ''}
+    data-feed-page-size={FEED_PAGE_SIZE}
+    data-feed-desktop-page-size={FEED_DESKTOP_PAGE_SIZE}
+    data-feed-mobile-prefetch-margin={FEED_MOBILE_PREFETCH_MARGIN_PX}
+    data-feed-desktop-prefetch-margin={FEED_DESKTOP_PREFETCH_MARGIN_PX}
+    data-feed-next-cursor={pagination?.nextCursor || ''}
+    data-feed-has-more={pagination?.hasMore ? '1' : '0'}
+  >
+    {(heading || intro) ? (
+      <section class="hz-trending__intro">
+        {eyebrow && <p class="hz-trending__intro-eyebrow">{eyebrow}</p>}
+        <h1>{heading}</h1>
+        {intro && <p>{intro}</p>}
+      </section>
+    ) : (
+      <h1 class="sr-only">{title || 'שווקים'}</h1>
+    )}
+
+    {error && (
+      <p style="color: var(--hz-text-muted); padding: var(--hz-space-6) 0;">
+        {error}
+      </p>
+    )}
+
+    {items.length > 0 && (
+      <section class="hz-trending__hero-zone" data-nosnippet>
+        <HeroCarousel items={heroItems} />
+        {showSocialGameBox && <SocialGameBox />}
+      </section>
+    )}
+
+    {items.length > 0 && (
+      <nav class="hz-trending__filters" aria-label="סינון" data-trending-filters data-nosnippet>
+        {showFilters ? (
+          <div class="hz-trending__chips" data-trending-chips>
+            <button class="hz-trending__chip is-active" data-chip="" type="button">הכל</button>
+            {chips.map((c) => (
+              <button class="hz-trending__chip" data-chip={c.key} type="button">{c.label}</button>
+            ))}
+          </div>
+        ) : (
+          <div class="hz-trending__chips" data-trending-chips hidden></div>
+        )}
+        <div class="hz-trending__sort" data-trending-sort-wrap>
+          <button
+            class="hz-trending__sort-trigger"
+            type="button"
+            data-trending-sort-trigger
+            aria-haspopup="listbox"
+            aria-expanded="false"
+            aria-label="מיון"
+          >
+            <span data-trending-sort-label>
+              {feed === 'new' ? 'חדש' : feed === 'closing' ? 'נסגרים בקרוב' : feed === 'volume' ? 'נפח גבוה' : 'טרנדי'}
+            </span>
+            <span class="material-symbols-outlined" aria-hidden="true">expand_more</span>
+          </button>
+          <ul class="hz-trending__sort-menu" role="listbox" data-trending-sort-menu hidden aria-label="מיון">
+            <li role="option" class="hz-trending__sort-opt" data-sort-value="trending" aria-selected={feed === 'trending'} tabindex="-1">טרנדי</li>
+            <li role="option" class="hz-trending__sort-opt" data-sort-value="new" aria-selected={feed === 'new'} tabindex="-1">חדש</li>
+            <li role="option" class="hz-trending__sort-opt" data-sort-value="closing" aria-selected={feed === 'closing'} tabindex="-1">נסגרים בקרוב</li>
+            <li role="option" class="hz-trending__sort-opt" data-sort-value="volume" aria-selected={feed === 'volume'} tabindex="-1">נפח גבוה</li>
+          </ul>
+        </div>
+      </nav>
+    )}
+
+    <section class="hz-trending__stream" aria-label="שווקים" data-market-stream data-nosnippet>
+      {/* First row is the mobile LCP region (mobile-audit 2.2) — the desktop grid is
+          4-wide (trending-stage.css), so the first 4 cards cover its whole first row;
+          on the single-column mobile layout that's the first 4 stacked cards, a safe
+          over-inclusion rather than a mid-scroll guess. Rest stay lazy. */}
+      {items.map((m, i) => <MarketCard market={m} eager={i < 4} />)}
+    </section>
+
+    {!error && items.length === 0 && (
+      <div class="hz-trending__empty">
+        אין שווקים פעילים בקטגוריה הזו כרגע. נעדכן ברגע שיתפרסמו שווקים מתאימים.
+      </div>
+    )}
+
+    {items.length > 0 && (
+      <button class="hz-trending__stream-hint" type="button" data-feed-load-more data-nosnippet hidden={!pagination?.hasMore}>המשך גלילה לעוד שווקים</button>
+    )}
+
+    {topicChips.length > 0 && (
+      <nav class="hz-trending__topics" aria-label="נושאים בקטגוריה">
+        <span class="hz-trending__topics-label">נושאים בקטגוריה:</span>
+        {topicChips.map((t) => (
+          <a class="hz-trending__topic" href={t.href}>{t.label}</a>
+        ))}
+      </nav>
+    )}
+  </div>
+</Layout>
+
+<script>
+  // @ts-nocheck — untyped inline script; TODO(typecheck-tighten): annotate then remove
+  (function () {
+    // Soft-nav-aware: re-binds chips/sort to the CURRENT page and manages exactly ONE feed
+    // SSE tied to the visible feed page — open on enter (initial + astro:page-load), close on
+    // astro:before-swap. Was: ran once with a beforeunload-only SSE close → leaked a live
+    // stream per feed page visited, and chips/sort died after the first soft-nav.
+    let source = null;
+    // The CURRENT feed page's stream-opener. init() re-arms it (and clears it on a
+    // non-feed page / before-swap) so the once-bound visibilitychange handler can
+    // reopen the right stream WITHOUT re-running init (which would double-bind
+    // chips/sort). Kept separate from `source` on purpose: a visibility-hide closes
+    // `source` but must NOT disarm `reopen`, or we could never reopen on return.
+    let reopen = null;
+    let loadObserver = null;
+    let feedAbort = null;
+    function closeStream() { if (source) { source.close(); source = null; } }
+    function disconnectLoadObserver() { if (loadObserver) { loadObserver.disconnect(); loadObserver = null; } }
+    function abortFeedBindings() { if (feedAbort) { feedAbort.abort(); feedAbort = null; } }
+    function init() {
+	    closeStream(); // guarantee a single live feed stream
+	    disconnectLoadObserver();
+	    abortFeedBindings();
+	    reopen = null; // disarm until we confirm we're on a feed page
+	    const stage = document.querySelector('[data-market-stream]');
+	    if (!stage) return; // not on a feed page now — stream stays closed
+	    const root = document.querySelector('[data-trending-stage]');
+	    if (!root) return;
+	    feedAbort = typeof AbortController === 'function' ? new AbortController() : null;
+	    const feedSignal = feedAbort?.signal;
+	    const chips = Array.from(document.querySelectorAll('[data-trending-chips] .hz-trending__chip'));
+	    const sortWrap = document.querySelector('[data-trending-sort-wrap]');
+	    const sortTrigger = document.querySelector('[data-trending-sort-trigger]');
+	    const sortMenu = document.querySelector('[data-trending-sort-menu]');
+	    const sortLabel = document.querySelector('[data-trending-sort-label]');
+	    const sortOpts = sortMenu ? Array.from(sortMenu.querySelectorAll('[data-sort-value]')) : [];
+	    const loadMore = document.querySelector('[data-feed-load-more]');
+	    let cards = Array.from(stage.querySelectorAll('.hz-card'));
+	    let loadingMore = false;
+
+	    // ── URL-addressable filter/sort state ───────────────────────────────
+	    // ?cat= / ?sort= — read fresh here because init() itself re-runs on every
+	    // astro:page-load (this script's chips/activeCat/streamCategory already
+	    // live inside init(), so there's no stale-closure trap across soft-nav —
+	    // re-invoking init() IS the re-read). Defaults: cat = the SSR category
+	    // prop (chip already marked is-active server-side), sort = the SSR feed
+	    // prop's dropdown selection. Invalid values fall back silently.
+	    const defaultCat = root.dataset.category || '';
+	    const defaultSort = root.dataset.feed || 'trending';
+	    function readUrlParam(name, fallback, allowed) {
+	      try {
+	        const value = new URL(window.location.href).searchParams.get(name);
+	        if (!value) return fallback;
+	        if (allowed && !allowed.includes(value)) return fallback;
+	        return value;
+	      } catch { return fallback; }
+	    }
+	    function writeUrlParam(name, value, fallback) {
+	      try {
+	        const url = new URL(window.location.href);
+	        if (!value || value === fallback) url.searchParams.delete(name);
+	        else url.searchParams.set(name, value);
+	        window.history.replaceState(null, '', url);
+	      } catch { /* swallow */ }
+	    }
+
+	    let activeCat = readUrlParam('cat', defaultCat);
+	    let sortValue = root.dataset.feed || 'trending';
+	    const currentSort = () => sortValue || 'trending';
+	    const isDesktopFeed = () => window.matchMedia?.('(min-width: 1025px)').matches === true;
+	    const readPositiveNumber = (value, fallback) => {
+	      const parsed = Number(value);
+	      return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
+	    };
+	    const currentPageSize = () => (
+	      isDesktopFeed()
+	        ? readPositiveNumber(root.dataset.feedDesktopPageSize, 24)
+	        : readPositiveNumber(root.dataset.feedPageSize, 16)
+	    );
+	    const currentPrefetchMargin = () => (
+	      isDesktopFeed()
+	        ? readPositiveNumber(root.dataset.feedDesktopPrefetchMargin, 1600)
+	        : readPositiveNumber(root.dataset.feedMobilePrefetchMargin, 1100)
+	    );
+	    const cardIdentity = (card) => card?.dataset?.feedKey || card?.dataset?.marketKey || '';
+	    function dedupeVisibleCards() {
+	      const seen = new Set();
+	      const unique = [];
+	      Array.from(stage.querySelectorAll('.hz-card')).forEach((card) => {
+	        const key = cardIdentity(card);
+	        if (key && seen.has(key)) {
+	          card.remove();
+	          return;
+	        }
+	        if (key) seen.add(key);
+	        unique.push(card);
+	      });
+	      cards = unique;
+	    }
+	    function appendUniqueCards(nextCards) {
+	      const seen = new Set(cards.map(cardIdentity).filter(Boolean));
+	      const appended = [];
+	      nextCards.forEach((card) => {
+	        const key = cardIdentity(card);
+	        if (key && seen.has(key)) {
+	          card.remove();
+	          return;
+	        }
+	        if (key) seen.add(key);
+	        stage.appendChild(card);
+	        appended.push(card);
+	      });
+	      cards = cards.concat(appended);
+	    }
+
+	    function applyFilter() {
+	      cards.forEach((card) => {
+	        const cat = card.getAttribute('data-category') || '';
+	        card.style.display = !activeCat || cat === activeCat ? '' : 'none';
+	      });
+	    }
+
+	    function applySort(mode) {
+	      if (mode === 'trending') return;
+	      const arr = cards.slice();
+	      if (mode === 'volume') {
+	        arr.sort((a, b) => parseFloat(b.dataset.volume || '0') - parseFloat(a.dataset.volume || '0'));
+      } else if (mode === 'new') {
+        arr.sort((a, b) => (Number(b.dataset.new) || 0) - (Number(a.dataset.new) || 0));
+      } else if (mode === 'closing') {
+        arr.sort((a, b) => {
+          const left = Number(a.dataset.closeAt) || Number.MAX_SAFE_INTEGER;
+          const right = Number(b.dataset.closeAt) || Number.MAX_SAFE_INTEGER;
+          return left - right;
+        });
+      }
+	      arr.forEach((card) => stage.appendChild(card));
+	    }
+
+	    function syncLoadMore() {
+	      if (!loadMore) return;
+	      const hasMore = root?.dataset.feedHasMore === '1' && Boolean(root?.dataset.feedNextCursor);
+	      loadMore.hidden = !hasMore;
+	      loadMore.disabled = loadingMore;
+	      loadMore.textContent = loadingMore ? 'טוען עוד שווקים…' : 'המשך גלילה לעוד שווקים';
+	    }
+
+	    async function loadNextPage() {
+	      const root = document.querySelector('[data-trending-stage]');
+	      const cursor = root?.dataset.feedNextCursor || '';
+	      if (!root || loadingMore || !cursor || root.dataset.feedHasMore !== '1') return;
+	      loadingMore = true;
+	      syncLoadMore();
+	      try {
+	        const url = new URL('/fragments/discovery-feed', window.location.origin);
+	        url.searchParams.set('feed', root.dataset.feed || 'trending');
+	        if (root.dataset.category) url.searchParams.set('category', root.dataset.category);
+	        url.searchParams.set('limit', String(currentPageSize()));
+	        url.searchParams.set('cursor', cursor);
+	        const response = await fetch(url.toString(), {
+	          headers: { accept: 'text/html' },
+	          credentials: 'include',
+	        });
+	        if (!response.ok) throw new Error('feed fragment failed');
+	        const html = await response.text();
+	        const template = document.createElement('template');
+	        template.innerHTML = html;
+	        const marker = template.content.querySelector('[data-feed-pagination]');
+	        const nextCards = Array.from(template.content.querySelectorAll('.hz-card'));
+	        if (marker) {
+	          root.dataset.feedNextCursor = marker.dataset.nextCursor || '';
+	          root.dataset.feedHasMore = marker.dataset.hasMore || '0';
+	          marker.remove();
+	        } else {
+	          root.dataset.feedNextCursor = '';
+	          root.dataset.feedHasMore = '0';
+	        }
+	        appendUniqueCards(nextCards);
+	        applySort(currentSort());
+	        applyFilter();
+	        window.HZCurrency?.upgrade?.(stage);
+	      } catch (_) {
+	        // Leave the button visible as a manual retry path.
+	      } finally {
+	        loadingMore = false;
+	        syncLoadMore();
+	      }
+	    }
+
+	    function primeDesktopFeed() {
+	      if (!isDesktopFeed() || root.dataset.feedDesktopPrimed === '1') return;
+	      if (root.dataset.feedHasMore !== '1' || !root.dataset.feedNextCursor) return;
+	      root.dataset.feedDesktopPrimed = '1';
+	      const run = () => { void loadNextPage(); };
+	      if ('requestIdleCallback' in window) requestIdleCallback(run, { timeout: 900 });
+	      else setTimeout(run, 250);
+	    }
+
+    chips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        chips.forEach((c) => c.classList.toggle('is-active', c === chip));
+        activeCat = chip.getAttribute('data-chip') || '';
+        applyFilter();
+        writeUrlParam('cat', activeCat, defaultCat);
+      }, feedSignal ? { signal: feedSignal } : undefined);
+	    });
+	    // Deep link: ?cat= may differ from the SSR-active chip — reconcile the
+	    // chip UI + filter before first interaction (category keys are latin,
+	    // no encodeURIComponent needed for compare; still URL-encoded on write
+	    // via URLSearchParams).
+	    if (activeCat !== defaultCat) {
+	      const matchChip = chips.find((c) => (c.getAttribute('data-chip') || '') === activeCat);
+	      if (matchChip) {
+	        chips.forEach((c) => c.classList.toggle('is-active', c === matchChip));
+	      } else {
+	        activeCat = defaultCat; // invalid cat key — fall back silently
+	      }
+	    }
+	    dedupeVisibleCards();
+	    applyFilter();
+
+	    if (sortWrap && sortTrigger && sortMenu && sortOpts.length) {
+	      const sortLabels = { trending: 'טרנדי', new: 'חדש', closing: 'נסגרים בקרוב', volume: 'נפח גבוה' };
+	      const listenerOpts = feedSignal ? { signal: feedSignal } : undefined;
+	      const optForValue = (value) => sortOpts.find((opt) => opt.dataset.sortValue === value);
+
+	      function setSortSelection(value) {
+	        sortValue = value;
+	        sortOpts.forEach((opt) => opt.setAttribute('aria-selected', String(opt.dataset.sortValue === value)));
+	        if (sortLabel) sortLabel.textContent = sortLabels[value] || sortLabels.trending;
+	      }
+
+	      function closeSortMenu(opts) {
+	        if (sortMenu.hidden) return;
+	        sortMenu.hidden = true;
+	        sortTrigger.setAttribute('aria-expanded', 'false');
+	        if (opts && opts.returnFocus) sortTrigger.focus();
+	      }
+
+	      function openSortMenu() {
+	        if (!sortMenu.hidden) return;
+	        sortMenu.hidden = false;
+	        sortTrigger.setAttribute('aria-expanded', 'true');
+	        const active = optForValue(sortValue) || sortOpts[0];
+	        active?.focus();
+	      }
+
+	      function selectSort(value) {
+	        setSortSelection(value);
+	        applySort(sortValue);
+	        writeUrlParam('sort', sortValue, defaultSort);
+	        closeSortMenu({ returnFocus: true });
+	      }
+
+	      sortTrigger.addEventListener('click', () => {
+	        if (sortMenu.hidden) openSortMenu();
+	        else closeSortMenu();
+	      }, listenerOpts);
+
+	      sortTrigger.addEventListener('keydown', (event) => {
+	        if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+	          event.preventDefault();
+	          openSortMenu();
+	        }
+	      }, listenerOpts);
+
+	      sortOpts.forEach((opt) => {
+	        opt.addEventListener('click', () => selectSort(opt.dataset.sortValue || 'trending'), listenerOpts);
+	        opt.addEventListener('keydown', (event) => {
+	          if (event.key === 'Enter' || event.key === ' ') {
+	            event.preventDefault();
+	            selectSort(opt.dataset.sortValue || 'trending');
+	            return;
+	          }
+	          if (event.key === 'Escape') {
+	            event.preventDefault();
+	            closeSortMenu({ returnFocus: true });
+	            return;
+	          }
+	          if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+	            event.preventDefault();
+	            const idx = sortOpts.indexOf(opt);
+	            const nextIdx = event.key === 'ArrowDown'
+	              ? (idx + 1) % sortOpts.length
+	              : (idx - 1 + sortOpts.length) % sortOpts.length;
+	            sortOpts[nextIdx]?.focus();
+	            return;
+	          }
+	          if (event.key === 'Home') { event.preventDefault(); sortOpts[0]?.focus(); return; }
+	          if (event.key === 'End') { event.preventDefault(); sortOpts[sortOpts.length - 1]?.focus(); }
+	        }, listenerOpts);
+	      });
+
+	      // Click-outside: document-level delegation, resolved live (ClientRouter-safe —
+	      // this listener is bound once per init() and torn down via feedSignal on
+	      // astro:before-swap, so it never survives a soft-nav to a non-feed page).
+	      document.addEventListener('click', (event) => {
+	        if (sortMenu.hidden) return;
+	        const path = typeof event.composedPath === 'function' ? event.composedPath() : [];
+	        if (path.includes(sortWrap) || sortWrap.contains(event.target)) return;
+	        closeSortMenu();
+	      }, listenerOpts);
+
+	      document.addEventListener('keydown', (event) => {
+	        if (event.key === 'Escape' && !sortMenu.hidden && sortWrap.contains(document.activeElement)) {
+	          closeSortMenu({ returnFocus: true });
+	        }
+	      }, listenerOpts);
+
+	      const requestedSort = readUrlParam('sort', defaultSort, sortOpts.map((opt) => opt.dataset.sortValue || ''));
+	      setSortSelection(requestedSort);
+	      applySort(sortValue);
+	    }
+	    if (loadMore) {
+	      loadMore.addEventListener('click', () => { void loadNextPage(); }, feedSignal ? { signal: feedSignal } : undefined);
+	      syncLoadMore();
+	      if ('IntersectionObserver' in window) {
+	        loadObserver = new IntersectionObserver((entries) => {
+	          if (entries.some((entry) => entry.isIntersecting)) void loadNextPage();
+	        }, { rootMargin: `${currentPrefetchMargin()}px 0px` });
+	        loadObserver.observe(loadMore);
+	      }
+	    }
+	    primeDesktopFeed();
+
+    // Live-fetch seam: one feed-level SSE, no per-card sockets. Existing cards
+    // get lightweight price/probability updates; richer hero/card rerenders can
+    // consume the same `hz:discovery-feed-snapshot` event later.
+    const streamFeed = root?.dataset.feed || 'trending';
+    const streamCategory = root?.dataset.category || '';
+    const priceLabel = (value) => 'V₪ ' + Math.max(0, Math.min(100, Math.round(Number(value) || 0)));
+	    const priceToken = (value) => {
+	      const amount = Math.max(0, Math.min(100, Math.round(Number(value) || 0)));
+	      return '<bdi class="hz-money" dir="ltr" aria-label="' + priceLabel(amount) + '">' +
+	        (window.HZCurrency?.symbolHtml?.({ decorative: true }) || '<span aria-hidden="true">V₪</span>') +
+	        '<span>' + amount + '</span></bdi>';
+	    };
+	    const itemFeedKey = (item) => String(item?.feedKey || item?.marketKey || '');
+	    function probabilityOf(outcome) {
+	      const raw = Number(outcome?.probability);
+	      if (!Number.isFinite(raw)) return null;
+	      return raw <= 1 ? raw * 100 : raw;
+	    }
+	    function findCardForItem(item) {
+	      const feedKey = itemFeedKey(item);
+	      const marketKey = String(item?.marketKey || '');
+	      const allCards = Array.from(stage.querySelectorAll('[data-market-key]'));
+	      return allCards.find((candidate) => (
+	        feedKey && candidate.dataset.feedKey === feedKey
+	      )) || allCards.find((candidate) => (
+	        marketKey && candidate.dataset.marketKey === marketKey
+	      )) || null;
+	    }
+	    function reconcileTrendingOrder(items) {
+	      if (currentSort() !== 'trending') return;
+	      const ordered = [];
+	      const seen = new Set();
+	      for (const item of items) {
+	        const card = findCardForItem(item);
+	        if (!card || seen.has(card)) continue;
+	        seen.add(card);
+	        ordered.push(card);
+	      }
+	      if (ordered.length < 2) return;
+	      const current = Array.from(stage.querySelectorAll('.hz-card'));
+	      if (ordered.every((card, index) => current[index] === card)) return;
+	      const fragment = document.createDocumentFragment();
+	      ordered.forEach((card) => fragment.appendChild(card));
+	      stage.insertBefore(fragment, stage.firstChild);
+	      cards = Array.from(stage.querySelectorAll('.hz-card'));
+	      applyFilter();
+	    }
+	    function updateCard(item) {
+	      const card = findCardForItem(item);
+	      if (!card) return;
+	      const outcomes = Array.isArray(item.outcomes) ? item.outcomes : [];
+      const top = outcomes
+        .map((outcome) => ({ outcome, pct: probabilityOf(outcome) }))
+        .filter((entry) => Number.isFinite(entry.pct))
+        .sort((a, b) => b.pct - a.pct)[0];
+      const ring = card.querySelector('[data-card-ring-value]');
+      if (ring && top) ring.textContent = Math.round(top.pct) + '%';
+      outcomes.forEach((outcome) => {
+        const key = String(outcome.outcomeKey || '');
+        const pct = probabilityOf(outcome);
+        if (!Number.isFinite(pct)) return;
+        card.querySelectorAll('[data-card-outcome-price]').forEach((node) => {
+          if (node.dataset.cardOutcomePrice === key) node.innerHTML = priceToken(pct);
+        });
+        card.querySelectorAll('[data-card-outcome-prob]').forEach((node) => {
+          if (node.dataset.cardOutcomeProb === key) node.textContent = Math.round(pct) + '%';
+        });
+      });
+      if (item.volume?.value != null) card.dataset.volume = String(item.volume.value);
+      // repaint the visible footer volume too (was only the sort-key dataset before)
+      // volume only grows, so non-null -> null won't happen in practice — but a
+      // sub-floor market crossing the floor (null -> non-null) must still populate,
+      // so we branch on both directions instead of skipping null labels.
+      const volEl = card.querySelector('[data-card-volume]');
+      if (volEl) {
+        if (item.volume?.label == null) {
+          volEl.textContent = '';
+        } else {
+          const volumeLabel = String(item.volume.label).replace(/^נפח מסחר:\s*/, '');
+          // Rebuild as the canonical hz-money/bdi structure (same shape SSR's
+          // vshekelMoneyHtml and this file's own priceToken() above use) instead
+          // of splicing the symbol into plain text via regex — that left the
+          // trailing amount as bare text outside any bidi isolation, so inside
+          // the RTL card footer it visually reordered to the symbol's other
+          // side on every SSE update (root cause of the wrong-side V₪ bug).
+          const amountText = volumeLabel.replace(/V[\u200e\u200f]?\u20aa\s*/, '');
+          volEl.innerHTML = '<bdi class="hz-money" dir="ltr" aria-label="' + volumeLabel + '">' +
+            (window.HZCurrency?.symbolHtml?.({ decorative: true }) || '<span aria-hidden="true">V₪</span>') +
+            '<span>' + amountText + '</span></bdi>';
+        }
+      }
+    }
+    if (typeof window.EventSource !== 'function') return;
+    // openStream closes over THIS page's feed/category + updateCard. Arming it into
+    // the module-level `reopen` lets the visibility handler reconnect on return.
+    function openStream() {
+      if (source) return;          // already live
+      if (document.hidden) return; // backgrounded → wait for visibilitychange to reopen
+      const url = new URL('/api/discovery/feed/stream', window.location.origin);
+      url.searchParams.set('feed', streamFeed);
+      if (streamCategory) url.searchParams.set('category', streamCategory);
+      source = new EventSource(url.toString());
+      source.addEventListener('discovery.feed_snapshot', (event) => {
+        let payload = null;
+        try { payload = JSON.parse(event.data || '{}'); } catch (_) {}
+	        if (!payload || !Array.isArray(payload.items)) return;
+	        window.dispatchEvent(new CustomEvent('hz:discovery-feed-snapshot', { detail: payload }));
+	        payload.items.forEach(updateCard);
+	        reconcileTrendingOrder(payload.items);
+	      });
+	    }
+    reopen = openStream; // arm for visibility-driven reconnect
+    openStream();        // open now (no-op if the tab is currently hidden)
+    } // end init()
+
+    init();
+    document.addEventListener('astro:page-load', init);                       // re-enter a feed page → reopen
+	    document.addEventListener('astro:before-swap', () => {                    // leave → close (no leak)
+	      closeStream();
+	      disconnectLoadObserver();
+	      abortFeedBindings();
+	      reopen = null;
+	    });
+    // Mobile lens: outdoors on a flaky connection, a backgrounded tab's SSE either
+    // burns battery/data or silently goes dead (socket "open" but no events), so you
+    // return to a stale feed. Drop the socket when hidden; reopen on return — the
+    // fresh connection's snapshot IS the catch-up. Bound ONCE (the IIFE runs once;
+    // only init re-runs on soft-nav), so no listener pile-up.
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) closeStream();
+      else if (reopen) reopen();
+    });
+  })();
+</script>

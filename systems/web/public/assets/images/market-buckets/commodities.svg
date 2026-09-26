@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="commodities market image">
+  <defs>
+    <linearGradient id="g" x1="62" y1="50" x2="454" y2="466" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#3a3420"/>
+      <stop offset=".58" stop-color="#182330"/>
+      <stop offset="1" stop-color="#0b111b"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#g)"/>
+  <!-- Flatbed truck cab (left, sloped front, lower than the barrel). -->
+  <path d="M64 304 L88 282 L188 282 L188 376 L64 376 Z" fill="none" stroke="#e7edf4" stroke-width="20" stroke-linejoin="round"/>
+  <!-- Cab window — mint, the driver. -->
+  <path d="M94 296 L106 286 L154 286 L154 318 L94 318 Z" fill="none" stroke="#6ee7b7" stroke-width="12" stroke-linejoin="round"/>
+  <!-- Flatbed platform — a horizontal beam, the barrel rides on top. -->
+  <path d="M188 376 L450 376" stroke="#e7edf4" stroke-width="20" stroke-linecap="round"/>
+  <path d="M450 376 L450 348" stroke="#e7edf4" stroke-width="20" stroke-linecap="round"/>
+  <!-- Barrel sitting on the bed — the commodity itself. -->
+  <ellipse cx="316" cy="200" rx="76" ry="16" fill="none" stroke="#e7edf4" stroke-width="20"/>
+  <path d="M240 200v176" stroke="#e7edf4" stroke-width="20" stroke-linecap="round"/>
+  <path d="M392 200v176" stroke="#e7edf4" stroke-width="20" stroke-linecap="round"/>
+  <!-- Two iron bands on the barrel — amber, the commodity value signal. -->
+  <path d="M250 252h132" stroke="#f7c66a" stroke-width="16" stroke-linecap="round"/>
+  <path d="M250 320h132" stroke="#f7c66a" stroke-width="16" stroke-linecap="round"/>
+  <!-- Wheels. -->
+  <circle cx="124" cy="402" r="26" fill="none" stroke="#e7edf4" stroke-width="20"/>
+  <circle cx="406" cy="402" r="26" fill="none" stroke="#e7edf4" stroke-width="20"/>
+  <!-- Highway dashes — the "in motion" signal. -->
+  <path d="M52 438h88M186 438h80M312 438h80" stroke="#f7c66a" stroke-width="12" stroke-linecap="round"/>
+</svg>

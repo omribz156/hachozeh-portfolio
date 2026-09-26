@@ -1,0 +1,76 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+usage() {
+  cat <<'EOF'
+committer: stage exactly the files you list, then commit
+
+usage:
+  ./workspace/scripts/committer -m "docs: tighten startup docs" path/to/file path/to/other
+
+rules:
+  - message required
+  - at least one file required
+  - refuses to run if unrelated files are already staged
+EOF
+}
+
+message=""
+files=()
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    -m|--message)
+      shift
+      message="${1:-}"
+      ;;
+    -h|--help)
+      usage
+      exit 0
+      ;;
+    *)
+      files+=("$1")
+      ;;
+  esac
+  shift || true
+done
+
+if [[ -z "$message" ]]; then
+  echo "commit message required" >&2
+  usage
+  exit 1
+fi
+
+if [[ "${#files[@]}" -eq 0 ]]; then
+  echo "at least one file required" >&2
+  usage
+  exit 1
+fi
+
+if ! git rev-parse --show-toplevel >/dev/null 2>&1; then
+  echo "not inside a git repo" >&2
+  exit 1
+fi
+
+staged_now="$(git diff --cached --name-only)"
+if [[ -n "$staged_now" ]]; then
+  echo "refusing to run: there are already staged files" >&2
+  echo "$staged_now" >&2
+  exit 1
+fi
+
+for file in "${files[@]}"; do
+  if [[ ! -e "$file" ]]; then
+    echo "missing file: $file" >&2
+    exit 1
+  fi
+done
+
+git add -- "${files[@]}"
+
+echo "staged:"
+git diff --cached --name-only -- "${files[@]}"
+echo
+
+git commit -m "$message"

@@ -1,0 +1,186 @@
+---
+// Shell-less layout for the help center (and later, the legals). Deliberately does
+// NOT render SiteHeader / the auth shell — so these pages carry zero SSR-baked auth
+// state and can be PRERENDERED safely. (Prerendering a page that uses the normal
+// Layout breaks the persist-shell avatar — see the reference memory / the help
+// center's own history.) Help is its own surface: opened in a new tab from the app,
+// kept intentionally separate (no return-to-platform in the header). The footer
+// reuses the real site footer's bottom legal strip.
+import '../styles/global.css';
+import '../styles/patterns/vshekel.css';
+import { ClientRouter } from 'astro:transitions';
+import GoogleAnalyticsTag from '../components/GoogleAnalyticsTag.astro';
+import PostHogTag from '../components/PostHogTag.astro';
+import { serializeJsonForHtmlScript } from '../lib/json-script.js';
+import {
+  SITE_LANGUAGE,
+  SITE_LOCALE,
+  SITE_NAME,
+  buildCanonicalUrl,
+  buildPageTitle,
+  buildSocialImageMeta,
+  buildWebPageJsonLd,
+  buildWebSiteJsonLd,
+  clampSeoText,
+  compactText,
+  withLargeImagePreviewRobots,
+} from '../lib/seo.js';
+
+interface Props {
+  title: string;
+  description?: string;
+  canonicalPath?: string;
+  canonicalUrl?: string;
+  image?: string;
+  ogType?: string;
+  robots?: string;
+  structuredData?: Record<string, unknown> | Array<Record<string, unknown>>;
+  twitterCard?: string;
+}
+const {
+  title,
+  description = '',
+  canonicalPath,
+  canonicalUrl,
+  image: explicitImage,
+  ogType = 'website',
+  robots = 'index, follow',
+  structuredData,
+  twitterCard = 'summary',
+} = Astro.props;
+const sharePageImageKeys = new Set(['help', 'terms', 'privacy', 'cookies', 'accessibility', 'graphs-and-accuracy']);
+const defaultShareImage = (() => {
+  const path = canonicalPath || Astro.url.pathname;
+  const firstSegment = String(path || '').split('?')[0].split('/').filter(Boolean)[0] || '';
+  const key = firstSegment === 'help' ? 'help' : firstSegment;
+  return sharePageImageKeys.has(key) ? `/share/pages/${key}.png` : undefined;
+})();
+const image = explicitImage || defaultShareImage;
+const seoTitle = buildPageTitle(title);
+const seoDescription = clampSeoText(description, 160, '');
+const seoCanonicalUrl = canonicalUrl || buildCanonicalUrl(canonicalPath || Astro.url.pathname);
+const seoImageMeta = buildSocialImageMeta(image);
+const seoImage = seoImageMeta.url;
+const seoRobots = withLargeImagePreviewRobots(robots);
+const jsonLd = structuredData || buildWebPageJsonLd({
+  title: seoTitle,
+  description: seoDescription,
+  canonicalUrl: seoCanonicalUrl,
+  imageUrl: seoImage,
+});
+const jsonLdItems = [buildWebSiteJsonLd(), ...(Array.isArray(jsonLd) ? jsonLd : [jsonLd])];
+
+// Mirrors the LEGAL array in SiteFooter.astro — keep in sync.
+const LEGAL = [
+  { label: 'תנאי שימוש', href: '/terms' },
+  { label: 'מדיניות פרטיות', href: '/privacy' },
+  { label: 'עוגיות', href: '/cookies' },
+  { label: 'הצהרת נגישות', href: '/accessibility' },
+];
+---
+<!doctype html>
+<html class="dark" dir="rtl" lang="he">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content" />
+    <GoogleAnalyticsTag />
+    <PostHogTag />
+    <ClientRouter />
+    <title>{seoTitle}</title>
+    {seoDescription && <meta name="description" content={seoDescription} />}
+    <meta name="robots" content={seoRobots} />
+    <link rel="canonical" href={seoCanonicalUrl} />
+    <meta name="theme-color" content="#101512" />
+    <link rel="alternate" hreflang={SITE_LANGUAGE} href={seoCanonicalUrl} />
+    <link rel="alternate" hreflang="x-default" href={seoCanonicalUrl} />
+    <meta property="og:site_name" content={SITE_NAME} />
+    <meta property="og:locale" content={SITE_LOCALE} />
+    <meta property="og:type" content={ogType} />
+    <meta property="og:title" content={seoTitle} />
+    {seoDescription && <meta property="og:description" content={seoDescription} />}
+    <meta property="og:url" content={seoCanonicalUrl} />
+    <meta property="og:image" content={seoImage} />
+    <meta property="og:image:type" content={seoImageMeta.type} />
+    <meta property="og:image:width" content={String(seoImageMeta.width)} />
+    <meta property="og:image:height" content={String(seoImageMeta.height)} />
+    <meta property="og:image:alt" content={compactText(title, SITE_NAME)} />
+    <meta name="twitter:card" content={twitterCard} />
+    <meta name="twitter:title" content={seoTitle} />
+    {seoDescription && <meta name="twitter:description" content={seoDescription} />}
+    <meta name="twitter:image" content={seoImage} />
+    <meta name="twitter:image:alt" content={compactText(title, SITE_NAME)} />
+    {jsonLdItems.map((item) => (
+      <script type="application/ld+json" set:html={serializeJsonForHtmlScript(item)} />
+    ))}
+    <link rel="icon" type="image/svg+xml" href="/assets/brand/logo-tile.svg" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@500;600;700&display=block"
+      rel="stylesheet"
+    />
+    <style is:inline>
+      body {
+        min-height: 100vh;
+        min-height: 100dvh; /* dynamic viewport: don't size past the visible area when the iOS bar is shown */
+        display: flex;
+        flex-direction: column;
+      }
+      .hz-docs-bar {
+        position: sticky; top: 0; z-index: 10;
+        height: 4rem; /* match the platform header bar (.hz-shell__inner) */
+        background: var(--hz-bg, #101512);
+        border-bottom: 1px solid var(--hz-border-faint, rgba(255,255,255,0.08));
+      }
+      /* inner aligns to the SHARED content frame so the brand sits exactly where
+         the platform header brand does — clean cross-surface transition */
+      .hz-docs-bar__inner {
+        display: flex; align-items: center; height: 100%;
+        max-width: var(--hz-content-max, 1280px); margin: 0 auto;
+        padding: 0 var(--hz-content-pad, 1.5rem);
+      }
+      /* brand sized to match .hz-brand (mark 2rem / name 1.5rem) for continuity */
+      .hz-docs-bar__home { display: inline-flex; align-items: center; gap: 0.55rem; color: var(--hz-text, #f4f1ea); text-decoration: none; }
+      .hz-docs-bar__home img { display: block; width: 2rem; height: 2rem; }
+      .hz-docs-bar__name { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.01em; line-height: 1; }
+      .hz-docs-main { flex: 1 0 auto; }
+      .hz-docs-foot { flex: none; padding-block: 1.5rem; border-top: 1px solid var(--hz-border-faint, rgba(255,255,255,0.08)); }
+      .hz-docs-foot__inner { max-width: var(--hz-content-max, 1280px); margin: 0 auto; padding-inline: var(--hz-content-pad, 1.5rem); }
+      /* bottom legal strip — ported from SiteFooter / site-shell.css to match the real footer */
+      .hz-footer__bottom { display: flex; flex-direction: column; align-items: flex-start; justify-content: space-between; gap: 1rem; }
+      @media (min-width: 768px) { .hz-footer__bottom { flex-direction: row; align-items: center; } }
+      .hz-footer__copyright { font-size: 0.75rem; color: var(--hz-text-faint); }
+      .hz-footer__legal { display: flex; gap: 1.5rem; flex-wrap: wrap; }
+      .hz-footer__legal-link { font-size: 0.75rem; color: var(--hz-text-faint); text-decoration: none; transition: color var(--hz-motion); }
+      .hz-footer__legal-link:hover { color: var(--hz-text-soft); }
+    </style>
+  </head>
+  <body>
+    <header class="hz-docs-bar">
+      <div class="hz-docs-bar__inner">
+        <a class="hz-docs-bar__home" href="/help">
+          <img src="/assets/brand/logo-tile.svg" alt="" width="32" height="32" />
+          <span class="hz-docs-bar__name">החוזה</span>
+        </a>
+      </div>
+    </header>
+    <main class="hz-docs-main">
+      <slot />
+    </main>
+    <footer class="hz-docs-foot">
+      <div class="hz-docs-foot__inner">
+        <div class="hz-footer__bottom">
+          <div class="hz-footer__copyright">&copy; 2026 החוזה. כל הזכויות שמורות.</div>
+          <div class="hz-footer__legal">
+            {LEGAL.map((l) => (
+              <a class="hz-footer__legal-link" href={l.href}>{l.label}</a>
+            ))}
+          </div>
+        </div>
+      </div>
+    </footer>
+    <script>
+      import '../client/currency/vshekel.client.js';
+    </script>
+  </body>
+</html>

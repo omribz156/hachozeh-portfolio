@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="foreign exchange market image">
+  <defs>
+    <linearGradient id="g" x1="56" y1="60" x2="456" y2="454" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#20384b"/>
+      <stop offset=".6" stop-color="#17212d"/>
+      <stop offset="1" stop-color="#0b111b"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#g)"/>
+  <path d="M156 178h190l-46-46M356 334H166l46 46" fill="none" stroke="#f7c66a" stroke-width="28" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="151" y="282" fill="#e7edf4" font-family="Arial, sans-serif" font-size="84" font-weight="800">$</text>
+  <text x="268" y="282" fill="#6ee7b7" font-family="Arial, sans-serif" font-size="58" font-weight="800">V₪</text>
+</svg>

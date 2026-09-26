@@ -1,0 +1,117 @@
+/* ──────────────────────────────────────────────────────────────
+   patterns/binary-pill-duo.css
+   Side-by-side Yes/No pair used inside the binary trade ticket.
+   Replaces the outcome-ladder pair of rows for binary markets:
+   in a binary market Yes + No = 1.00, so showing them as two
+   list rows duplicates the same information twice. Collapsing
+   into one paired affordance keeps the math honest and the trade
+   surface focal.
+   Click toggles which pill is active. Active pill carries the
+   full side-aware color background; inactive pill stays muted.
+   Click does NOT cause any other page-state change — chart, hero,
+   viewer-positions stay anchored to the canonical side. The pill
+   is a trade-direction selector, not a view-toggle.
+   Side semantics:
+     --yes (canonical / optimistic): mint tint family (--hz-action-buy)
+     --no  (non-canonical / inverse): coral tint family (--hz-action-sell)
+   For Up/Down markets the same pattern renders with Up taking the
+   --yes role and Down taking --no. Vocabulary comes from snapshot,
+   not the pattern.
+   BEM:
+     .hz-binary-pill-duo            — wrapper (flex pair)
+     .hz-binary-pill                — single pill button
+     .hz-binary-pill--yes / --no    — side semantics
+     .hz-binary-pill--active        — selected state
+     .hz-binary-pill--disabled      — non-clickable (e.g. sell-side with no holdings)
+     .hz-binary-pill__label         — side name
+     .hz-binary-pill__price         — current contract price
+   ────────────────────────────────────────────────────────────── */
+
+.hz-binary-pill-duo {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.65rem;
+}
+
+.hz-binary-pill {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  border: 1px solid var(--hz-border-faint);
+  border-radius: var(--hz-radius-md);
+  background: rgb(255 255 255 / 0.025);
+  padding: 0.86rem 1.1rem;
+  color: var(--hz-text-soft);
+  font-family: var(--hz-font-ui);
+  cursor: pointer;
+  transition:
+    background 180ms ease,
+    border-color 180ms ease,
+    color 180ms ease,
+    transform 120ms ease;
+}
+
+.hz-binary-pill:hover:not(.hz-binary-pill--disabled) {
+  background: rgb(255 255 255 / 0.045);
+  border-color: var(--hz-border-soft);
+}
+
+.hz-binary-pill:active:not(.hz-binary-pill--disabled) {
+  transform: translateY(1px);
+}
+
+.hz-binary-pill__label {
+  font-size: 0.98rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.hz-binary-pill__price {
+  font-family: var(--hz-font-mono);
+  font-size: 0.92rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+/* Active state — full side-aware tint. */
+.hz-binary-pill--yes.hz-binary-pill--active {
+  background: rgb(var(--hz-action-buy-rgb) / 0.18);
+  border-color: rgb(var(--hz-action-buy-rgb) / 0.6);
+  color: var(--hz-action-buy);
+}
+
+.hz-binary-pill--no.hz-binary-pill--active {
+  background: rgb(var(--hz-action-sell-rgb) / 0.18);
+  border-color: rgb(var(--hz-action-sell-rgb) / 0.6);
+  color: var(--hz-action-sell-strong);
+}
+
+.hz-binary-pill--yes.hz-binary-pill--active .hz-binary-pill__label,
+.hz-binary-pill--yes.hz-binary-pill--active .hz-binary-pill__price {
+  color: var(--hz-action-buy);
+}
+
+.hz-binary-pill--no.hz-binary-pill--active .hz-binary-pill__label,
+.hz-binary-pill--no.hz-binary-pill--active .hz-binary-pill__price {
+  color: var(--hz-action-sell-strong);
+}
+
+.hz-binary-pill--disabled {
+  cursor: not-allowed;
+  opacity: 0.42;
+}
+
+@media (max-width: 480px) {
+  .hz-binary-pill {
+    padding: 0.72rem 0.9rem;
+  }
+
+  .hz-binary-pill__label {
+    font-size: 0.92rem;
+  }
+
+  .hz-binary-pill__price {
+    font-size: 0.84rem;
+  }
+}

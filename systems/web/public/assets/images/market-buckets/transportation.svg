@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="transportation market image">
+  <defs>
+    <linearGradient id="g" x1="58" y1="52" x2="456" y2="466" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1d3a4b"/>
+      <stop offset=".56" stop-color="#152232"/>
+      <stop offset="1" stop-color="#0b111b"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#g)"/>
+  <!-- Bus body — wide rounded rectangle, the public-transit silhouette. -->
+  <rect x="56" y="178" width="400" height="190" rx="26" fill="none" stroke="#e7edf4" stroke-width="22" stroke-linejoin="round"/>
+  <!-- Driver window — mint accent, front of the bus (right side). -->
+  <rect x="378" y="208" width="62" height="62" rx="8" fill="none" stroke="#6ee7b7" stroke-width="14" stroke-linejoin="round"/>
+  <!-- Passenger windows — four neutral squares across the side. -->
+  <rect x="80" y="208" width="58" height="62" rx="6" fill="none" stroke="#e7edf4" stroke-width="14"/>
+  <rect x="152" y="208" width="58" height="62" rx="6" fill="none" stroke="#e7edf4" stroke-width="14"/>
+  <rect x="224" y="208" width="58" height="62" rx="6" fill="none" stroke="#e7edf4" stroke-width="14"/>
+  <rect x="296" y="208" width="58" height="62" rx="6" fill="none" stroke="#e7edf4" stroke-width="14"/>
+  <!-- Door — vertical line + subtle handle dot, mid-body. -->
+  <path d="M226 296v66" stroke="#e7edf4" stroke-width="10" stroke-linecap="round" opacity=".55"/>
+  <path d="M196 296v66" stroke="#e7edf4" stroke-width="10" stroke-linecap="round" opacity=".55"/>
+  <!-- Headlight — amber dot at the front. -->
+  <circle cx="440" cy="328" r="14" fill="#f7c66a"/>
+  <!-- Two wheels. -->
+  <circle cx="136" cy="388" r="30" fill="none" stroke="#e7edf4" stroke-width="22"/>
+  <circle cx="376" cy="388" r="30" fill="none" stroke="#e7edf4" stroke-width="22"/>
+  <!-- Highway lane dashes underneath. -->
+  <path d="M52 432h100M198 432h84M328 432h128" stroke="#f7c66a" stroke-width="14" stroke-linecap="round"/>
+</svg>

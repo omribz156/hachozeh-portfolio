@@ -1,0 +1,350 @@
+/**
+ * probability-chart.css — Layer 1 renderer styles.
+ *
+ * Covers the SVG canvas and all elements the HzProbabilityChartRenderer
+ * mounts into it: lines, grid, axes, end-dots, hover crosshair, tooltip.
+ *
+ * What is NOT here:
+ *   - Chart card chrome: .chart-card root, footer, legend, line-picker,
+ *     range-tabs, settings, controls — those belong to the wrapper layer.
+ */
+
+/* ── SVG canvas ─────────────────────────────────────────────────────────── */
+
+.chart-card__svg {
+  width: 100%;
+  height: auto;
+  display: block;
+  touch-action: pan-y;
+  /* Clip content to the SVG viewport so points outside the autoscaled
+   * Y-domain (e.g. a seed-artifact spike at 100% when the rest of the
+   * series sits at 12-17%) don't leak above/below the chart card. The
+   * Y-domain is allowed to ignore outliers; the rendered geometry follows. */
+  overflow: hidden;
+  /* Chart coordinates are intrinsically LTR (time flows left→right).
+   * The page may be RTL, but SVG inherits direction from the document,
+   * which makes text-anchor:start anchor the END of the label and flow
+   * leftward into the data area — the line then visually passes through
+   * the gutter label. Force LTR on the SVG to break that. */
+  direction: ltr;
+}
+
+/* ── Grid lines ─────────────────────────────────────────────────────────── */
+
+.chart-card__svg .grid {
+  stroke: var(--chart-grid);
+  stroke-width: 1;
+  /* Dotted, not solid — matches Polymarket (1px on / 3px off) and Kalshi
+   * (1/4). True dots read as a reference grid that sits behind the data
+   * rather than a solid rule that competes with it. */
+  stroke-dasharray: 1 3;
+}
+
+/* Vertical (time) gridlines ride quieter than the horizontal probability
+ * lines — Poly tints them ~half as bright; we drop opacity to the same effect
+ * so the value grid stays the one the eye reads. */
+.chart-card__svg .grid--vertical {
+  opacity: 0.5;
+}
+
+/* ── Axis labels ────────────────────────────────────────────────────────── */
+
+.chart-card__svg .axis-text {
+  fill: var(--chart-axis-text);
+  font-size: 10.5px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+}
+
+/* The resolution-time label pinned at the right edge of a resolved chart (where
+ * it settled). Slightly bolder + brighter than the round-number ticks so it
+ * reads as "this is when it ended," not just another grid tick. */
+.chart-card__svg .axis-text--resolution {
+  fill: var(--hz-text-muted, var(--chart-axis-text));
+  font-weight: 600;
+}
+
+/* ── Probability lines ──────────────────────────────────────────────────── */
+
+.chart-card__svg .line {
+  fill: none;
+  /* 1.5 viewBox units → ~2px CSS at typical render scale (600 viewBox
+   * stretched to ~800px wide). Matches the old chart's effective line
+   * weight; the previous 2-unit stroke was reading ~33% heavier than
+   * the genre default. */
+  stroke-width: 1.5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.chart-card__svg .line--past {
+  opacity: 1;
+}
+
+.chart-card__svg .line--future {
+  /* 0.28 reads cleanly on desktop but falls below visible-threshold on
+   * mobile (smaller screen + lower contrast + thinner 1.5-stroke lines =
+   * sub-pixel-level visibility). 0.45 keeps the dim distinction clear
+   * and stays readable on mobile. */
+  opacity: 0.45;
+}
+
+/* Settlement segment (resolved charts): the dashed tail from the last traded
+ * point to the terminal (winner → 100%, loser → 0%). Dashed + dimmed so it
+ * reads as "how it settled," distinct from the solid "prices people paid"
+ * line — keeps us clear of the no-synthetic-movement rule. */
+.chart-card__svg .line--settlement {
+  stroke-dasharray: 2.5 3;
+  stroke-width: 1.5;
+  opacity: 0.6;
+}
+
+/* The solid horizontal carry: the last traded price held flat from the final
+ * trade to resolution (no trades there — the LMSR price genuinely held). Solid
+ * (not dashed) so a sparse market doesn't show a long dangling dashed tail;
+ * slightly under full opacity to read as "held, untraded" vs the active line. */
+.chart-card__svg .line--settlement-carry {
+  stroke-width: 1.5;
+  opacity: 0.9;
+}
+
+/* ── End-of-line dots ───────────────────────────────────────────────────── */
+
+.chart-card__svg .end-dot {
+  stroke: none;
+}
+
+/* Resolved-market terminator variants (Slice 2).
+ * Winner gets a subtle outer stroke so it pops above the loser dots.
+ * Loser is slightly dimmed so the winner is visually primary.
+ * The glyph (✓/✗) sits centered on the enlarged dot. */
+
+.chart-card__svg .end-dot--winner {
+  stroke: rgba(255, 255, 255, 0.35);
+  stroke-width: 1.5;
+}
+
+.chart-card__svg .end-dot--loser {
+  opacity: 0.75;
+  stroke: none;
+}
+
+.chart-card__svg .end-dot-glyph {
+  fill: #fff;
+  font-weight: 700;
+  font-size: 9px;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+  pointer-events: none;
+  /* Prevent text from inheriting page RTL direction which would misplace
+   * the glyph relative to the dot center. The parent SVG is already set
+   * to ltr via the direction attribute; this belt-and-suspenders. */
+  direction: ltr;
+}
+
+/* ── Binary area fill ───────────────────────────────────────────────────── */
+
+/* Gradient fill is set inline (url(#...)); this rule exists for future CSS
+ * hooks (e.g. transition on opacity, forced-colors overrides). */
+.chart-card__svg .line-area {
+  stroke: none;
+}
+
+/* Soft halo on the end-dot for binary's single-line mode. The line is the
+ * star of the show, so the live-tip gets quiet visual presence.
+ * Not an animation — just a stationary glow. The 6px viewBox-unit blur
+ * reads as ~8px CSS at typical render scale (600px viewBox → ~800px wide). */
+.chart-card__svg .end-dot--live {
+  filter: drop-shadow(0 0 6px currentColor);
+}
+
+/* Continuous live "heartbeat" — a ring that expands and fades out from behind
+ * the live end-dot every ~2.4s, signalling the chart updates in real time
+ * (the hero charts now refresh off the discovery feed doorbell; the pulse is
+ * the visual tell). A separate element from .end-dot--live so it never
+ * collides with the one-time reveal pulse. transform-box: fill-box anchors the
+ * scale to the circle's own center rather than the SVG origin. */
+.chart-card__svg .end-dot-ping {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: hz-chart-ping 2400ms ease-out infinite;
+  pointer-events: none;
+}
+@keyframes hz-chart-ping {
+  0%   { transform: scale(1); opacity: 0.5; }
+  70%  { transform: scale(5); opacity: 0; }
+  100% { transform: scale(5); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chart-card__svg .end-dot-ping { animation: none; opacity: 0; }
+}
+
+/* ── Entry animation — trace + lead dot ─────────────────────────────────────
+ * Fires once on first mount (the wrapper sets [data-reveal] for that render
+ * only). All lines trace oldest→newest in parallel; the canonical line's area
+ * wipes in behind it and a lead dot rides its leading edge to "now". Doctrine:
+ * guide/components/market-detail/probability-chart.md → Entry animation. */
+/* Linear (even velocity end-to-end) over 1.5s. An ease-out front-loads the trace —
+ * on a market whose move sits mid-line, the dramatic part flashes past in the
+ * first quarter-second and the bead then crawls a flat tail. Even velocity gives
+ * every segment screen-time proportional to where it sits, and 1.5s reads as a
+ * deliberate reveal that also covers the rest of the page hydrating without
+ * dragging on flat markets. End dots (every line) stay hidden through the draw
+ * and pop in only once it finishes — see hz-chart-dotpop (delay 1500ms). */
+.chart-card__svg[data-reveal] .line--past {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: hz-chart-draw 1500ms linear forwards;
+}
+/* The fill reveal is driven in JS (renderer's rAF clips the fill to the line's
+ * drawn X each frame), not CSS — a CSS wipe is linear in X and outruns the
+ * stepped line. So there is no [data-reveal] .line-area rule here on purpose;
+ * the inline clip-path (width 0 → animated) hides it until the first frame. */
+.chart-card__svg[data-reveal] .reveal-lead-dot {
+  offset-distance: 0%;
+  /* Bright bead riding the front: white rim + series-colored glow so the
+   * motion reads even when the line itself is flat. */
+  stroke: rgba(255, 255, 255, 0.92);
+  stroke-width: 1.5;
+  filter: drop-shadow(0 0 5px currentColor);
+  animation: hz-chart-lead 1500ms linear forwards;
+}
+/* End dots (every line) appear only AFTER the trace finishes: they hold at
+ * opacity 0 through the 1500ms draw (delay = draw duration), then pop in. The
+ * lead dot carries the motion during the draw; the instant it lands, every
+ * line's terminal dot resolves in together. */
+.chart-card__svg[data-reveal] .end-dot {
+  animation: hz-chart-dotpop 260ms ease-out 1500ms both;
+}
+/* Resolved marker (✓/✗ dot + its glyph) is the THIRD/final beat: it lands after
+ * the settlement hop has faded in, so the sequence reads "line → it settled →
+ * ✓". Delay chains it past the hop (1450ms + 360ms ≈ 1810ms). The winner/loser
+ * dot and glyph share this timing so they appear as one piece. (Non-resolved
+ * end-dots keep the .end-dot timing below.) */
+.chart-card__svg[data-reveal] .end-dot--winner,
+.chart-card__svg[data-reveal] .end-dot--loser,
+.chart-card__svg[data-reveal] .end-dot-glyph {
+  animation: hz-chart-dotfade 240ms ease-out 1810ms both;
+}
+/* The live dot's continuous ping also waits out the draw, so the heartbeat
+ * begins only once the dot has landed. opacity:0 holds it hidden through the
+ * delay (the ping's backwards-fill is off, so the base opacity wins); once the
+ * looping ping enters its active phase it drives opacity itself. */
+.chart-card__svg[data-reveal] .end-dot-ping {
+  opacity: 0;
+  animation-delay: 1500ms;
+}
+/* Settlement hop is the SECOND beat: after the solid trade line finishes drawing
+ * (1500ms), the dashed hop to the terminal settlement point fades in. It's a real
+ * segment (the line genuinely reaches the backend's settlement point), so it just
+ * needs to appear after the draw, not wipe — the fade chains it past the line so
+ * it reads as a continuation. `both` holds opacity:0 through the delay so it stays
+ * hidden until its beat; reduced-motion (animation:none) leaves it at base 0.6. */
+.chart-card__svg[data-reveal] .line--settlement {
+  animation: hz-chart-settle-fade 360ms ease-out 1450ms both;
+}
+@keyframes hz-chart-settle-fade {
+  from { opacity: 0; }
+  to   { opacity: 0.6; }
+}
+/* The solid carry rides the SAME settlement beat as the dashed hop: it's the
+ * held-price continuation, so it must stay hidden through the line's draw and
+ * appear only once the line has reached it — otherwise it floats out ahead of
+ * the still-drawing line. `both` + from:0 holds it hidden through the delay. */
+.chart-card__svg[data-reveal] .line--settlement-carry {
+  animation: hz-chart-carry-fade 360ms ease-out 1450ms both;
+}
+@keyframes hz-chart-carry-fade {
+  from { opacity: 0; }
+  to   { opacity: 0.9; }
+}
+@keyframes hz-chart-draw {
+  to { stroke-dashoffset: 0; }
+}
+@keyframes hz-chart-lead {
+  0% { offset-distance: 0%; opacity: 1; }
+  88% { opacity: 1; }
+  100% { offset-distance: 100%; opacity: 0; }
+}
+@keyframes hz-chart-dotfade {
+  0%, 80% { opacity: 0; }
+  100% { opacity: 1; }
+}
+@keyframes hz-chart-dotpop {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .chart-card__svg[data-reveal] .line--past,
+  .chart-card__svg[data-reveal] .line-area,
+  .chart-card__svg[data-reveal] .end-dot,
+  .chart-card__svg[data-reveal] .end-dot-glyph,
+  .chart-card__svg[data-reveal] .end-dot--live,
+  .chart-card__svg[data-reveal] .line--settlement,
+  .chart-card__svg[data-reveal] .line--settlement-carry {
+    animation: none;
+  }
+  .chart-card__svg[data-reveal] .reveal-lead-dot {
+    display: none;
+  }
+}
+
+/* ── Hover crosshair ────────────────────────────────────────────────────── */
+
+.chart-card__svg .crosshair {
+  stroke: var(--chart-crosshair);
+  stroke-width: 1;
+  stroke-dasharray: 3 3;
+}
+
+/* ── Hover dots (per-series snap point on the crosshair) ───────────────── */
+
+.chart-card__svg .hover-dot {
+  stroke: var(--hz-bg-raised);
+  stroke-width: 1.5;
+}
+
+/* ── Hover value labels ─────────────────────────────────────────────────── */
+
+.chart-card__svg .hover-label {
+  font-size: 14px;
+  font-weight: 800;
+  font-family: var(--hz-font-ui);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* Surface-specific chart text sizing. The `svg` in the selector adds an element
+   to the specificity so these beat the base `.chart-card__svg .hover-label`
+   regardless of source order. Market-detail dials the numbers DOWN (dense page,
+   lots of surrounding chrome); the trending hero dials them UP (it's the marquee
+   card, desktop-only). */
+.market-detail-stage-chart svg .hover-label { font-size: 12px; }
+.market-detail-stage-chart svg .axis-text { font-size: 9.5px; }
+.hz-hero svg .hover-label { font-size: 16px; }
+.hz-hero svg .axis-text { font-size: 12px; }
+
+.chart-card__svg .hover-label-bg {
+  fill: rgba(17, 24, 36, 0.92);
+  stroke: rgba(255, 255, 255, 0.08);
+  stroke-width: 1;
+}
+
+/* ── Timestamp pill (top of crosshair) ──────────────────────────────────── */
+
+.chart-card__svg .timestamp-bg {
+  fill: rgba(17, 24, 36, 0.95);
+  stroke: rgba(255, 255, 255, 0.1);
+}
+
+.chart-card__svg .timestamp-text {
+  fill: var(--hz-text);
+  font-size: 10px;
+  font-weight: 700;
+  font-family: var(--hz-font-ui);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+  /* The SVG is force-LTR for axis geometry, which renders this Hebrew date
+   * ("21 יוני · 16:55") in the wrong bidi order. Override to RTL here — safe
+   * because the pill is text-anchor:middle (not the start/end the axis labels
+   * use), so direction doesn't shift its anchoring. */
+  direction: rtl;
+}

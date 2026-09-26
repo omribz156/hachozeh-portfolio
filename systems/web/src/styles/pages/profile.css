@@ -1,0 +1,249 @@
+/* ============================================================================
+   profile.css — owner profile page ("פרופיל חוֹזֶה")
+   Ported from systems/design/to-integrate/profile/dist/ (index.html inline \3c style>
+   + shared.css atoms). Companion files: profile-kit.css (.pk-*), profile-dossier.css
+   (.db-* layout/card). All values are --hz-* tokens.
+
+   The generic atoms (.btn/.avatar/.eyebrow/.chip/.mono/.pos/.neg/.stat-*) are SCOPED
+   under .hz-profile so they don't collide with the web app's globals — the whole
+   profile (incl. the edit overlay) is wrapped in .hz-profile.
+   ========================================================================== */
+
+/* ── atoms (scoped) ─────────────────────────────────────────── */
+.hz-profile .mono { font-family: var(--hz-font-mono); font-feature-settings: "tnum" 1; letter-spacing: -0.01em; }
+.hz-profile .avatar {
+  display: grid; place-items: center; flex: none;
+  border-radius: var(--hz-radius-pill);
+  background:
+    linear-gradient(145deg, rgb(var(--hz-brand-rgb) / 0.22), rgb(var(--hz-info-rgb) / 0.12)),
+    var(--hz-bg-raised);
+  color: var(--hz-text); font-weight: 700; letter-spacing: 0.02em;
+  border: 1px solid var(--hz-border-soft); box-shadow: var(--hz-shadow-soft); overflow: hidden;
+}
+.hz-profile .eyebrow { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--hz-text-faint); }
+.hz-profile .chip {
+  display: inline-flex; align-items: center; gap: 0.4em; padding: 0.2em 0.6em;
+  border-radius: var(--hz-radius-pill); font-size: 0.8rem; font-weight: 600; line-height: 1;
+  background: var(--hz-surface-soft); color: var(--hz-text-soft); border: 1px solid var(--hz-border-faint);
+}
+.hz-profile .chip.buy { background: var(--hz-action-buy-soft); color: var(--hz-action-buy-strong); border-color: transparent; }
+.hz-profile .chip.sell { background: var(--hz-action-sell-soft); color: var(--hz-action-sell-strong); border-color: transparent; }
+.hz-profile .chip.info { background: var(--hz-info-soft); color: var(--hz-info); border-color: transparent; }
+.hz-profile .chip.brand { background: var(--hz-brand-soft); color: var(--hz-brand-strong); border-color: transparent; }
+.hz-profile .btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 0.45em;
+  padding: 0.6em 1.1em; border-radius: var(--hz-radius-pill);
+  font-family: inherit; font-size: 0.9rem; font-weight: 600;
+  border: 1px solid var(--hz-border-soft); background: transparent; color: var(--hz-text-soft);
+  cursor: pointer; transition: all var(--hz-motion); white-space: nowrap;
+}
+@media (hover: hover) {
+  .hz-profile .btn:hover { background: var(--hz-surface-hover); color: var(--hz-text); border-color: var(--hz-border); }
+}
+.hz-profile .btn.primary { background: var(--hz-brand); color: var(--hz-text-inverse); border-color: transparent; }
+@media (hover: hover) {
+  .hz-profile .btn.primary:hover { background: var(--hz-brand-strong); }
+}
+.hz-profile .btn.sm { padding: 0.4em 0.85em; font-size: 0.82rem; }
+.hz-profile .btn.ghost { border-color: transparent; }
+.hz-profile .pos { color: var(--hz-action-buy-strong); }
+.hz-profile .neg { color: var(--hz-action-sell-strong); }
+
+/* ── page chrome ────────────────────────────────────────────── */
+.db-wrap { max-width: 1000px; margin: 0 auto; padding: var(--hz-space-8) var(--hz-space-6) var(--hz-space-12); }
+
+/* unified section header (titles · tools) */
+.db-sect { scroll-margin-top: var(--hz-space-6); }
+/* Section spacing is handled by .db-main's flex `gap` (space-8). The old
+   margin-block-start here stacked ON TOP of that gap (flex margins don't
+   collapse), doubling the space between the stat-strip and the positions. */
+.db-secthead { display: flex; align-items: center; justify-content: space-between; gap: var(--hz-space-4); padding-block-end: var(--hz-space-5); }
+.db-sh-h { font-size: 1.15rem; font-weight: 700; letter-spacing: -0.01em; margin: 0; }
+
+/* badge row inside the rail card */
+.db-cardbadges { display: flex; justify-content: center; flex-wrap: wrap; gap: var(--hz-space-3); padding: var(--hz-space-5) var(--hz-space-6); border-block-end: 1px solid var(--hz-border-faint); }
+.db-cardbadges:empty { display: none; }
+
+/* about / bio block */
+.db-about-text { font-size: 1.02rem; line-height: 1.7; color: var(--hz-text-soft); max-width: 58ch; text-wrap: pretty; overflow-wrap: anywhere; margin: 0; }
+.db-about-text:has(.db-bio-text:empty) { display: none; } /* no bio → hide, no placeholder */
+
+/* inline identity meta under the bio: joined · followers · following · views.
+   Consolidated here from the rail count-list and the identity-header join line. */
+.db-bio-meta { display: flex; flex-wrap: wrap; align-items: center; margin-block-start: var(--hz-space-4); font-size: 0.9rem; color: var(--hz-text-muted); }
+.db-bio-meta .bm-item { display: inline-flex; align-items: center; gap: 0.35em; }
+/* A plain class `display` always beats the UA [hidden] default, so the
+   below-floor cold-start markup's hidden follower item (ProfileDossier.astro)
+   rendered anyway until this was added — caught in verification, not by eye. */
+.db-bio-meta .bm-item[hidden] { display: none; }
+.db-bio-meta .bm-item:not(:last-child)::after { content: "·"; margin-inline: var(--hz-space-3); color: var(--hz-text-faint); }
+/* :not(:last-child) alone still fires when the ONLY later sibling is the
+   hidden below-floor follower fallback (ProfileDossier.astro) — it's still a
+   DOM sibling, just display:none. Without this, the visible recency line
+   grows a dangling "·" with nothing rendered after it. */
+.db-bio-meta .bm-item:has(+ .bm-item[hidden]:last-child)::after { content: none; }
+.db-bio-meta b { color: var(--hz-text); font-weight: 600; }
+.db-bio-meta .bm-joined .material-symbols-outlined { font-size: 16px; color: var(--hz-text-faint); }
+
+/* brand glyph inside the avatar */
+.avatar-glyph { width: 58%; height: 58%; object-fit: contain; display: block; }
+.avatar-photo { width: 100%; height: 100%; object-fit: cover; border-radius: inherit; display: block; }
+.avatar-photo[data-profile-default-avatar] { object-fit: contain; }
+
+/* name row + X social + share */
+.db-name-row { display: flex; align-items: center; gap: var(--hz-space-3); }
+.db-identity .db-identity-text { flex: 1; }
+.db-social-x { display: inline-grid; place-items: center; width: 1.85rem; height: 1.85rem; border-radius: var(--hz-radius-md); color: var(--hz-text-muted); border: 1px solid var(--hz-border-faint); transition: color var(--hz-motion), border-color var(--hz-motion), background var(--hz-motion); }
+.db-social-x svg { width: 0.95rem; height: 0.95rem; display: block; }
+.db-social-x__icon { width: 0.95rem; height: 0.95rem; max-width: 0.95rem; max-height: 0.95rem; flex: none; }
+@media (hover: hover) {
+  .db-social-x:hover { color: var(--hz-text); border-color: var(--hz-border-soft); background: var(--hz-surface-soft); }
+}
+.db-share-stub { display: inline-grid; place-items: center; width: 2.25rem; height: 2.25rem; border-radius: var(--hz-radius-md); background: var(--hz-surface-soft); border: 1px solid var(--hz-border-soft); color: var(--hz-text-muted); cursor: pointer; transition: color var(--hz-motion), border-color var(--hz-motion), background var(--hz-motion); }
+.db-share-stub .material-symbols-outlined { font-size: 18px; }
+@media (hover: hover) {
+  .db-share-stub:hover { color: var(--hz-brand-strong); border-color: var(--hz-brand-dim); background: var(--hz-brand-soft); }
+}
+
+/* header action cluster */
+.db-identity-actions { margin-inline-start: auto; align-self: center; display: flex; align-items: center; gap: var(--hz-space-3); }
+.db-edit-btn { display: inline-grid; place-items: center; width: 2.25rem; height: 2.25rem; padding: 0; font-family: inherit; color: var(--hz-text-muted); background: var(--hz-surface-soft); border: 1px solid var(--hz-border-soft); border-radius: var(--hz-radius-md); cursor: pointer; transition: color var(--hz-motion), border-color var(--hz-motion), background var(--hz-motion); }
+.db-edit-btn .material-symbols-outlined { font-size: 18px; }
+@media (hover: hover) {
+  .db-edit-btn:hover { color: var(--hz-brand-strong); border-color: var(--hz-brand-dim); background: var(--hz-brand-soft); }
+}
+/* edit is icon-only everywhere now; keep the label in DOM for a11y but hidden */
+.db-edit-label { display: none; }
+/* Follow button (public view) — עקוב = brand CTA, עוקב = quiet outline w/ check + unfollow hint on hover */
+.db-follow-btn { display: inline-flex; align-items: center; gap: 0.4em; height: 2.25rem; padding: 0 1.1em; font-family: inherit; font-size: 0.9rem; font-weight: 600; color: var(--hz-text-inverse); background: var(--hz-brand); border: 1px solid transparent; border-radius: var(--hz-radius-md); cursor: pointer; transition: color var(--hz-motion), border-color var(--hz-motion), background var(--hz-motion); }
+@media (hover: hover) {
+  .db-follow-btn:hover { background: var(--hz-brand-strong); }
+}
+.db-follow-btn .material-symbols-outlined { font-size: 18px; }
+.db-follow-btn:disabled { opacity: 0.6; cursor: progress; }
+.db-follow-btn.is-following { background: var(--hz-surface-soft); color: var(--hz-text-muted); border-color: var(--hz-border-soft); }
+@media (hover: hover) {
+  .db-follow-btn.is-following:hover { color: var(--hz-action-sell-strong); border-color: var(--hz-action-sell-soft); background: var(--hz-surface-soft); }
+}
+.db-follow-wrap { position: relative; display: inline-flex; }
+.db-follow-status {
+  position: absolute; inset-inline-start: 0; top: calc(100% + 0.4em);
+  white-space: nowrap; font-size: 0.78rem; color: var(--hz-action-sell-strong);
+  opacity: 0; transform: translateY(-2px); pointer-events: none;
+  transition: opacity var(--hz-motion), transform var(--hz-motion);
+}
+.db-follow-status.is-shown { opacity: 1; transform: translateY(0); }
+
+/* stat strip (in the bio section) */
+/* Unequal tracks: monthly-rank (rightmost = first track in RTL) is short, so it
+   yields width to the biggest-win cell whose fixed two-decimal V₪ value can wrap at 1fr.
+   Track order in RTL = [monthly, streak, biggest-win, resolved]. */
+.db-statstrip { display: grid; grid-template-columns: 0.85fr 0.95fr 1.2fr; margin-block-start: var(--hz-space-6); }
+.db-statstrip .ss { display: flex; flex-direction: column; gap: 0.3rem; padding-inline: var(--hz-space-5); border-inline-end: 1px solid var(--hz-border-faint); }
+.db-statstrip .ss:first-child { padding-inline-start: 0; }
+.db-statstrip .ss:last-child { border-inline-end: 0; padding-inline-end: 0; }
+.db-statstrip .ss-v { font-family: var(--hz-font-mono); font-weight: 700; font-size: 1.7rem; letter-spacing: -0.02em; color: var(--hz-text); line-height: 1; white-space: nowrap; }
+.db-statstrip .ss-v.rank { color: var(--hz-brand-strong); }
+.db-statstrip .ss-v.pos { color: var(--hz-action-buy); direction: ltr; unicode-bidi: isolate; text-align: right; }
+.db-statstrip .ss-v.soon { color: var(--hz-text-faint); font-size: 1rem; font-family: var(--hz-font-ui); font-weight: 600; }
+/* Real zero/no-data-yet (audit 1.3) — distinct from .soon (permanently-stubbed feature).
+   A fresh account's streak/win are genuinely absent, not "coming later"; the dash keeps
+   the mono numeric rhythm of the row instead of switching to the UI font like .soon does. */
+.db-statstrip .ss-v.empty { color: var(--hz-text-faint); font-family: var(--hz-font-mono); font-weight: 700; }
+.db-statstrip .ss-k { font-size: 0.82rem; color: var(--hz-text-muted); }
+/* Overall-accuracy cell: desktop keeps accuracy in the rail card, so this
+   mobile-only cell is hidden here and swapped in for the rank stub at ≤920. */
+.db-statstrip .ss--acc { display: none; }
+.db-statstrip .ss--acc .s { font-size: 0.6em; color: var(--hz-brand-strong); font-weight: 700; }
+
+/* "בקרוב" inline flag for stubbed stats */
+.db-soon { color: var(--hz-text-faint); font-size: 0.78rem; font-weight: 600; }
+
+/* positions/record pointer (owner v1 — real inline tables tracked in the backend task) */
+.db-proof-pointer { display: flex; flex-direction: column; gap: var(--hz-space-4); align-items: flex-start; padding: var(--hz-space-6); border: 1px dashed var(--hz-border-soft); border-radius: var(--hz-radius-lg); background: var(--hz-surface-soft); }
+.db-proof-pointer p { margin: 0; color: var(--hz-text-muted); font-size: 0.95rem; line-height: 1.6; }
+.db-proof-pointer .db-soon { display: inline-block; }
+
+/* verified seal — Material Symbols, amber */
+.pk-verified.pk-seal { background: transparent; box-shadow: none; color: var(--hz-brand); }
+.pk-verified.pk-seal .material-symbols-outlined { font-size: 34px; font-variation-settings: 'FILL' 1, 'wght' 700, 'opsz' 24; filter: drop-shadow(0 0 2px var(--hz-bg)) drop-shadow(0 0 2px var(--hz-bg)); }
+
+/* "view all" footer link */
+.db-seeall { display: flex; justify-content: center; margin-block-start: var(--hz-space-5); }
+.db-seeall a { font-size: 0.9rem; font-weight: 600; color: var(--hz-text-muted); text-decoration: none; padding: 0.65em 1.4em; border: 1px solid var(--hz-border-faint); border-radius: var(--hz-radius-pill); transition: color var(--hz-motion), border-color var(--hz-motion), background var(--hz-motion); }
+@media (hover: hover) {
+  .db-seeall a:hover { color: var(--hz-brand-strong); border-color: var(--hz-brand-dim); background: var(--hz-brand-soft); }
+}
+
+/* ── edit-profile overlay ──────────────────────────────────── */
+.edit-overlay { position: fixed; inset: 0; z-index: 1010; isolation: isolate; display: grid; place-items: center; padding: var(--hz-space-6); pointer-events: auto; }
+.edit-overlay[hidden] { display: none; }
+.edit-backdrop { position: absolute; inset: 0; background: rgba(8, 9, 12, 0.66); touch-action: none; }
+.edit-modal { position: relative; width: min(520px, 100%); max-height: calc(100dvh - 2 * var(--hz-space-6)); display: flex; flex-direction: column; background: linear-gradient(180deg, var(--hz-bg-raised), var(--hz-bg-soft)); border: 1px solid var(--hz-border-soft); border-radius: var(--hz-radius-xl); box-shadow: var(--hz-shadow-rail); overflow: hidden; touch-action: pan-y; }
+@media (prefers-reduced-motion: no-preference) { .edit-modal { animation: editRise 180ms ease; } }
+@keyframes editRise { from { transform: translateY(8px); } }
+.edit-modal-head { display: flex; align-items: center; justify-content: space-between; gap: var(--hz-space-4); padding: var(--hz-space-6); border-bottom: 1px solid var(--hz-border-faint); }
+.edit-modal-head h2 { margin: 0; font-size: 1.25rem; font-weight: 700; letter-spacing: -0.01em; }
+.edit-close { display: inline-grid; place-items: center; width: 2rem; height: 2rem; border-radius: var(--hz-radius-md); background: transparent; border: 0; color: var(--hz-text-muted); cursor: pointer; transition: color var(--hz-motion), background var(--hz-motion); }
+.edit-close .material-symbols-outlined { font-size: 20px; }
+@media (hover: hover) {
+  .edit-close:hover { color: var(--hz-text); background: var(--hz-surface-soft); }
+}
+.edit-modal-body { padding: var(--hz-space-6); overflow-y: auto; display: flex; flex-direction: column; gap: var(--hz-space-6); }
+.edit-avatar-row { display: flex; align-items: center; gap: var(--hz-space-5); }
+.edit-avatar-actions { display: flex; flex-direction: column; gap: var(--hz-space-3); align-items: flex-start; }
+.edit-file-btn { display: inline-flex; align-items: center; gap: 0.4em; font-size: 0.88rem; font-weight: 600; color: var(--hz-text); background: var(--hz-surface-soft); border: 1px solid var(--hz-border-soft); border-radius: var(--hz-radius-md); padding: 0.5em 0.9em; cursor: pointer; transition: color var(--hz-motion), border-color var(--hz-motion), background var(--hz-motion); }
+.edit-file-btn .material-symbols-outlined { font-size: 17px; }
+@media (hover: hover) {
+  .edit-file-btn:hover { color: var(--hz-brand-strong); border-color: var(--hz-brand-dim); background: var(--hz-brand-soft); }
+}
+.edit-link-btn { background: none; border: 0; color: var(--hz-text-faint); font-size: 0.82rem; font-family: inherit; cursor: pointer; padding: 0; transition: color var(--hz-motion); }
+@media (hover: hover) {
+  .edit-link-btn:hover { color: var(--hz-text-muted); }
+}
+.edit-field { display: flex; flex-direction: column; gap: 0.45rem; }
+.edit-label { font-size: 0.82rem; font-weight: 600; color: var(--hz-text-muted); }
+.edit-field input, .edit-field textarea { width: 100%; box-sizing: border-box; font-family: inherit; font-size: 16px; /* 16px floor: below it iOS zooms on focus and the zoom sticks */ color: var(--hz-text); background: var(--hz-bg); border: 1px solid var(--hz-border-soft); border-radius: var(--hz-radius-md); padding: 0.7em 0.85em; transition: border-color var(--hz-motion); }
+.edit-field input:focus, .edit-field textarea:focus { outline: none; border-color: var(--hz-brand-dim); }
+.edit-hint { font-size: 0.75rem; color: var(--hz-text-faint); align-self: flex-start; }
+
+/* Bio: starts a single line and grows downward as text wraps (JS sets height
+   from scrollHeight). The char counter lives INSIDE the field — pinned to the
+   bottom-trailing corner, with a reserved bottom strip so it never overlaps text. */
+.edit-bio-wrap { position: relative; }
+.edit-bio-wrap textarea { resize: none; overflow: hidden; line-height: 1.6; padding-block-end: 1.7em; }
+.edit-bio-count { position: absolute; bottom: 0.5em; left: 0.85em; direction: ltr; font-size: 0.72rem; color: var(--hz-text-faint); pointer-events: none; font-feature-settings: "tnum" 1; }
+/* Showcase-category picker (#7): record-categories as selectable chips, ≤4.
+   Native checkbox hidden; the chip carries the checked/disabled state. */
+.edit-label-sub { font-weight: 500; color: var(--hz-text-faint); font-size: 0.75rem; margin-inline-start: 0.45em; }
+.edit-cats { display: flex; flex-wrap: wrap; gap: var(--hz-space-3); }
+.edit-cat { position: relative; display: inline-flex; align-items: center; gap: 0.5em; padding: 0.42em 0.8em; border: 1px solid var(--hz-border-soft); border-radius: var(--hz-radius-pill); background: var(--hz-bg); cursor: pointer; font-size: 0.88rem; transition: border-color var(--hz-motion), background var(--hz-motion), opacity var(--hz-motion); }
+.edit-cat input { position: absolute; opacity: 0; pointer-events: none; }
+.edit-cat-nm { color: var(--hz-text-soft); }
+.edit-cat-pct { font-family: var(--hz-font-mono); font-size: 0.8rem; color: var(--hz-text-faint); direction: ltr; }
+.edit-cat-pct .s { font-size: 0.8em; color: var(--hz-text-muted); }
+.edit-cat:has(input:checked) { border-color: transparent; background: var(--hz-brand-soft); }
+.edit-cat:has(input:checked) .edit-cat-nm { color: var(--hz-brand-strong); font-weight: 600; }
+.edit-cat:has(input:checked) .edit-cat-pct { color: var(--hz-brand-strong); }
+.edit-cat.is-disabled { opacity: 0.4; cursor: not-allowed; }
+
+.edit-error { font-size: 0.8rem; color: var(--hz-action-sell-strong); margin: 0; display: none; }
+.edit-error.is-shown { display: block; }
+.edit-modal-foot { display: flex; justify-content: flex-end; gap: var(--hz-space-3); padding: var(--hz-space-5) var(--hz-space-6); border-top: 1px solid var(--hz-border-faint); }
+.edit-modal-foot .btn { min-width: 6.5rem; }
+.edit-modal-foot .btn:disabled { opacity: 0.6; cursor: progress; }
+
+/* ── responsive: rail stacks under the identity/proof on narrow ── */
+@media (max-width: 920px) {
+  /* keep all 3 stats on one line; minmax(0,…) + tighter font/padding so the
+     widest value (V₪ X.XK, nowrap) fits without blowing out the row. */
+  .db-statstrip { grid-template-columns: minmax(0, 0.85fr) minmax(0, 0.95fr) minmax(0, 1.2fr); gap: 0; }
+  .db-statstrip .ss { padding-inline: var(--hz-space-3); }
+  .db-statstrip .ss-v { font-size: 1.4rem; }
+  /* Mobile stat row = [הרצף · דיוק כולל · הרווח הגדול]: drop the "בקרוב" rank stub
+     and swap in the accuracy cell so it sits beside biggest-win. With rank
+     hidden, the streak cell becomes the first VISIBLE cell → flush it right. */
+  .db-statstrip .ss--rank { display: none; }
+  .db-statstrip .ss--acc { display: flex; }
+  .db-statstrip .ss:nth-child(2) { padding-inline-start: 0; }
+}

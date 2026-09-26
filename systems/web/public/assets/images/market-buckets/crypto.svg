@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="crypto market image">
+  <defs>
+    <linearGradient id="g" x1="70" y1="54" x2="454" y2="468" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#1b2a36"/>
+      <stop offset=".55" stop-color="#143b43"/>
+      <stop offset="1" stop-color="#0b111b"/>
+    </linearGradient>
+    <radialGradient id="r" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(358 152) rotate(132) scale(304)">
+      <stop stop-color="#6ee7b7" stop-opacity=".65"/>
+      <stop offset="1" stop-color="#6ee7b7" stop-opacity="0"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#g)"/>
+  <rect width="512" height="512" rx="96" fill="url(#r)"/>
+  <path d="M256 86 405 172v168l-149 86-149-86V172l149-86Z" fill="none" stroke="#f7c66a" stroke-width="26" stroke-linejoin="round"/>
+  <path d="M256 86v340M107 172l149 84 149-84M107 340l149-84 149 84" fill="none" stroke="#f7c66a" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" opacity=".86"/>
+  <circle cx="256" cy="256" r="42" fill="#6ee7b7"/>
+</svg>

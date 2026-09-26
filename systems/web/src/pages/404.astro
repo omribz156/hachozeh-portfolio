@@ -1,0 +1,18 @@
+---
+import { existsSync, readFileSync } from 'node:fs';
+import { join } from 'node:path';
+
+const errorHtmlPath = [
+  join(process.cwd(), 'public/error.html'),
+  join(process.cwd(), 'systems/web/public/error.html'),
+].find((candidate) => existsSync(candidate));
+const errorHtml = readFileSync(errorHtmlPath || join(process.cwd(), 'public/error.html'), 'utf8');
+
+return new Response(errorHtml, {
+  status: 404,
+  statusText: 'Not Found',
+  headers: {
+    'content-type': 'text/html; charset=utf-8',
+  },
+});
+---

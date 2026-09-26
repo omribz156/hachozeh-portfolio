@@ -1,0 +1,86 @@
+/* Event-mode layout. Reuses hz-outcome-row / hz-outcome-ladder; only the
+   event-specific section labels + resolved collapse live here. */
+.hz-event-ladder__section-label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0;
+  color: var(--hz-text-muted);
+  /* No inline padding: the label's right edge (RTL start) sits flush with the
+     chart's right rail and the row titles below it, instead of floating inset. */
+  padding: 0.6rem 0 0.5rem;
+}
+.hz-event-ladder__resolved { margin-top: 1rem; }
+.hz-event-ladder__resolved-summary {
+  list-style: none;
+  cursor: pointer;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: var(--hz-text-muted);
+  padding: 0.5rem 0.9rem;
+}
+.hz-event-ladder__resolved-summary::-webkit-details-marker { display: none; }
+
+/* Event summary strip — gives the event a "voice" before the ladder:
+   how many dated markets + total volume. Light touch, not a full hero. */
+.hz-event-summary {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: var(--hz-text-muted);
+  padding: 0.1rem 0.2rem 0.9rem;
+}
+.hz-event-summary__stat { font-weight: 600; }
+.hz-event-summary__sep { color: var(--hz-text-faint); }
+
+/* Probability column layout (centered grid + centered text) and the movement
+   indicator's tint + hide-when-flat behavior are shared, and now live on
+   .hz-outcome-row in outcome-ladder.css so both ladders match. Nothing
+   event-specific remains for the probability column. */
+
+/* The date/label column is a link into the child's focused single-market
+   page (?focus). The כן/לא pills are siblings (they arm the sidebar, not
+   navigate), so the two affordances stay distinct. */
+.hz-event-row__link {
+  display: block;
+  color: inherit;
+  text-decoration: none;
+  cursor: pointer;
+}
+@media (hover: hover) {
+  .hz-event-row__link:hover .hz-outcome-row__title {
+    color: var(--hz-brand);
+  }
+}
+
+/* "you hold" pills in the row meta — a compact yes/no readout of the viewer's
+   position in this child market (EventLadder derives it from the portfolio
+   snapshot and refreshes on every trade). */
+.hz-event-row__holding {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+.hz-event-row__holding-chip {
+  font-size: 0.7rem;
+  font-weight: 700;
+  line-height: 1.35;
+  padding: 0.05rem 0.4rem;
+  border-radius: var(--hz-radius-pill);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.hz-event-row__holding-chip--yes {
+  color: var(--hz-action-buy-strong);
+  background: var(--hz-action-buy-soft);
+}
+.hz-event-row__holding-chip--no {
+  color: var(--hz-action-sell-strong);
+  background: var(--hz-action-sell-soft);
+}
+
+/* Per-row buy CTAs use the real ladder pill — the row is a plain
+   hz-outcome-row (3-col grid: main | probability | actions) and the buttons
+   are the exact hz-trade-button / hz-outcome-row__actions face from the
+   multi-outcome ladder. No custom pill styling here; only the wiring differs
+   (data-event-buy → EventLadder.jsx retargets the sidebar). */

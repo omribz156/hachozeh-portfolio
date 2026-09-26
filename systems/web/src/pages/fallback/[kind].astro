@@ -1,0 +1,24 @@
+---
+function overlayForKind(kind) {
+  return {
+    login: 'login',
+    'login.html': 'login',
+    signup: 'signup',
+    'signup.html': 'signup',
+    otp: 'otp',
+    'otp.html': 'otp',
+    'processing-of-login-or-signup': 'auth-processing',
+    'processing-of-login-or-signup.html': 'auth-processing',
+    'signup-success': 'auth-success',
+    'signup-success.html': 'auth-success',
+    'signup-failed': 'auth-error',
+    'signup-failed.html': 'auth-error',
+  }[kind] || '';
+}
+
+// Deposit is closed (see runtime-config.js NAVI_DISABLE_DEPOSIT). The legacy
+// vshekel-deposit kinds fall through to a plain root redirect — no dead
+// ?overlay=deposit param. Restore the mapping here to relight the deep link.
+const overlay = overlayForKind(Astro.params.kind || '');
+return Astro.redirect(overlay ? `/?overlay=${overlay}` : '/');
+---

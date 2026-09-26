@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="general market image">
+  <defs>
+    <linearGradient id="g" x1="62" y1="52" x2="452" y2="466" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#26364a"/>
+      <stop offset=".58" stop-color="#17212d"/>
+      <stop offset="1" stop-color="#0b111b"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#g)"/>
+  <!-- Compass ring — frames the rose, "many directions". -->
+  <circle cx="256" cy="256" r="158" fill="none" stroke="#e7edf4" stroke-width="14" opacity=".35"/>
+  <!-- North arrow — amber, the standout direction. -->
+  <path d="M256 106 L288 244 L256 230 L224 244 Z" fill="#f7c66a"/>
+  <!-- East arrow — mint accent, the second strong outcome. -->
+  <path d="M406 256 L268 288 L282 256 L268 224 Z" fill="#6ee7b7"/>
+  <!-- South arrow — neutral. -->
+  <path d="M256 406 L288 268 L256 282 L224 268 Z" fill="#e7edf4"/>
+  <!-- West arrow — neutral. -->
+  <path d="M106 256 L244 288 L230 256 L244 224 Z" fill="#e7edf4"/>
+  <!-- Center hub — keeps the cardinal arrows pinned to a focal point. -->
+  <circle cx="256" cy="256" r="18" fill="#172330" stroke="#e7edf4" stroke-width="8"/>
+</svg>

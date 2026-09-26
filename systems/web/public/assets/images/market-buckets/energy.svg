@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="energy market image">
+  <defs>
+    <linearGradient id="bg" x1="56" y1="58" x2="458" y2="460" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#322414"/>
+      <stop offset=".55" stop-color="#152432"/>
+      <stop offset="1" stop-color="#0b111b"/>
+    </linearGradient>
+    <linearGradient id="drop" x1="190" y1="108" x2="330" y2="372" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#f7c66a"/>
+      <stop offset=".55" stop-color="#f59e0b"/>
+      <stop offset="1" stop-color="#ef4444"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+  <path d="M256 92c48 72 106 140 106 210 0 66-48 116-106 116s-106-50-106-116c0-70 58-138 106-210Z" fill="url(#drop)" stroke="#e7edf4" stroke-width="18" stroke-linejoin="round"/>
+  <path d="M230 332c24 18 64 12 80-24" fill="none" stroke="#0b111b" stroke-width="18" stroke-linecap="round"/>
+  <path d="M120 414h272" stroke="#e7edf4" stroke-width="18" stroke-linecap="round"/>
+  <path d="M154 446h204" stroke="#6ee7b7" stroke-width="14" stroke-linecap="round"/>
+</svg>

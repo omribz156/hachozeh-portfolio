@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>תקלה · החוזה</title>
+  <meta name="robots" content="noindex" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600;700&family=Noto+Sans+Hebrew:wght@500;600;700;800&display=block" />
+
+  <style>
+  *, *::before, *::after { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { min-height: 100vh; }
+  h1, p { margin: 0; padding: 0; }
+  a { color: inherit; text-decoration: none; }
+
+  :root {
+    color-scheme: dark;
+    font-size: clamp(13px, calc(0.4vw + 11.5px), 17px);
+
+    --hz-font-ui: "Arimo", "Noto Sans Hebrew", system-ui, -apple-system, "Segoe UI", sans-serif;
+    --hz-font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+    --hz-bg: #13141a;
+    --hz-bg-soft: #16171d;
+    --hz-bg-deep: #0a0b10;
+
+    --hz-text: #f6f4ef;
+    --hz-text-soft: #d7d3c8;
+    --hz-text-muted: #9a958a;
+    --hz-text-faint: #5e5a52;
+    --hz-text-inverse: #1a1407;
+
+    --hz-brand: #e8b257;
+    --hz-brand-strong: #f5c771;
+
+    --hz-border-faint: rgba(255, 248, 232, 0.065);
+    --hz-border-soft: rgba(255, 248, 232, 0.12);
+    --hz-border: rgba(255, 248, 232, 0.18);
+    --hz-border-strong: rgba(255, 248, 232, 0.28);
+
+    --hz-surface-soft: rgba(255, 248, 232, 0.035);
+    --hz-surface-hover: rgba(255, 248, 232, 0.055);
+
+    --hz-radius-md: 0.82rem;
+    --hz-motion: 180ms ease;
+  }
+
+  body {
+    background:
+      radial-gradient(circle at 78% -10%, rgba(232, 178, 87, 0.08), transparent 36rem),
+      radial-gradient(circle at 8% 12%, rgba(122, 174, 230, 0.05), transparent 30rem),
+      linear-gradient(180deg, var(--hz-bg-soft) 0%, var(--hz-bg) 70%, var(--hz-bg-deep) 100%);
+    color: var(--hz-text);
+    font-family: var(--hz-font-ui);
+    direction: rtl;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .eb-main {
+    flex: 1 1 auto;
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    padding: 16vh 10vw 0;
+    /* viewport-fit=cover means this page can now paint under a notch/home-indicator;
+       raise the edges the content actually sits near so nothing tucks under either. */
+    padding-inline-start: max(10vw, env(safe-area-inset-left));
+    padding-inline-end: max(10vw, env(safe-area-inset-right));
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+
+  .eb-col {
+    width: 100%;
+    max-width: 680px;
+    display: flex;
+    flex-direction: column;
+    gap: 32px;
+  }
+
+  /* mark row — quiet hairline + amber tick, no number to leak */
+  .eb-mark-row {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 4px;
+  }
+  .eb-mark-tick {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--hz-brand);
+    box-shadow: 0 0 12px rgba(232, 178, 87, 0.5);
+    flex-shrink: 0;
+  }
+  .eb-mark-row__hr {
+    height: 1px;
+    flex: 1;
+    background: var(--hz-border-faint);
+  }
+  .eb-mark-label {
+    font-family: var(--hz-font-ui);
+    font-size: 12.5px;
+    letter-spacing: 0;
+    line-height: 1.35;
+    color: var(--hz-text-faint);
+  }
+
+  .eb-h1 {
+    font-family: "Noto Sans Hebrew", var(--hz-font-ui);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    line-height: 1.1;
+    font-size: 56px;
+    color: var(--hz-text);
+  }
+
+  .eb-body {
+    font-size: 17px;
+    line-height: 1.6;
+    max-width: 540px;
+    color: var(--hz-text-soft);
+  }
+
+  .eb-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+  }
+  .eb-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 10px 18px;
+    border-radius: var(--hz-radius-md);
+    border: 1px solid var(--hz-border);
+    background: var(--hz-surface-soft);
+    color: var(--hz-text);
+    font-family: var(--hz-font-ui);
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    transition:
+      background var(--hz-motion),
+      border-color var(--hz-motion),
+      color var(--hz-motion);
+  }
+  .eb-btn:hover {
+    background: var(--hz-surface-hover);
+    border-color: var(--hz-border-strong);
+  }
+  .eb-btn--primary {
+    background: var(--hz-brand);
+    color: var(--hz-text-inverse);
+    border-color: var(--hz-brand);
+    font-weight: 700;
+  }
+  .eb-btn--primary:hover { background: var(--hz-brand-strong); }
+</style>
+</head>
+<body>
+  <main class="eb-main">
+    <div class="eb-col">
+      <div class="eb-mark-row">
+        <span class="eb-mark-tick"></span>
+        <span class="eb-mark-label">תקלה</span>
+        <span class="eb-mark-row__hr"></span>
+      </div>
+      <h1 class="eb-h1">לא הצלחנו להגיע למה שחיפשת</h1>
+      <p class="eb-body">ייתכן שהדף לא קיים, שאינך מורשה לראות אותו, או שמשהו נשבר אצלנו. אפשר לחזור לדף הבית או לנסות שוב בעוד רגע.</p>
+      <div class="eb-actions">
+        <a class="eb-btn eb-btn--primary" href="/">חזרה לדף הבית</a>
+        <button class="eb-btn" type="button" onclick="location.reload()">נסה שוב</button>
+      </div>
+    </div>
+  </main>
+</body>
+</html>

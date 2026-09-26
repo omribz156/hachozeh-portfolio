@@ -1,0 +1,15 @@
+---
+import ViewerPositions from './ViewerPositions.jsx';
+const { marketKey, canonicalOutcomeId, noOutcomeId = '', yesLabel = 'כן', noLabel = 'לא', yesPrice = 0, noPrice = 0 } = Astro.props;
+---
+
+<ViewerPositions
+  client:load
+  marketKey={marketKey}
+  canonicalOutcomeId={canonicalOutcomeId}
+  noOutcomeId={noOutcomeId}
+  yesLabel={yesLabel}
+  noLabel={noLabel}
+  yesPrice={yesPrice}
+  noPrice={noPrice}
+/>

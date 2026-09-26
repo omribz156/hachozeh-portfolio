@@ -1,0 +1,43 @@
+/* ──────────────────────────────────────────────────────────────
+   patterns/outcome-dot.css
+   Small colored circle that names an outcome — used inside the
+   chart legend (next to each line) and in outcome rows (next to
+   each outcome title). Five colors that cycle through outcomes;
+   not semantic, purely identity. Soft halo via box-shadow.
+   BEM:
+     .hz-outcome-dot                  — base dot
+     .hz-outcome-dot--{blue|green|orange|pink|yellow}
+   ────────────────────────────────────────────────────────────── */
+
+
+  .hz-outcome-dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    flex-shrink: 0;
+    border-radius: var(--hz-radius-pill);
+  }
+
+  .hz-outcome-dot--blue {
+    background: #3b82f6;
+    box-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+  }
+
+  .hz-outcome-dot--green {
+    background: #22c55e;
+    box-shadow: 0 0 8px rgba(34, 197, 94, 0.5);
+  }
+
+  .hz-outcome-dot--orange {
+    background: #f97316;
+    box-shadow: 0 0 8px rgba(249, 115, 22, 0.5);
+  }
+
+  .hz-outcome-dot--pink {
+    background: #e879f9;
+    box-shadow: 0 0 8px rgba(232, 121, 249, 0.45);
+  }
+
+  .hz-outcome-dot--yellow {
+    background: #facc15;
+    box-shadow: 0 0 8px rgba(250, 204, 21, 0.45);
+  }

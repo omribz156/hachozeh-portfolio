@@ -1,0 +1,167 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { BACKEND_INTERNAL_URL } from '../../../lib/backend.js';
+import { buildAbsoluteUrl, clampSeoText, compactText } from '../../../lib/seo.js';
+
+const params = Astro.url.searchParams;
+const formatAmount = (amount = '', label = '') => {
+  const cleanLabel = compactText(label);
+  if (/^V₪\s*\S/.test(cleanLabel) && cleanLabel.length <= 24) return cleanLabel;
+  const numeric = Number(amount);
+  if (!Number.isFinite(numeric)) return 'קריאה נכונה';
+  return `V₪ ${new Intl.NumberFormat('he-IL', {
+    maximumFractionDigits: numeric >= 100 ? 0 : 2,
+  }).format(numeric)}`;
+};
+
+// Persisted-truth path: ?claim={id} resolves the consented share snapshot from
+// the backend (identity + entry odds, unforgeable). The plain query params below
+// remain the pre-consent fallback — deletable once consent stamping is verified
+// in prod (see workspace/tasks/reference/share-loop-audit.md).
+const claimId = compactText(params.get('claim'));
+let share = null;
+if (claimId) {
+  try {
+    const response = await fetch(
+      new URL(`/api/share/claims/${encodeURIComponent(claimId)}`, BACKEND_INTERNAL_URL),
+      { headers: { accept: 'application/json' }, signal: AbortSignal.timeout(1800) },
+    );
+    if (response.ok) share = await response.json().catch(() => null);
+  } catch {
+    share = null;
+  }
+}
+
+const marketKey = share?.marketKey || compactText(params.get('market'));
+const marketTitle = share?.marketTitle || compactText(params.get('title'), 'שוק בהחוזה');
+const outcome = share?.outcomeLabel || compactText(params.get('outcome'));
+const amountLabel = share
+  ? formatAmount(share.proceeds, '')
+  : formatAmount(params.get('amount'), params.get('amountLabel'));
+const predictorName = share?.user?.displayName || '';
+const entryPricePct = Number.isFinite(Number(share?.entryPricePct)) ? Number(share.entryPricePct) : null;
+
+const shareQuery = share ? `claim=${encodeURIComponent(claimId)}` : params.toString();
+const imagePath = `/share/claims/win.png${shareQuery ? `?${shareQuery}` : ''}`;
+const targetPath = marketKey ? `/markets/${encodeURIComponent(marketKey)}` : '/';
+const title = `קריאה נכונה · החוזה`;
+const description = clampSeoText(
+  share
+    ? `${predictorName} קרא נכון את "${marketTitle}"${entryPricePct != null ? ` במחיר כניסה של ${entryPricePct}%` : ''}. התוצאה: ${outcome}. ${amountLabel} על השאלה הזאת.`
+    : `קריאה נכונה בשוק "${marketTitle}"${outcome ? `. התוצאה: ${outcome}` : ''}. ${amountLabel} על השאלה הזאת.`,
+  160,
+  'קריאה נכונה בהחוזה.'
+);
+const canonicalUrl = buildAbsoluteUrl(`/share/claims/win${shareQuery ? `?${shareQuery}` : ''}`);
+---
+
+<Layout
+  title={title}
+  description={description}
+  canonicalUrl={canonicalUrl}
+  image={imagePath}
+  robots="noindex, follow"
+  twitterCard="summary_large_image"
+  showFooter={false}
+>
+  <div class="claim-share-page">
+    <a class="claim-share-page__card" href={targetPath} aria-label="פתיחת השוק בהחוזה">
+      <img src={imagePath} alt={description} width="1200" height="630" />
+    </a>
+    {share && (
+      <p class="claim-share-page__story">
+        {share.user?.handle ? (
+          <a class="claim-share-page__predictor" href={`/@${encodeURIComponent(share.user.handle)}`}>{predictorName}</a>
+        ) : (
+          <b>{predictorName}</b>
+        )}
+        {' '}קרא נכון את "{marketTitle}"{entryPricePct != null ? ` במחיר כניסה של ${entryPricePct}%` : ''}. התוצאה: {outcome}.
+      </p>
+    )}
+    <p class="claim-share-page__about">החוזה הוא שוק תחזיות ישראלי. קונים עמדה על שאלה אמיתית, והדיוק נרשם לרקורד.</p>
+    <div class="claim-share-page__ctas">
+      <a class="claim-share-page__cta claim-share-page__cta--primary" href={targetPath}>פתח את השוק בהחוזה</a>
+      <a class="claim-share-page__cta" href="/trending">מה הקריאה שלך? לשווקים הפתוחים</a>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .claim-share-page {
+    min-height: calc(100vh - var(--hz-shell-header-height, 72px));
+    display: grid;
+    place-items: center;
+    align-content: center;
+    gap: 1.1rem;
+    padding: 2rem 1rem;
+    background: #07100f;
+    text-align: center;
+  }
+
+  .claim-share-page__card {
+    display: block;
+    width: min(100%, 960px);
+  }
+
+  .claim-share-page__card img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border: 1px solid rgba(247, 198, 106, 0.28);
+    border-radius: 10px;
+    box-shadow: 0 24px 70px rgba(0, 0, 0, 0.42);
+  }
+
+  .claim-share-page__story {
+    max-width: 44rem;
+    margin: 0;
+    color: #f2f4ef;
+    font-size: 1.05rem;
+    font-weight: 600;
+    line-height: 1.55;
+  }
+
+  .claim-share-page__predictor {
+    color: #f7c66a;
+    font-weight: 900;
+    text-decoration: none;
+  }
+
+  .claim-share-page__predictor:hover {
+    text-decoration: underline;
+  }
+
+  .claim-share-page__about {
+    max-width: 40rem;
+    margin: 0;
+    color: rgba(242, 244, 239, 0.62);
+    font-size: 0.9rem;
+    line-height: 1.5;
+  }
+
+  .claim-share-page__ctas {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem 1.5rem;
+    margin-block-start: 0.25rem;
+  }
+
+  .claim-share-page__cta {
+    color: rgba(242, 244, 239, 0.78);
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .claim-share-page__cta--primary {
+    color: #07100f;
+    background: #f7c66a;
+    padding: 0.6rem 1.4rem;
+    border-radius: 999px;
+    font-weight: 900;
+  }
+
+  .claim-share-page__cta:not(.claim-share-page__cta--primary):hover {
+    color: #f7c66a;
+  }
+</style>

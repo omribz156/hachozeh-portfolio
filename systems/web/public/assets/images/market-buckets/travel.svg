@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="travel market image">
+  <defs>
+    <linearGradient id="g" x1="58" y1="54" x2="456" y2="466" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#17394c"/>
+      <stop offset=".58" stop-color="#153b3c"/>
+      <stop offset="1" stop-color="#0b111b"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="96" fill="url(#g)"/>
+  <!-- Wing — filled triangle sweeping down-back, drawn first so fuselage overlaps. -->
+  <path d="M220 252 L96 350 L304 268 Z" fill="#e7edf4" opacity=".88"/>
+  <!-- Fuselage — pill shape, nose pointing right (direction of travel). -->
+  <path d="M84 256 Q84 226 122 222 L378 232 Q416 246 416 256 Q416 266 378 280 L122 290 Q84 286 84 256 Z" fill="#e7edf4"/>
+  <!-- Tail fin — amber accent, the "departing" signal. -->
+  <path d="M120 230 L98 158 L176 230 Z" fill="#f7c66a"/>
+  <!-- Cockpit window — mint accent near the nose. -->
+  <circle cx="378" cy="252" r="14" fill="#6ee7b7"/>
+  <!-- Contrail — three mint dashes trailing behind the plane. -->
+  <path d="M68 372h44" stroke="#6ee7b7" stroke-width="14" stroke-linecap="round" opacity=".65"/>
+  <path d="M128 372h40" stroke="#6ee7b7" stroke-width="14" stroke-linecap="round" opacity=".5"/>
+  <path d="M184 372h32" stroke="#6ee7b7" stroke-width="14" stroke-linecap="round" opacity=".35"/>
+</svg>
