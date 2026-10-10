@@ -59,7 +59,8 @@ export function registerHealthRoutes(
   app.get("/health/live", async () => buildLivenessPayload(context.env));
 
   async function buildReadinessReply(_request: unknown, reply: FastifyReply) {
-    const payload = await buildReadinessPayload(context.env);
+    const payload = await buildReadinessPayload(context.env, context.dbPool);
+    reply.header("cache-control", "no-store");
     reply.code(payload.status === "ready" ? 200 : 503);
     return payload;
   }

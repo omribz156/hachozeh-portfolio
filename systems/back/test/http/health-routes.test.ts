@@ -46,6 +46,18 @@ async function adminSessionQuery(sql: string) {
 }
 
 describe("health routes", () => {
+  it.each([true, false])("checks actual database readiness without exposing internals: %s", async (ok) => {
+    const { baseUrl } = await startServer({ queryImpl: async () => {
+      if (!ok) throw new Error("private database connection detail");
+      return { rows: [{ value: 1 }] };
+    } });
+    const response = await fetch(`${baseUrl}/health/ready`);
+    const payload = await response.json();
+    expect(response.status).toBe(ok ? 200 : 503);
+    expect(response.headers.get("cache-control")).toBe("no-store");
+    expect(payload.dependencies.postgres).toEqual({ ok, latencyMs: expect.any(Number) });
+  });
+
   it("returns liveness payload without touching dependencies", async () => {
     const { baseUrl } = await startServer();
 

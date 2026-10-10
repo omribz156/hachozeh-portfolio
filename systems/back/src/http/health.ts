@@ -154,8 +154,8 @@ export function buildLivenessPayload(env: AppEnv) {
   };
 }
 
-export async function buildReadinessPayload(env: AppEnv) {
-  const database = await checkDatabaseReadiness(env.db);
+export async function buildReadinessPayload(env: AppEnv, dbPool: Pool) {
+  const database = await checkDatabaseReadiness(dbPool);
 
   return {
     service: env.serviceName,

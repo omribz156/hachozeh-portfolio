@@ -549,7 +549,7 @@ describe("createAppServer Fastify server", () => {
         }
       },
       logger: createLogger("error"),
-      dbPool: createDbPool()
+      dbPool: { query: async () => { throw new Error("database unavailable"); } } as unknown as Pool
     });
     const baseUrl = await listen(server);
 

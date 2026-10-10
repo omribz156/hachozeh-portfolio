@@ -1,62 +1,26 @@
-import { Socket } from "node:net";
+import type { QueryConfig } from "pg";
+import type { Queryable } from "./client/pool";
 
-import type { AppEnv } from "../config/env";
+export type DbReadiness = { ok: boolean; latencyMs: number };
+const probes = new WeakMap<Queryable, { until: number; result: Promise<DbReadiness> }>();
 
-export type DbReadiness = {
-  ok: boolean;
-  latencyMs: number;
-  target: string;
-  error?: string;
-};
-
-export async function checkDatabaseReadiness(
-  config: AppEnv["db"]
-): Promise<DbReadiness> {
+/** Coalesce public probes and test the actual authenticated/TLS pool, not just TCP. */
+export function checkDatabaseReadiness(pool: Queryable): Promise<DbReadiness> {
+  const cached = probes.get(pool);
+  if (cached && cached.until > Date.now()) return cached.result;
   const startedAt = Date.now();
-  const target = `${config.host}:${config.port}`;
-
-  return new Promise<DbReadiness>((resolve) => {
-    const socket = new Socket();
-    let settled = false;
-
-    const finish = (result: DbReadiness) => {
-      if (settled) {
-        return;
-      }
-
-      settled = true;
-      socket.destroy();
-      resolve(result);
-    };
-
-    socket.setTimeout(config.connectTimeoutMs);
-
-    socket.once("connect", () => {
-      finish({
-        ok: true,
-        latencyMs: Date.now() - startedAt,
-        target
+  const entry = { until: Infinity, result: Promise.resolve({ ok: false, latencyMs: 0 }) };
+  entry.result = new Promise<DbReadiness>((resolve) => {
+    const finish = (ok: boolean) => resolve({ ok, latencyMs: Date.now() - startedAt });
+    const timer = setTimeout(() => finish(false), 5_000);
+    const query: QueryConfig & { query_timeout: number } = { text: "select 1", query_timeout: 5_000 };
+    Promise.resolve().then(() => pool.query(query))
+      .then(() => finish(true), () => finish(false))
+      .finally(() => {
+        clearTimeout(timer);
+        entry.until = Date.now() + 5_000;
       });
-    });
-
-    socket.once("timeout", () => {
-      finish({
-        ok: false,
-        latencyMs: Date.now() - startedAt,
-        target,
-        error: "timeout"
-      });
-    });
-
-    socket.once("error", (error) => {
-      finish({
-        ok: false,
-        latencyMs: Date.now() - startedAt,
-        target,
-        error: error.message
-      });
-    });
-
-    socket.connect(config.port, config.host);
   });
+  probes.set(pool, entry);
+  return entry.result;
 }

@@ -333,7 +333,7 @@ describe("createFastifyApp", () => {
     const app = createFastifyApp({
       env: createReadinessEnv(1, 5),
       logger: createLogger("error"),
-      dbPool: createDbPool([])
+      dbPool: { query: async () => { throw new Error("database unavailable"); } } as unknown as Pool
     });
 
     const response = await app.inject({
