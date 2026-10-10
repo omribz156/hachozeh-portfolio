@@ -20,6 +20,7 @@ export async function fetchPublicTagList() {
   const data = await res.json();
   return Array.isArray(data?.tags) ? data.tags : [];
 }
+import { backendFetch as fetch } from './server-security';
 
 // Entity tags whose markets sit in a category (frontend hub key) — powers the
 // category → /t/ cross-links on /topics/<key>. Each carries its published count.

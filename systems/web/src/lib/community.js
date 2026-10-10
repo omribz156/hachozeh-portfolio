@@ -46,3 +46,4 @@ export async function fetchCommunityThread(id, { cookie = null } = {}) {
   if (!id) return null;
   return getJson(`/api/community/discussions/${encodeURIComponent(id)}`, cookie);
 }
+import { backendFetch as fetch } from './server-security';

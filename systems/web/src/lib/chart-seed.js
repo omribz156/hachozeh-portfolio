@@ -30,6 +30,7 @@ export async function fetchChartSeed(marketKey, range) {
   }
   return null;
 }
+import { backendFetch as fetch } from './server-security';
 
 // Event-chart seed: same contract as fetchChartSeed but hits the event-history
 // endpoint (one line per child). Never throws — degrades to null so the event

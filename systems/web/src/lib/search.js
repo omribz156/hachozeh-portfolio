@@ -60,3 +60,4 @@ export async function fetchSearch(
     return empty;
   }
 }
+import { backendFetch as fetch } from './server-security';

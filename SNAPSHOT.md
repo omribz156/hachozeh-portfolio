@@ -1,6 +1,7 @@
 # Portfolio Snapshot
 
 Prepared: 2026-09-26
+Security source refresh: 2026-10-11; separate sanitized backport, not production history.
 Status: published; local and GitHub checks passed. See [VERIFICATION.md](VERIFICATION.md).
 
 Public repository: https://github.com/omribz156/hachozeh-portfolio
@@ -25,6 +26,15 @@ The local setup uses synthetic seed data. Retained operational CLI commands are
 examples, not authorization to operate Hachozeh production. Browser screenshot
 baselines are intentionally omitted and must be regenerated from synthetic data
 for a new local environment.
+
+The security refresh adds bounded abuse monitoring, email-auth controls, OTP
+replay/concurrency protection, account-isolation tests, safer browser/backend
+destinations, storage-path validation, and optional certificate-verified database
+transport. Local sample configuration explicitly enables synthetic email-code
+evaluation; production-style configuration defaults to disabled. No real provider
+keys or database certificates are included. Runtime dependency audit is clean;
+known development-tool advisories have a narrow, expiring review documented in
+`workspace/security/dependency-review.md`, not a blanket scanner exclusion.
 
 The verification workflow has no deployment steps, provider secrets, privileged
 PR triggers, or production database connection. CodeQL is not enabled here:

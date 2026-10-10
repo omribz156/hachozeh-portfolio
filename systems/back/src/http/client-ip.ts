@@ -26,7 +26,7 @@ function getFirstXForwardedFor(request: IncomingMessage): string | undefined {
   return undefined;
 }
 
-function hasTrustedProxySecret(request: IncomingMessage, configuredSecret: string): boolean {
+export function hasTrustedProxySecret(request: IncomingMessage, configuredSecret: string): boolean {
   if (!configuredSecret) return false;
 
   const supplied = request.headers[PROXY_TRUST_HEADER];

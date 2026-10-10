@@ -27,7 +27,7 @@ import ErrorOverlay      from './ErrorOverlay.jsx';
 import SuccessOverlay    from './SuccessOverlay.jsx';
 import IdeaOverlay       from './IdeaOverlay.jsx';
 
-export default function PageOverlayHost() {
+export default function PageOverlayHost({ emailEnabled = false, turnstileSiteKey = '' }) {
   const {
     overlayValue,
     active,
@@ -114,7 +114,7 @@ export default function PageOverlayHost() {
   }, [overlayValue, open, clearAuthFlowError, setAuthState, setAuthError]);
 
   // ── Form submit (login / signup / otp) ──────────────────────────────────────
-  const handleSubmit = useCallback(async (action, value) => {
+  const handleSubmit = useCallback(async (action, value, turnstileToken = '') => {
     const session = window.NaviAuthSession;
 
     if (!session?.isEnabled?.()) {
@@ -159,7 +159,7 @@ export default function PageOverlayHost() {
       open('auth-processing');
 
       try {
-        const payload = await session.start(identifier, action);
+        const payload = await session.start(identifier, action, turnstileToken);
         const devCode = shouldSuppressDevOtp() ? '' : (payload.devCode || '');
         setAuthState((prev) => ({
           ...prev,
@@ -250,6 +250,7 @@ export default function PageOverlayHost() {
       case 'login':
         return (
           <LoginOverlay
+            emailEnabled={emailEnabled} turnstileSiteKey={turnstileSiteKey}
             key={overlayValue}
             authState={authState}
             onClose={close}
@@ -261,6 +262,7 @@ export default function PageOverlayHost() {
       case 'signup':
         return (
           <SignupOverlay
+            emailEnabled={emailEnabled} turnstileSiteKey={turnstileSiteKey}
             key={overlayValue}
             authState={authState}
             onClose={close}

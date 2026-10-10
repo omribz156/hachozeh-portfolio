@@ -19,14 +19,15 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci --ignore-scripts
-      - run: npm audit --audit-level=low
+      - run: npm audit --omit=dev --audit-level=low
+      - run: node workspace/security/check-dependency-audit.mjs
       - run: npm run security:codeql:gate:test
       - run: npm --prefix systems/back run typecheck
       - run: npm --prefix systems/back test -- --maxWorkers=2
         env:
           NODE_ENV: test
       - run: npm --prefix systems/web run check
-      - run: node --test systems/web/src/lib/*.test.mjs workspace/security/*.test.mjs
+      - run: node --test systems/web/src/lib/*.test.mjs systems/web/src/client/auth/*.test.mjs workspace/security/*.test.mjs
       - run: npm --prefix systems/web run build
   static-security:
     runs-on: ubuntu-latest
@@ -35,5 +36,5 @@ jobs:
         with:
           persist-credentials: false
       - run: pipx install semgrep==1.172.0
-      - run: semgrep scan --config p/security-audit --config p/secrets --config p/nodejs --config p/react --config p/github-actions --metrics=off --disable-version-check --json --output "$RUNNER_TEMP/semgrep.json" .
+      - run: semgrep scan --config p/security-audit --config p/secrets --config p/nodejs --config p/react --config p/github-actions --timeout 30 --metrics=off --disable-version-check --json --output "$RUNNER_TEMP/semgrep.json" .
       - run: node workspace/security/check-semgrep-review.mjs "$RUNNER_TEMP/semgrep.json"

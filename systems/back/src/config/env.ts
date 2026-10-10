@@ -1,6 +1,7 @@
 import { existsSync } from "node:fs";
 
 import { config as loadDotenv } from "dotenv";
+import { readDbTlsMode, type DbTlsMode } from "../db/client/tls";
 
 // Portfolio copy loads only explicitly selected or package-local configuration;
 // CI and production set real env vars, so a missing file is a silent no-op.
@@ -54,6 +55,7 @@ export type AppEnv = {
   };
   publicBaseUrl: string;
   db: {
+    tlsMode?: DbTlsMode;
     host: string;
     port: number;
     name: string;
@@ -342,6 +344,7 @@ export function loadAppEnv(): AppEnv {
     },
     publicBaseUrl: readString("PUBLIC_BASE_URL", "http://127.0.0.1:6969/trending"),
     db: {
+      tlsMode: readDbTlsMode(),
       host: readString("DB_HOST", "127.0.0.1"),
       port: readInteger("DB_PORT", 55432),
       name: readString("DB_NAME", "navi"),

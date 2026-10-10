@@ -1,13 +1,21 @@
 (function () {
   const currentUrl = new URL(window.location.href);
-  const queryBackendBaseUrl = currentUrl.searchParams.get("backendBase");
+  const isLocalPreview = ["localhost", "127.0.0.1", "[::1]"].includes(currentUrl.hostname);
+  const queryBackendBaseUrl = isLocalPreview ? currentUrl.searchParams.get("backendBase") : null;
+  function safeBackendBase(value) {
+    try {
+      const url = new URL(value || currentUrl.origin);
+      if (!["http:", "https:"].includes(url.protocol) || url.username || url.password) return "";
+      return url.origin === currentUrl.origin || (isLocalPreview && ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname)) ? url.origin : "";
+    } catch { return ""; }
+  }
   // Fallback chain: explicit query param → runtime-config global (set by
   // runtime-config.js, the single client authority) → same-origin relative ''
   // (Caddy proxies /api to the backend, so relative paths work everywhere).
-  const DEFAULT_BACKEND_BASE_URL =
+  const DEFAULT_BACKEND_BASE_URL = safeBackendBase(
     (queryBackendBaseUrl && queryBackendBaseUrl.trim()) ||
     window.NAVI_BACKEND_BASE_URL ||
-    '';
+    '');
   const enabled =
     window.NAVI_ENABLE_BACKEND_AUTH === true ||
     currentUrl.searchParams.get("source") === "backend" ||
@@ -485,7 +493,7 @@
         `/api/auth/google/start?returnTo=${encodeURIComponent(returnTo)}`
       );
     },
-    async start(identifier, purpose) {
+    async start(identifier, purpose, turnstileToken = '') {
       if (!enabled) {
         throw new Error("Backend auth mode is not enabled.");
       }
@@ -495,7 +503,7 @@
         headers: {
           "content-type": "application/json",
         },
-        body: JSON.stringify({ identifier, purpose }),
+        body: JSON.stringify({ identifier, purpose, turnstileToken }),
       });
     },
     async verify(challengeId, code) {

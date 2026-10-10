@@ -36,8 +36,8 @@ type HealthRouteContext = {
 
 function readBearerToken(authorization: string | string[] | undefined): string {
   const value = Array.isArray(authorization) ? authorization[0] : authorization;
-  const match = value?.match(/^Bearer\s+(.+)$/i);
-  return match?.[1]?.trim() ?? "";
+  const parts = value?.trim().split(/\s+/) ?? [];
+  return parts.length === 2 && parts[0]?.toLowerCase() === "bearer" ? parts[1] : "";
 }
 
 function isDiagnosticsBearerAuthorized(authorization: string | string[] | undefined): boolean {

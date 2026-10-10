@@ -3,6 +3,26 @@
 Date: 2026-09-26
 Scope: this curated portfolio candidate, not the live deployment.
 
+## October 11 Security Refresh
+
+The September results below are historical, not a claim about today's advisory feed.
+Current local verification: 1,716 backend tests across 252 files; 23 frontend/security
+helper tests; backend typecheck; Astro check (zero errors/warnings, existing hints)
+and production build. Runtime npm audit reports zero vulnerabilities. The full audit
+reports known development-only findings under two advisories; the named, dev-only
+review expires November 10 and rejects new/production findings. See
+`workspace/security/dependency-review.md`.
+
+The chart scan-review hash was refreshed after reviewing its sole change: use of
+the restricted server-side backend fetch wrapper. Chart markup and escaping are
+unchanged. Database TLS tests use a synthetic public certificate with no private
+key. This refresh contains no production connection material or private history.
+
+Hosted refresh results will be recorded after the release workflow completes.
+Local Semgrep: 1,474 scanned files, no errors, the same seven individually reviewed
+findings and no new findings. Staged patch secret scan: no leaks; this is not a new
+whole-history scan. Synthetic public TLS certificate explicitly included in Git.
+
 ## GitHub Verification
 
 The public snapshot commit `aa9f6a8738d9f0d7461b8c8490deb74df07d8f29` passed both

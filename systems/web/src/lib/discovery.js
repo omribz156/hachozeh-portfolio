@@ -13,3 +13,4 @@ export async function fetchFeed(feed = 'trending', category = null, options = {}
   if (!res.ok) throw new Error(`discovery feed "${feed}" → HTTP ${res.status}`);
   return res.json();
 }
+import { backendFetch as fetch } from './server-security';

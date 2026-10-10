@@ -11,3 +11,4 @@ export async function fetchPublicProfileCatalog({ limit = 100, cursor = null, of
   if (!res.ok) throw new Error(`public profile catalog -> HTTP ${res.status}`);
   return res.json();
 }
+import { backendFetch as fetch } from './server-security';

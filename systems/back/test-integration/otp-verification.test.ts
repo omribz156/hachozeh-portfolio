@@ -139,6 +139,19 @@ afterEach(async () => {
 });
 
 describe("verifyAuthChallenge integration", () => {
+  it("consumes a correct code once under simultaneous verification", async () => {
+    const results = await Promise.allSettled(Array.from({ length: 6 }, () =>
+      verifyAuthChallenge(pool, TEST_ENV, buildOtpRequest(), { challengeId, code: challengeCode })
+    ));
+    expect(results.filter(result => result.status === "fulfilled")).toHaveLength(1);
+    const sessions = await pool.query("select count(*)::int as count from sessions where user_id = $1", [userId]);
+    expect(sessions.rows[0].count).toBe(1);
+    const audits = await pool.query("select count(*)::int as count from audit_events where actor_id = $1 and action = 'security.session.created'", [userId]);
+    expect(audits.rows[0].count).toBe(1);
+    await expect(verifyAuthChallenge(pool, TEST_ENV, buildOtpRequest(), { challengeId, code: challengeCode }))
+      .rejects.toMatchObject({ code: "invalid_code" });
+  });
+
   it("persists failed OTP attempts and expires at max attempts", async () => {
     await expect(
       verifyAuthChallenge(pool, TEST_ENV, buildOtpRequest(), {

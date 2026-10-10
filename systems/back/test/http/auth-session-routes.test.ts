@@ -293,6 +293,12 @@ describe("auth session routes", () => {
           return { rows: [] };
         }
 
+        if (sql.includes("insert into audit_events")) {
+          expect(values?.[1]).toBe(userId);
+          expect(values?.[2]).toBe("security.account.export_prepared");
+          expect(JSON.parse(String(values?.[5]))).toMatchObject({ requestId: expect.any(String), ipHash: expect.any(String) });
+          return { rows: [] };
+        }
         expect(values).toEqual([userId]);
 
         if (sql.includes("from users") && sql.includes("last_login_at")) {
@@ -757,6 +763,10 @@ describe("auth session routes", () => {
           return { rows: [] };
         }
 
+        if (sql.includes("insert into audit_events")) {
+          expect(values?.[2]).toBe("security.session.created");
+          return { rows: [] };
+        }
         throw new Error(`Unexpected db query in verify test: ${sql}`);
       }
     });

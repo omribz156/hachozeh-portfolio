@@ -23,7 +23,7 @@
     "@sentry/astro": "^10.62.0",
     "astro": "^7.3.5",
     "preact": "^10.29.2",
-    "sharp": "^0.35.4"
+    "sharp": "^0.35.5"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",

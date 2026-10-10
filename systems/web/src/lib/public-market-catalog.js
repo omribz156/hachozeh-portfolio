@@ -11,3 +11,4 @@ export async function fetchPublicMarketCatalog({ limit = 100, status = 'all', cu
   if (!res.ok) throw new Error(`public market catalog → HTTP ${res.status}`);
   return res.json();
 }
+import { backendFetch as fetch } from './server-security';

@@ -77,12 +77,14 @@ describe("db privilege audit", () => {
     expect(report.findings).toEqual([]);
   });
 
-  it("passes provider-managed mode when the managed runtime user owns its own schema", () => {
+  it("reports the provider-managed owner exception as WARN, not least-privilege PASS", () => {
     const report = assessDbPrivilegeAudit({
       user: "hachozeh",
       database: "hachozeh",
       dbRoleMode: "provider-managed",
       strict: true,
+      canCreateRoles: true,
+      canCreateDatabases: true,
       userIsSuperuser: false,
       canCreateDatabaseObjects: true,
       schemaPrivileges: [{ schema: "public", can_create_schema_objects: true }],
@@ -94,16 +96,30 @@ describe("db privilege audit", () => {
       ]
     });
 
-    expect(report.verdict).toBe("ok");
+    expect(report.verdict).toBe("warn");
+    expect(report.leastPrivilege).toBe(false);
     expect(report.findings).toEqual([]);
     expect(report.informationalFindings).toEqual(
       expect.arrayContaining([
         "runtime DB user can create database objects",
+        "runtime DB user can create roles",
+        "runtime DB user can create databases",
         "runtime DB user owns 41 table(s)",
         "runtime DB user has TRUNCATE on 41 table(s) in public"
       ])
     );
   });
+
+  it.each(["canCreateRoles", "canCreateDatabases", "canBypassRls", "canReplicate"] as const)(
+    "fails a split runtime with %s even without table ownership", (capability) => {
+      const report = assessDbPrivilegeAudit({
+        user: "runtime", database: "test", strict: true, [capability]: true,
+        canCreateDatabaseObjects: false, schemaPrivileges: [], ownedTables: [], tablePrivileges: []
+      });
+      expect(report.verdict).toBe("bad");
+      expect(report.leastPrivilege).toBe(false);
+    }
+  );
 
   it("fails provider-managed mode when the DB user is a superuser", () => {
     const report = assessDbPrivilegeAudit({

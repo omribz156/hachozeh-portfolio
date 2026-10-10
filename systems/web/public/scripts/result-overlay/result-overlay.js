@@ -22,8 +22,8 @@
 
   function esc(s) {
     return String(s == null ? "" : s)
-      .replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;")
-      .replaceAll('"', "&quot;").replaceAll("'", "&#39;");
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#39;");
   }
 
   function currencyHtml(s) {
@@ -31,6 +31,14 @@
       /V[\u200e\u200f]?\u20aa/g,
       window.HZCurrency?.symbolHtml?.() || "V₪",
     );
+  }
+
+  function safeResultLink(value, fallback) {
+    try {
+      var url = new URL(value || fallback, window.location.origin);
+      return url.origin === window.location.origin && ["http:", "https:"].includes(url.protocol)
+        ? url.pathname + url.search + url.hash : fallback;
+    } catch { return fallback; }
   }
 
   var panel = null, scrim = null, isOpen = false;
@@ -255,8 +263,8 @@
     var sub = win
       ? (opts.market ? '<div class="hz-result__market">' + esc(opts.market) + "</div>" : "")
       : (opts.verdict ? '<div class="hz-result__market">' + esc(opts.verdict) + "</div>" : "");
-    var href = esc(opts.marketHref || "#");
-    var nextHref = esc(opts.nextHref || "/");
+    var href = esc(safeResultLink(opts.marketHref, "#"));
+    var nextHref = esc(safeResultLink(opts.nextHref, "/"));
     // Win → the primary action CLAIMS the payout (wired in the click handler).
     // Loss → keep the "next market" nudge.
     var actions = win

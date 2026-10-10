@@ -1,11 +1,11 @@
 {
-  "reviewed": "2026-09-26",
+  "reviewed": "2026-10-11",
   "sourceHashes": {
     "systems/web/src/components/graphs-accuracy/GraphsAccuracy.jsx": "84533ee61a8d4b5472cafdb933dd6bb41361bd8f7d6f98fea1f455fcabb32847",
     "systems/web/src/lib/json-script.test.mjs": "1185946682e503cc731505bdab04f0f3d800c0377a1531ae3dea641b96541193",
     "systems/web/src/lib/graphs-accuracy-charts.js": "9c64fe155a31967a98f550e22dbb9d92546c4c83b8350d22a95452aeaa283a8a",
     "systems/web/src/lib/graphs-accuracy-charts.test.mjs": "ef5d55b2803476fe48aec32af5fcec4f15126021e4f13696eab088c4c58a72e5",
-    "systems/web/src/pages/graphs-and-accuracy.astro": "04768b51b524fa94b0b075a1dec4d97a62a60b1269cb11a3f0c8353213581000",
+    "systems/web/src/pages/graphs-and-accuracy.astro": "3a28b857f949dda70ed9b73fde5e44b032a6c592460cbfbd3f26b3a45b6afb1f",
     "systems/web/src/lib/json-script.js": "b16bb9786b90e11eae3c1ab7db6326672b435a4ca95782bcd4734b7f9151dddb"
   },
   "findings": [

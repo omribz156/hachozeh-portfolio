@@ -11,3 +11,4 @@ export async function fetchWeeklyLeaderboard(limit = 3) {
 
   return res.json();
 }
+import { backendFetch as fetch } from './server-security';

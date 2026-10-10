@@ -1,7 +1,7 @@
 // Feedback image object storage — Cloudflare R2 when configured, local disk otherwise.
 // Mirrors avatar-storage.ts but uses a separate bucket env and the `feedback/` key prefix.
 import { mkdir, readFile, unlink, writeFile } from "node:fs/promises";
-import { join, resolve } from "node:path";
+import { resolve, sep } from "node:path";
 
 import { readFeedbackR2Config, type R2StorageConfig } from "../storage/object-storage-config";
 
@@ -15,6 +15,18 @@ const FEEDBACK_IMAGE_UPLOAD_DIR = resolve(
 const R2_KEY_PREFIX = "feedback/";
 
 let cachedClient: unknown = null;
+function validateFileName(fileName: string): void {
+  if (fileName.length > 160 || !fileName.endsWith(".webp") || !/^feedback-[a-zA-Z0-9_-]+\.webp$/.test(fileName)) {
+    throw new Error("Invalid feedback image filename");
+  }
+}
+function localImagePath(fileName: string): string {
+  const filePath = resolve(FEEDBACK_IMAGE_UPLOAD_DIR, fileName);
+  if (!filePath.startsWith(FEEDBACK_IMAGE_UPLOAD_DIR + sep)) {
+    throw new Error("Invalid feedback image path");
+  }
+  return filePath;
+}
 async function r2Client(config: R2StorageConfig): Promise<{ send(command: unknown): Promise<unknown> }> {
   if (cachedClient) {
     return cachedClient as { send(command: unknown): Promise<unknown> };
@@ -33,6 +45,7 @@ async function r2Client(config: R2StorageConfig): Promise<{ send(command: unknow
 }
 
 export async function putFeedbackImage(fileName: string, buffer: Buffer): Promise<void> {
+  validateFileName(fileName);
   const config = readFeedbackR2Config();
   if (config) {
     const client = await r2Client(config);
@@ -51,10 +64,11 @@ export async function putFeedbackImage(fileName: string, buffer: Buffer): Promis
   }
 
   await mkdir(FEEDBACK_IMAGE_UPLOAD_DIR, { recursive: true });
-  await writeFile(join(FEEDBACK_IMAGE_UPLOAD_DIR, fileName), buffer, { flag: "wx" });
+  await writeFile(localImagePath(fileName), buffer, { flag: "wx" });
 }
 
 export async function readFeedbackImage(fileName: string): Promise<Buffer | null> {
+  validateFileName(fileName);
   const config = readFeedbackR2Config();
   if (config) {
     const client = await r2Client(config);
@@ -74,7 +88,7 @@ export async function readFeedbackImage(fileName: string): Promise<Buffer | null
     }
   }
 
-  return readFile(join(FEEDBACK_IMAGE_UPLOAD_DIR, fileName)).catch((error: NodeJS.ErrnoException) => {
+  return readFile(localImagePath(fileName)).catch((error: NodeJS.ErrnoException) => {
     if (error.code === "ENOENT") {
       return null;
     }
@@ -83,6 +97,7 @@ export async function readFeedbackImage(fileName: string): Promise<Buffer | null
 }
 
 export async function deleteFeedbackImage(fileName: string): Promise<void> {
+  validateFileName(fileName);
   const config = readFeedbackR2Config();
   if (config) {
     const client = await r2Client(config);
@@ -94,7 +109,7 @@ export async function deleteFeedbackImage(fileName: string): Promise<void> {
     return;
   }
 
-  await unlink(join(FEEDBACK_IMAGE_UPLOAD_DIR, fileName)).catch((error: NodeJS.ErrnoException) => {
+  await unlink(localImagePath(fileName)).catch((error: NodeJS.ErrnoException) => {
     if (error.code !== "ENOENT") {
       throw error;
     }

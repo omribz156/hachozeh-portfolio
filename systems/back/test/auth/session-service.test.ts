@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { IncomingMessage } from "node:http";
 import type { Pool } from "pg";
 
@@ -76,6 +76,8 @@ function createQueryable(overrides?: {
 }): Queryable {
   return {
     query: vi.fn(async (sql: string) => {
+      if (sql.includes("pg_advisory_xact_lock")) return { rows: [] };
+      if (sql.includes("as hourly")) return { rows: [{ hourly: "0", daily: "0" }] };
       if (sql.includes("from otp_challenges")) {
         if (sql.includes("count(*)::text")) {
           return {
@@ -282,7 +284,9 @@ function createPoolForVerify(overrides: {
 }
 
 describe("auth session service", () => {
+  beforeEach(() => { vi.stubEnv("AUTH_EMAIL_ENABLED", "true"); });
   afterEach(() => {
+    vi.unstubAllEnvs();
     vi.restoreAllMocks();
   });
 

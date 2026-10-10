@@ -206,8 +206,8 @@
     v = (v || "").trim();
     if (!v) return "";
     var m = v.match(/(?:x\.com|twitter\.com)\/(@?[A-Za-z0-9_]+)/i);
-    if (m) return m[1].replace(/^@/, "");
-    return v.replace(/^@/, "");
+    var handle = (m ? m[1] : v).replace(/^@/, "");
+    return /^[A-Za-z0-9_]{1,15}$/.test(handle) ? handle : "";
   }
 
   async function save() {

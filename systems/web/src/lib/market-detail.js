@@ -35,3 +35,4 @@ export async function fetchMarketSavedState(marketKey, cookieHeader = '') {
     return false;
   }
 }
+import { backendFetch as fetch } from './server-security';

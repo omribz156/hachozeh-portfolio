@@ -324,3 +324,4 @@ export async function GET({ url, clientAddress, request }) {
     },
   });
 }
+import { backendFetch as fetch } from '../../../lib/server-security';

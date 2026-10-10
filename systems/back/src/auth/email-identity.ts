@@ -1,7 +1,11 @@
+import { z } from "zod";
+
+const SingleEmailSchema = z.email().max(254);
+
 export function normalizeEmail(identifier: string): string {
   const normalized = identifier.trim().toLowerCase();
 
-  if (!normalized || !normalized.includes("@") || normalized.startsWith("@") || normalized.endsWith("@")) {
+  if (!SingleEmailSchema.safeParse(normalized).success || normalized.split("@")[0].length > 64) {
     throw new Error("identifier must be a valid email.");
   }
 

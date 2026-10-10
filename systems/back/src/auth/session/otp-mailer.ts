@@ -139,6 +139,7 @@ export async function sendAuthOtpEmail(
   const email = buildAuthOtpEmail(input);
   const response = await fetch("https://api.resend.com/emails", {
     method: "POST",
+    signal: AbortSignal.timeout(10_000),
     headers: {
       authorization: `Bearer ${env.mail.resendApiKey}`,
       "content-type": "application/json"

@@ -58,6 +58,11 @@ import {
 import type { AppEnv } from "../../config/env";
 import type { Queryable } from "../../db/client/pool";
 import { recordRateLimitIntegritySignal } from "../../risk/market-integrity-service";
+import { takeRateLimitAuditSlot } from "../../observability/rate-limit-audit-budget";
+import { insertAuditEvent } from "../../shared/audit-events";
+import { readClientFingerprint } from "../../auth/session/session-records";
+import { createAccessLogBudget } from "../../../../shared/security-log";
+import { validateEmailChallengeToken } from "../../auth/session/email-security";
 import { formatUnknownError, type Logger } from "../../shared/logger";
 import type { RateLimiter, RateLimitResult } from "../rate-limit";
 
@@ -102,6 +107,7 @@ async function recordRateLimitSignalSafely(
   request: FastifyRequest,
   result: RateLimitResult
 ): Promise<void> {
+  if (!takeRateLimitAuditSlot(context.dbPool, result.family)) return;
   try {
     await recordRateLimitIntegritySignal(context.dbPool, request.raw, result);
   } catch (error) {
@@ -116,7 +122,7 @@ export function registerAuthSessionRoutes(
   app: FastifyInstance,
   context: AuthSessionRouteContext
 ): void {
-  const authStart = context.startAuthChallenge ?? startAuthChallenge;
+  const authLogs = createAccessLogBudget("auth");
 
   app.post("/api/auth/start", async (request, reply) => {
     const otpSendResult = context.rateLimiter.check(request.raw, "auth_otp_send");
@@ -142,10 +148,14 @@ export function registerAuthSessionRoutes(
     }
 
     try {
+      await validateEmailChallengeToken(readRequiredBody(request), context.env);
       const parsedBody = parseStartBody(readRequiredBody(request));
-      return await authStart(context.dbPool, context.env, parsedBody);
+      return context.startAuthChallenge
+        ? await context.startAuthChallenge(context.dbPool, context.env, parsedBody)
+        : await startAuthChallenge(context.dbPool, context.env, parsedBody, { ...readClientFingerprint(request.raw), requestId: String(request.raw.headers["x-security-request-id"] || "") });
     } catch (error) {
       if (error instanceof AuthSessionError) {
+        if (authLogs.allow()) context.logger.info("security.auth.start_rejected", { code: error.code, requestId: request.raw.headers["x-security-request-id"], ...readClientFingerprint(request.raw) });
         sendError(reply, error.statusCode, error.code, error.message);
         return undefined;
       }
@@ -175,6 +185,7 @@ export function registerAuthSessionRoutes(
       return payload;
     } catch (error) {
       if (error instanceof AuthSessionError) {
+        if (authLogs.allow()) context.logger.info("security.auth.verify_rejected", { code: error.code, requestId: request.raw.headers["x-security-request-id"], ...readClientFingerprint(request.raw) });
         sendError(reply, error.statusCode, error.code, error.message);
         return undefined;
       }
@@ -564,6 +575,8 @@ export function registerAuthSessionRoutes(
         allowDemo: false
       });
       const payload = await readCurrentUserDataExport(context.dbPool, actor.actorId);
+      await insertAuditEvent(context.dbPool, { actorId: actor.actorId, action: "security.account.export_prepared", entityType: "user", entityId: actor.actorId,
+        payload: { ...readClientFingerprint(request.raw), requestId: String(request.raw.headers["x-security-request-id"] || ""), revision: process.env.RENDER_GIT_COMMIT || "local" } });
       reply
         .header("content-type", "application/json; charset=utf-8")
         .header("cache-control", "no-store")

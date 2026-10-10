@@ -14,3 +14,4 @@ export async function fetchRelatedMarkets(marketKey) {
     return { tags: [], panels: {} };
   }
 }
+import { backendFetch as fetch } from './server-security';

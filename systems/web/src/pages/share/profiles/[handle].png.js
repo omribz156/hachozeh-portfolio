@@ -282,3 +282,4 @@ export async function GET({ params, clientAddress, request }) {
     },
   });
 }
+import { backendFetch as fetch } from '../../../lib/server-security';

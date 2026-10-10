@@ -1,16 +1,25 @@
 (function () {
   const authSession = window.NaviAuthSession;
   const currentUrl = new URL(window.location.href);
-  const queryBackendBaseUrl = currentUrl.searchParams.get("backendBase");
+  const isLocalPreview = ["localhost", "127.0.0.1", "[::1]"].includes(currentUrl.hostname);
+  const queryBackendBaseUrl = isLocalPreview ? currentUrl.searchParams.get("backendBase") : null;
+  function safeBackendBase(value) {
+    if (!value) return "";
+    try {
+      const url = new URL(value);
+      if (!["http:", "https:"].includes(url.protocol) || url.username || url.password) return "";
+      return url.origin === currentUrl.origin || (isLocalPreview && ["localhost", "127.0.0.1", "[::1]"].includes(url.hostname)) ? url.origin : "";
+    } catch { return ""; }
+  }
   // Fallback chain: explicit query param → auth session → runtime-config global
   // → same-origin (Caddy proxies /api to the backend, so '' is correct for prod
   // and any subdomain). The old localhost literal is removed — it was never
   // reachable (window.location.origin is always defined in a browser context).
-  const DEFAULT_BACKEND_BASE_URL =
+  const DEFAULT_BACKEND_BASE_URL = safeBackendBase(
     (queryBackendBaseUrl && queryBackendBaseUrl.trim()) ||
     authSession?.getBackendBaseUrl?.() ||
     window.NAVI_BACKEND_BASE_URL ||
-    '';
+    '');
   const backendModeEnabled =
     window.NAVI_REQUIRE_BACKEND_PORTFOLIO === true ||
     authSession?.isEnabled?.() === true ||

@@ -3,12 +3,12 @@ export const CONTENT_SECURITY_POLICY = [
   "base-uri 'self'",
   "object-src 'none'",
   "frame-ancestors 'none'",
-  "frame-src 'none'",
+  "frame-src https://challenges.cloudflare.com",
   "form-action 'self'",
   // data: allows Astro's ClientRouter sentinel script (a bare data:application/javascript,
   // element it injects to sync module-script execution on soft navigations). Without it
   // the ClientRouter re-run mechanism is blocked by CSP on every soft nav.
-  "script-src 'self' 'unsafe-inline' data: https://www.googletagmanager.com https://eu.i.posthog.com",
+  "script-src 'self' 'unsafe-inline' data: https://www.googletagmanager.com https://eu.i.posthog.com https://challenges.cloudflare.com",
   "script-src-attr 'none'",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
   "font-src 'self' https://fonts.gstatic.com data:",

@@ -9,3 +9,4 @@ export async function fetchMarketFamily(familyKey) {
   if (!res.ok) throw new Error(`market-family "${familyKey}" → HTTP ${res.status}`);
   return res.json();
 }
+import { backendFetch as fetch } from './server-security';

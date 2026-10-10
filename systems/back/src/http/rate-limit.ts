@@ -45,6 +45,7 @@ export type RateLimitContext = {
 type RateLimiterOptions = {
   sweepBucketThreshold?: number;
   sweepIntervalMs?: number;
+  maxBuckets?: number;
 };
 
 export function buildRateLimitKey(input: {
@@ -109,9 +110,8 @@ const DEFAULT_RULES: Record<RouteFamily, RateLimitRule> = {
   general_request: { limit: 300, windowMs: 60_000 }
 };
 
-// Lazy-sweep tunables: evict expired buckets when either condition fires.
+// Sweep at most once per minute; cardinality is independently capped.
 // No setInterval — keeps the module dependency-free and test-deterministic.
-const SWEEP_BUCKET_THRESHOLD = 10_000; // trigger if map exceeds this size
 const SWEEP_INTERVAL_MS = 60_000;      // trigger at most once per minute regardless
 
 function readClientKey(request: IncomingMessage): string {
@@ -301,8 +301,9 @@ export function createInMemoryRateLimiter(
 ): RateLimiter & { readDiagnostics(): RateLimitDiagnostics } {
   const buckets = new Map<string, RateLimitBucket>();
   let lastSweepAt = 0;
-  const sweepBucketThreshold = options.sweepBucketThreshold ?? SWEEP_BUCKET_THRESHOLD;
   const sweepIntervalMs = options.sweepIntervalMs ?? SWEEP_INTERVAL_MS;
+  const maxBuckets = Math.max(1, options.maxBuckets ?? 10_000);
+  const overflow = new Map<RouteFamily, RateLimitBucket>();
 
   const rules = Object.fromEntries(
     Object.entries(DEFAULT_RULES).map(([family, rule]) => {
@@ -319,14 +320,14 @@ export function createInMemoryRateLimiter(
   ) as Record<RouteFamily, RateLimitRule>;
 
   function maybeSweep(now: number): void {
-    if (buckets.size < sweepBucketThreshold && now - lastSweepAt < sweepIntervalMs) {
+    if (now - lastSweepAt < sweepIntervalMs) {
       return;
     }
 
     lastSweepAt = now;
 
     for (const [key, bucket] of buckets) {
-      if (bucket.resetAt < now) {
+      if (bucket.resetAt <= now) {
         buckets.delete(key);
       }
     }
@@ -341,7 +342,8 @@ export function createInMemoryRateLimiter(
 
       const rule = rules[family];
       const bucketKey = buildBucketKey(request, family, context);
-      const existingBucket = buckets.get(bucketKey);
+      const overflowed = !buckets.has(bucketKey) && buckets.size >= maxBuckets;
+      const existingBucket = overflowed ? overflow.get(family) : buckets.get(bucketKey);
       const bucket =
         existingBucket && existingBucket.resetAt > now
           ? existingBucket
@@ -351,7 +353,8 @@ export function createInMemoryRateLimiter(
             };
 
       bucket.count += 1;
-      buckets.set(bucketKey, bucket);
+      if (overflowed) overflow.set(family, bucket);
+      else buckets.set(bucketKey, bucket);
 
       const remaining = Math.max(0, rule.limit - bucket.count);
       const retryAfterSeconds = Math.max(1, Math.ceil((bucket.resetAt - now) / 1000));

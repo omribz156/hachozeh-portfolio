@@ -28,6 +28,11 @@ export type DbPrivilegeAuditReport = {
   dbRoleMode: DbRoleMode;
   strict: boolean;
   userIsSuperuser: boolean;
+  canCreateRoles: boolean;
+  canCreateDatabases: boolean;
+  canBypassRls: boolean;
+  canReplicate: boolean;
+  leastPrivilege: boolean;
   canCreateDatabaseObjects: boolean;
   schemasWithCreate: string[];
   ownedTableCount: number;
@@ -54,6 +59,10 @@ export function assessDbPrivilegeAudit(input: {
   dbRoleMode?: DbRoleMode;
   strict: boolean;
   userIsSuperuser?: boolean;
+  canCreateRoles?: boolean;
+  canCreateDatabases?: boolean;
+  canBypassRls?: boolean;
+  canReplicate?: boolean;
   canCreateDatabaseObjects: boolean;
   schemaPrivileges: SchemaPrivilegeRow[];
   ownedTables: OwnedTableRow[];
@@ -83,6 +92,15 @@ export function assessDbPrivilegeAudit(input: {
     findings.push("runtime DB user is a database superuser");
   }
 
+  if (input.canCreateRoles) {
+    (providerManaged ? informationalFindings : findings).push("runtime DB user can create roles");
+  }
+  if (input.canCreateDatabases) {
+    (providerManaged ? informationalFindings : findings).push("runtime DB user can create databases");
+  }
+  if (input.canBypassRls) findings.push("runtime DB user can bypass row-level security");
+  if (input.canReplicate) findings.push("runtime DB user has replication privileges");
+
   if (input.canCreateDatabaseObjects) {
     const message = "runtime DB user can create database objects";
     (providerManaged ? informationalFindings : findings).push(message);
@@ -109,11 +127,17 @@ export function assessDbPrivilegeAudit(input: {
     dbRoleMode,
     strict: input.strict,
     userIsSuperuser: input.userIsSuperuser === true,
+    canCreateRoles: input.canCreateRoles === true,
+    canCreateDatabases: input.canCreateDatabases === true,
+    canBypassRls: input.canBypassRls === true,
+    canReplicate: input.canReplicate === true,
+    leastPrivilege: findings.length === 0 && informationalFindings.length === 0,
     canCreateDatabaseObjects: input.canCreateDatabaseObjects,
     schemasWithCreate,
     ownedTableCount,
     riskyPrivileges,
-    verdict: findings.length === 0 ? "ok" : input.strict ? "bad" : "warn",
+    verdict: findings.length > 0 ? (input.strict ? "bad" : "warn") :
+      informationalFindings.length > 0 ? "warn" : "ok",
     findings,
     informationalFindings
   };
@@ -139,8 +163,14 @@ async function main(): Promise<void> {
     const identity = await pool.query<{ current_user: string; current_database: string }>(
       "select current_user, current_database()"
     );
-    const role = await pool.query<{ user_is_superuser: boolean }>(
-      "select rolsuper as user_is_superuser from pg_roles where rolname = current_user"
+    const role = await pool.query<{
+      user_is_superuser: boolean; can_create_roles: boolean; can_create_databases: boolean;
+      can_bypass_rls: boolean; can_replicate: boolean;
+    }>(
+      `select bool_or(rolsuper) as user_is_superuser, bool_or(rolcreaterole) as can_create_roles,
+        bool_or(rolcreatedb) as can_create_databases, bool_or(rolbypassrls) as can_bypass_rls,
+        bool_or(rolreplication) as can_replicate
+       from pg_roles where pg_has_role(current_user, oid, 'MEMBER')`
     );
     const createDb = await pool.query<{ can_create_database_objects: boolean }>(
       "select has_database_privilege(current_user, current_database(), 'CREATE') as can_create_database_objects"
@@ -156,7 +186,7 @@ async function main(): Promise<void> {
     );
     const ownedTables = await pool.query<OwnedTableRow>(
       `
-        select schemaname, count(*) filter (where tableowner = current_user)::text as owned_tables, count(*)::text as total_tables
+        select schemaname, count(*) filter (where pg_has_role(current_user, tableowner, 'MEMBER'))::text as owned_tables, count(*)::text as total_tables
         from pg_tables
         where schemaname not like 'pg_%'
           and schemaname <> 'information_schema'
@@ -166,12 +196,14 @@ async function main(): Promise<void> {
     );
     const tablePrivileges = await pool.query<TablePrivilegeRow>(
       `
-        select table_schema, privilege_type, count(*)::text
-        from information_schema.role_table_grants
-        where grantee = current_user
-          and table_schema not in ('pg_catalog', 'information_schema')
-        group by table_schema, privilege_type
-        order by table_schema, privilege_type
+        select n.nspname as table_schema, p.privilege_type, count(*)::text
+        from pg_class c join pg_namespace n on n.oid = c.relnamespace
+        cross join (values ('TRUNCATE'), ('TRIGGER')) as p(privilege_type)
+        where c.relkind in ('r', 'p') and n.nspname not like 'pg_%'
+          and n.nspname <> 'information_schema'
+          and has_table_privilege(current_user, c.oid, p.privilege_type)
+        group by n.nspname, p.privilege_type
+        order by n.nspname, p.privilege_type
       `
     );
     const report = assessDbPrivilegeAudit({
@@ -180,6 +212,10 @@ async function main(): Promise<void> {
       dbRoleMode,
       strict,
       userIsSuperuser: role.rows[0]?.user_is_superuser === true,
+      canCreateRoles: role.rows[0]?.can_create_roles === true,
+      canCreateDatabases: role.rows[0]?.can_create_databases === true,
+      canBypassRls: role.rows[0]?.can_bypass_rls === true,
+      canReplicate: role.rows[0]?.can_replicate === true,
       canCreateDatabaseObjects: createDb.rows[0]?.can_create_database_objects === true,
       schemaPrivileges: schemaPrivileges.rows,
       ownedTables: ownedTables.rows,
@@ -188,7 +224,7 @@ async function main(): Promise<void> {
 
     const output = {
       generatedAt: new Date().toISOString(),
-      status: report.verdict === "ok" ? "PASS" : "FAIL",
+      status: report.verdict === "ok" ? "PASS" : report.verdict === "warn" ? "WARN" : "FAIL",
       report
     };
 

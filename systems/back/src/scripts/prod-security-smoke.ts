@@ -1,4 +1,6 @@
-type CheckResult = {
+import { resolve } from "node:path";
+
+export type CheckResult = {
   name: string;
   ok: boolean;
   detail: string;
@@ -66,14 +68,15 @@ function expectHeader(
   return `${header}=${value ?? "(absent)"} (${expected})`;
 }
 
-async function main(): Promise<void> {
-  const baseUrl = normalizeBaseUrl(
-    readArg("--base-url") ||
-      process.env["PROD_SECURITY_SMOKE_BASE_URL"] ||
-      process.env["PUBLIC_BASE_URL"] ||
-      "https://hachozeh.com"
-  );
-  const allowHttp = hasFlag("--allow-http");
+export async function runProductionSecuritySmoke(
+  rawBaseUrl: string,
+  allowHttp = false,
+  fetcher: typeof fetch = fetch
+): Promise<CheckResult[]> {
+  const baseUrl = normalizeBaseUrl(rawBaseUrl);
+  const request = (path: string, init: RequestInit = {}) => fetcher(buildUrl(baseUrl, path), {
+    ...init, redirect: "manual", signal: AbortSignal.timeout(10_000)
+  });
   const results: CheckResult[] = [];
 
   await check(results, "public URL uses HTTPS", async () => {
@@ -85,13 +88,13 @@ async function main(): Promise<void> {
   });
 
   await check(results, "shell has security headers", async () => {
-    const response = await fetch(buildUrl(baseUrl, "/trending"), {
+    const response = await request("/", {
       headers: { accept: "text/html" },
       redirect: "manual"
     });
 
-    if (response.status < 200 || response.status >= 400) {
-      return `unexpected status=${response.status}`;
+    if (response.status !== 200) {
+      throw new Error(`unexpected status=${response.status}`);
     }
 
     const checks = [
@@ -113,20 +116,20 @@ async function main(): Promise<void> {
   });
 
   await check(results, "guest /api/me rejects with no-store", async () => {
-    const response = await fetch(buildUrl(baseUrl, "/api/me"), {
+    const response = await request("/api/me", {
       headers: { accept: "application/json" }
     });
     const cacheControl = response.headers.get("cache-control");
 
     if (response.status !== 401 || cacheControl !== "no-store") {
-      return `status=${response.status}; cache-control=${cacheControl ?? "(absent)"}`;
+      throw new Error(`status=${response.status}; cache-control=${cacheControl ?? "(absent)"}`);
     }
 
     return `status=401; cache-control=${cacheControl}`;
   });
 
   await check(results, "session read is anonymous and read-limited", async () => {
-    const response = await fetch(buildUrl(baseUrl, "/api/session"), {
+    const response = await request("/api/session", {
       headers: { accept: "application/json" }
     });
     const payload = await response.json().catch(() => null);
@@ -137,14 +140,14 @@ async function main(): Promise<void> {
       payload?.session?.authenticated !== false ||
       family !== "session_read"
     ) {
-      return `status=${response.status}; authenticated=${String(payload?.session?.authenticated)}; family=${family ?? "(absent)"}`;
+      throw new Error(`status=${response.status}; authenticated=${String(payload?.session?.authenticated)}; family=${family ?? "(absent)"}`);
     }
 
     return `status=200; authenticated=false; family=${family}`;
   });
 
   await check(results, "untrusted CORS origin is not allowed", async () => {
-    const response = await fetch(buildUrl(baseUrl, "/api/me"), {
+    const response = await request("/api/me", {
       headers: {
         accept: "application/json",
         origin: "https://evil.example"
@@ -154,25 +157,33 @@ async function main(): Promise<void> {
     const allowCredentials = response.headers.get("access-control-allow-credentials");
 
     if (allowOrigin || allowCredentials) {
-      return `acao=${allowOrigin ?? "(absent)"}; acac=${allowCredentials ?? "(absent)"}`;
+      throw new Error(`acao=${allowOrigin ?? "(absent)"}; acac=${allowCredentials ?? "(absent)"}`);
     }
 
     return "no ACAO/ACAC for evil origin";
   });
 
   await check(results, "unknown API path is bounded", async () => {
-    const response = await fetch(buildUrl(baseUrl, "/api/security-smoke-not-real"), {
+    const response = await request("/api/security-smoke-not-real", {
       headers: { accept: "application/json" }
     });
     const family = response.headers.get("x-rate-limit-family");
 
     if (response.status !== 404 || family !== "general_request") {
-      return `status=${response.status}; family=${family ?? "(absent)"}`;
+      throw new Error(`status=${response.status}; family=${family ?? "(absent)"}`);
     }
 
     return `status=404; family=${family}`;
   });
 
+  return results;
+}
+
+async function main(): Promise<void> {
+  const results = await runProductionSecuritySmoke(
+    readArg("--base-url") || process.env["PROD_SECURITY_SMOKE_BASE_URL"] ||
+      process.env["PUBLIC_BASE_URL"] || "https://hachozeh.com", hasFlag("--allow-http")
+  );
   for (const result of results) {
     const marker = result.ok ? "ok" : "fail";
     console.log(`${marker}\t${result.name}\t${result.detail}`);
@@ -183,7 +194,9 @@ async function main(): Promise<void> {
   }
 }
 
-main().catch((error) => {
-  console.error(error instanceof Error ? error.stack || error.message : error);
-  process.exitCode = 1;
-});
+if (process.argv[1] && /\/prod-security-smoke\.(ts|js)$/.test(resolve(process.argv[1]))) {
+  main().catch((error) => {
+    console.error(error instanceof Error ? error.message : "Production smoke failed");
+    process.exitCode = 1;
+  });
+}

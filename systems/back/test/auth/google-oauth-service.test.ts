@@ -256,6 +256,10 @@ function createPoolForNewGoogleUser() {
       if (sql.includes("insert into sessions")) {
         return { rows: [] };
       }
+      if (sql.includes("insert into audit_events")) {
+        expect(values?.[2]).toBe("security.session.created");
+        return { rows: [] };
+      }
 
       if (sql.includes("count(distinct user_id)::text as user_count")) {
         return { rows: [{ user_count: "1" }] };

@@ -1,6 +1,7 @@
 import { defineMiddleware } from 'astro:middleware';
 import { BACKEND_INTERNAL_URL } from './lib/backend.js';
 import { applySecurityHeaders } from './lib/security-headers.js';
+import { backendFetch, withBackendRequest, recordWebResponse } from './lib/server-security';
 
 // Mirror the backend's AUTH_SESSION_COOKIE_NAME (default 'navi_session'). The
 // server can therefore tell, per request, whether the caller is authenticated
@@ -17,7 +18,8 @@ function rendersTheShell(pathname: string): boolean {
   return true;
 }
 
-export const onRequest = defineMiddleware(async (context, next) => {
+export const onRequest = defineMiddleware(async (context, next) => withBackendRequest(context.request, async () => {
+  const startedAt = performance.now();
   // Default: definitively anonymous (guests + asset requests). `validated` tells
   // the client whether this is an authoritative answer it can adopt without its
   // own round-trip, or a fail-closed fallback it should re-check itself.
@@ -93,7 +95,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
       // expiry) on every render. Forward the request's cookie server-to-server.
       // /api/session embeds currentUser for authed sessions, so the full payload
       // captured here lets the client adopt it instead of re-fetching on load.
-      const response = await fetch(new URL('/api/session', BACKEND_INTERNAL_URL), {
+      const response = await backendFetch(new URL('/api/session', BACKEND_INTERNAL_URL), {
         headers: {
           cookie: context.request.headers.get('cookie') || '',
           accept: 'application/json',
@@ -116,6 +118,7 @@ export const onRequest = defineMiddleware(async (context, next) => {
 
   context.locals.auth = auth;
   const response = await next();
+  recordWebResponse(context.request, response.status, Math.round(performance.now() - startedAt), context.routePattern || '/:unmatched');
   applySecurityHeaders(response.headers, context.url);
   return response;
-});
+}));

@@ -289,7 +289,7 @@ const ssrAuthenticated = ssrAuth.authenticated === true;
       import '../client/quick-buy/cards.client.js';
     </script>
 
-    <PageOverlayHost client:only="preact" />
+    <PageOverlayHost client:only="preact" emailEnabled={process.env.AUTH_EMAIL_ENABLED === 'true' || (process.env.NODE_ENV !== 'production' && process.env.AUTH_EMAIL_ENABLED !== 'false')} turnstileSiteKey={process.env.TURNSTILE_SITE_KEY || ''} />
     <QuickBuyHost client:only="preact" />
 
     <!-- A11y: when any modal dialog is open, mark the page chrome `inert` so screen

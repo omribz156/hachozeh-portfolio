@@ -51,6 +51,10 @@ export function isValidOtpCode(value) {
 
 export function mapAuthErrorMessage(code) {
   const messages = {
+    email_auth_paused:       'הכניסה באימייל אינה זמינה זמנית. אפשר להמשיך עם Google.',
+    challenge_required:      'יש להשלים את בדיקת האבטחה לפני בקשת הקוד.',
+    challenge_failed:        'בדיקת האבטחה נכשלה. נסה שוב.',
+    mail_delivery_failed:    'שליחת הקוד נכשלה. נסה שוב מאוחר יותר.',
     access_denied:           'הכניסה עם Google בוטלה.',
     google_auth_failed:      'Google לא החזיר אימות תקין. נסה שוב.',
     google_auth_unavailable: 'כניסה עם Google לא מוגדרת כרגע.',

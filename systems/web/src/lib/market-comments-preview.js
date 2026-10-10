@@ -41,3 +41,4 @@ export async function fetchCommentPreview(marketKey) {
   cache.set(marketKey, { expires: Date.now() + TTL_MS, data });
   return data;
 }
+import { backendFetch as fetch } from './server-security';

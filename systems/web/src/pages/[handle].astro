@@ -7,6 +7,8 @@ import { join } from 'node:path';
 import Layout from '../layouts/Layout.astro';
 import ProfileDossier from '../components/ProfileDossier.astro';
 import { BACKEND_INTERNAL_URL } from '../lib/backend.js';
+import { backendFetch } from '../lib/server-security';
+import { loadProfilePageData } from '../lib/profile-page-data.js';
 import { buildProfilePageJsonLd, buildCanonicalUrl } from '../lib/seo.js';
 import '../styles/pages/profile-kit.css';
 import '../styles/pages/profile-dossier.css';
@@ -18,29 +20,19 @@ const auth = Astro.locals.auth;
 const viewerAuthed = auth?.authenticated === true;
 
 const cookie = Astro.request.headers.get('cookie') || '';
+let profileUnavailable = false;
 async function getJSON(path: string, withCookie = false) {
   try {
-    const res = await fetch(new URL(path, BACKEND_INTERNAL_URL), {
+    const res = await backendFetch(new URL(path, BACKEND_INTERNAL_URL), {
       headers: withCookie ? { cookie, accept: 'application/json' } : { accept: 'application/json' },
       signal: AbortSignal.timeout(1800),
     });
-    return res.ok ? await res.json().catch(() => null) : null;
-  } catch { return null; }
+    if (withCookie && res.status !== 404 && !res.ok) profileUnavailable = true;
+    return res.ok ? await res.json().catch(() => { if (withCookie) profileUnavailable = true; return null; }) : null;
+  } catch { if (withCookie) profileUnavailable = true; return null; }
 }
 
-const enc = encodeURIComponent(paramId);
-// Fetch the profile + its sub-resources CONCURRENTLY — each depends only on the URL param,
-// not on one another, so the old 4 sequential awaits were ~4× the needed latency. `profile`
-// (public read WITH cookie) resolves viewerFollows + increments the view counter; the 404 gate
-// is applied after the wave (a discarded sub-fetch on an unknown handle is rare and still cheap).
-const [profile, trackRecord, pos, rec] = paramId
-  ? await Promise.all([
-      getJSON(`/api/social/users/${enc}`, true),
-      getJSON(`/api/social/users/${enc}/track-record`),
-      getJSON(`/api/social/users/${enc}/positions?limit=20`),
-      getJSON(`/api/social/users/${enc}/record?limit=20`),
-    ])
-  : [null, null, null, null];
+const [profile, trackRecord, pos, rec] = await loadProfilePageData(paramId, getJSON);
 
 const notFound = !profile;
 if (notFound) {
@@ -50,10 +42,11 @@ if (notFound) {
   ].find((candidate) => existsSync(candidate));
   const errorHtml = readFileSync(errorHtmlPath || join(process.cwd(), 'public/error.html'), 'utf8');
   return new Response(errorHtml, {
-    status: 404,
-    statusText: 'Not Found',
+    status: profileUnavailable ? 503 : 404,
+    statusText: profileUnavailable ? 'Service Unavailable' : 'Not Found',
     headers: {
       'content-type': 'text/html; charset=utf-8',
+      'cache-control': 'no-store',
     },
   });
 }

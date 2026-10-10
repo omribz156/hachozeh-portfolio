@@ -4,10 +4,12 @@ import { useState } from 'preact/hooks';
 import OverlayFrame from './OverlayFrame.jsx';
 import BrandMark from './BrandMark.jsx';
 import GoogleButton from './GoogleButton.jsx';
+import EmailChallenge from './EmailChallenge.jsx';
 
-export default function SignupOverlay({ authState, onClose, onSubmit, onGoogleClick, onOpenOverlay }) {
+export default function SignupOverlay({ authState, onClose, onSubmit, onGoogleClick, onOpenOverlay, emailEnabled = false, turnstileSiteKey = '' }) {
   const [email, setEmail] = useState(authState.identifier || '');
-  const canSubmit = email.trim().length > 0;
+  const [token, setToken] = useState('');
+  const canSubmit = emailEnabled && email.trim().length > 0 && (!turnstileSiteKey || Boolean(token));
   const errorBanner = authState.errorMessage && authState.retryOverlay === 'signup'
     ? <div class="navi-overlay-error-banner" role="alert">{authState.errorMessage}</div>
     : null;
@@ -15,7 +17,7 @@ export default function SignupOverlay({ authState, onClose, onSubmit, onGoogleCl
   function handleSubmit(e) {
     e.preventDefault();
     if (!canSubmit) return;
-    onSubmit('signup', email.trim());
+    onSubmit('signup', email.trim(), token);
   }
 
   return (
@@ -24,9 +26,10 @@ export default function SignupOverlay({ authState, onClose, onSubmit, onGoogleCl
       <h1 id="navi-overlay-title" class="navi-overlay-title">פתח חשבון</h1>
       <p class="navi-overlay-subtitle">ניתוח שווקים מתחיל בפנים. דקה אחת.</p>
       <GoogleButton label="הרשם עם Google" onClick={onGoogleClick} />
-      <div class="navi-overlay-divider"><span>או</span></div>
+      {!emailEnabled && <p class="navi-overlay-subtitle">הכניסה באימייל אינה זמינה זמנית.</p>}
+      {emailEnabled && <div class="navi-overlay-divider"><span>או</span></div>}
       {errorBanner}
-      <form data-overlay-submit="signup" onSubmit={handleSubmit}>
+      {emailEnabled && <form data-overlay-submit="signup" onSubmit={handleSubmit}>
         <div class="navi-overlay-field">
           <input
             id="navi-signup-email"
@@ -40,7 +43,8 @@ export default function SignupOverlay({ authState, onClose, onSubmit, onGoogleCl
           />
           <button type="submit" class="navi-overlay-continue" disabled={!canSubmit}>המשך</button>
         </div>
-      </form>
+        {turnstileSiteKey && <EmailChallenge siteKey={turnstileSiteKey} onToken={setToken} />}
+      </form>}
       <p class="navi-overlay-legal">
         בלחיצה על המשך, אני מסכים ל<a href="/terms" target="_blank" rel="noopener noreferrer">תנאי השימוש</a>
         {' '}ול<a href="/privacy" target="_blank" rel="noopener noreferrer">מדיניות הפרטיות</a>, ומאשר שמלאו לי 18.

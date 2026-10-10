@@ -1,6 +1,7 @@
 import { Pool, type PoolClient, type PoolConfig } from "pg";
 
 import type { AppEnv } from "../../config/env";
+import { databaseTls } from "./tls";
 
 export type Queryable = Pick<Pool, "query"> | Pick<PoolClient, "query">;
 
@@ -11,6 +12,7 @@ function buildPoolConfig(env: AppEnv["db"]): PoolConfig {
     database: env.name,
     user: env.user,
     password: env.password,
+    ssl: databaseTls(env.host, env.tlsMode),
     connectionTimeoutMillis: env.connectTimeoutMs,
     statement_timeout: env.statementTimeoutMs,
     query_timeout: env.queryTimeoutMs,

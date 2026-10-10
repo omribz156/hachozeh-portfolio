@@ -9,6 +9,7 @@ import { withSavepoint } from "../shared/transaction-savepoint";
 import { buildClearedSessionCookie, buildSessionCookie, readCookie } from "./session-cookie";
 import { AuthSessionError } from "./session/errors";
 import { hashValue } from "./session/hashing";
+import { assertEmailAuthEnabled, hashOtp, matchesOtp } from "./session/email-security";
 import {
   readChallengeForVerification,
   readRecentChallenge,
@@ -41,6 +42,8 @@ import {
   readIdentityByIdentifier
 } from "./session/user-identity-records";
 import { STARTER_GRANT_AMOUNT } from "../economy/economy-config";
+import { insertAuditEvent } from "../shared/audit-events";
+import { securityLog } from "../../../shared/security-log";
 
 export { AuthSessionError } from "./session/errors";
 export type { AuthStartResponse, SessionResponse, SessionSummaryResult } from "./session/types";
@@ -187,6 +190,10 @@ export async function createAuthenticatedSessionForUser(
     [input.userId]
   );
 
+  await insertAuditEvent(db, { actorId: input.userId, action: "security.session.created", entityType: "session", entityId: sessionId,
+    payload: { createdUser: input.createdUser, ipHash: fingerprint.ipHash, userAgentHash: fingerprint.userAgentHash,
+      requestId: String(request.headers["x-security-request-id"] || ""), revision: process.env.RENDER_GIT_COMMIT || "local" } });
+
   return {
     payload: buildAuthenticatedSessionResponse(
       input.userId,
@@ -214,8 +221,10 @@ export async function createAuthenticatedSessionForUser(
 export async function startAuthChallenge(
   db: Queryable,
   env: AppEnv,
-  body: unknown
+  body: unknown,
+  source: { requestId?: string; ipHash?: string | null; userAgentHash?: string | null } = {}
 ): Promise<AuthStartResponse> {
+  assertEmailAuthEnabled(env);
   const request = parseStartBody(body);
 
   const inserted = canUseTransaction(db)
@@ -225,12 +234,17 @@ export async function startAuthChallenge(
     : await createPendingAuthChallenge(db, env, request);
 
   try {
-    await sendAuthOtpEmail(env, {
+    const delivery = await sendAuthOtpEmail(env, {
       identifier: inserted.identifier,
       code: inserted.code,
       purpose: inserted.purpose,
       expiresAt: inserted.expiresAt
     });
+    securityLog("security.auth.mail_sent", { challengeId: inserted.challengeId, provider: delivery.provider, messageId: delivery.messageId, ...source });
+    try {
+      await insertAuditEvent(db, { actorId: "system:auth", action: "security.auth.mail_sent", entityType: "otp_challenge", entityId: inserted.challengeId,
+        payload: { provider: delivery.provider, messageId: delivery.messageId, ...source, revision: process.env.RENDER_GIT_COMMIT || "local" } });
+    } catch { securityLog("security.audit.failed", { operation: "mail_sent", challengeId: inserted.challengeId }); }
   } catch (error) {
     await db.query(
       `
@@ -263,6 +277,17 @@ async function createPendingAuthChallenge(
     lockIdentifier?: boolean;
   }
 ): Promise<AuthStartInsertResult> {
+  if (env.nodeEnv === "production") {
+    await db.query("select pg_advisory_xact_lock(hashtext('auth_mail_global_budget'))");
+    const budget = await db.query<{ hourly: string; daily: string }>(`
+      select count(*) filter (where created_at >= now() - interval '1 hour')::text as hourly,
+             count(*)::text as daily from otp_challenges
+      where created_at >= now() - interval '24 hours'
+    `);
+    if (Number(budget.rows[0]?.hourly ?? 0) >= 30 || Number(budget.rows[0]?.daily ?? 0) >= 100) {
+      throw new AuthSessionError(429, "rate_limited", "Email sign-in is busy. Please try again later.");
+    }
+  }
   if (options?.lockIdentifier) {
     await lockAuthStartIdentifier(db, request.identifier);
   }
@@ -321,7 +346,7 @@ async function createPendingAuthChallenge(
       challengeId,
       request.identifier,
       request.purpose,
-      hashValue(code),
+      hashOtp(code, challengeId),
       env.auth.otpMaxAttempts,
       expiresAt.toISOString()
     ]
@@ -346,6 +371,7 @@ export async function verifyAuthChallenge(
   setCookie: string;
 }> {
   const input = parseVerifyBody(body);
+  assertEmailAuthEnabled(env);
 
   const verification = await withTransaction<VerifyChallengeResult>(
     db,
@@ -372,7 +398,7 @@ export async function verifyAuthChallenge(
       };
     }
 
-    if (challenge.code_hash !== hashValue(input.code)) {
+    if (!matchesOtp(challenge.code_hash, input.code, challenge.id)) {
       const nextAttempts = challenge.attempt_count + 1;
       const nextStatus = nextAttempts >= challenge.max_attempts ? "expired" : "pending";
 

@@ -1,4 +1,9 @@
 import { randomUUID } from "node:crypto";
+import { createTrafficMonitor } from "../../../shared/security-traffic";
+import { sendSecurityAlert } from "../observability/security-alert";
+import { takeRateLimitAuditSlot, flushRateLimitAuditSummary } from "../observability/rate-limit-audit-budget";
+import { hasTrustedProxySecret, resolveClientIp } from "./client-ip";
+import { createAccessLogBudget, securityFingerprint } from "../../../shared/security-log";
 import { performance } from "node:perf_hooks";
 
 import fastify, { type FastifyInstance, type FastifyReply, type FastifyRequest } from "fastify";
@@ -143,6 +148,7 @@ async function recordRateLimitSignalSafely(
     sessionId?: string | null;
   }
 ): Promise<void> {
+  if (!takeRateLimitAuditSlot(context.dbPool, result.family)) return;
   try {
     await recordRateLimitIntegritySignal(context.dbPool, request.raw, result, signalContext);
   } catch (error) {
@@ -318,6 +324,32 @@ export function createFastifyApp(context: FastifyAppContext): FastifyInstance {
     bodyLimit: 32 * 1024
   });
   const rateLimiter = context.rateLimiter ?? DEFAULT_RATE_LIMITER;
+  const traffic = createTrafficMonitor({ source: "backend", send: sendSecurityAlert });
+  const accessLogs = createAccessLogBudget("backend");
+  const authTraffic = createTrafficMonitor({ source: "backend", threshold: 20, rejectionThreshold: 10, send: (signal) => sendSecurityAlert({ ...signal, category: "auth" }) });
+  const timer = setInterval(() => { traffic.tick(); authTraffic.tick(); accessLogs.flush(); flushRateLimitAuditSummary(context.dbPool); }, 30_000);
+  timer.unref();
+  app.addHook("onClose", async () => { clearInterval(timer); await traffic.drain(); await authTraffic.drain(); });
+  let webAlertAfter = 0;
+  let webAlertPending = false;
+  app.post("/internal/security-traffic", async (request, reply) => {
+    if (!hasTrustedProxySecret(request.raw, process.env.HACHOZEH_PROXY_SECRET ?? "")) {
+      return reply.code(403).send({ error: "forbidden" });
+    }
+    const value = request.body as Record<string, unknown> | null;
+    if (!value || value.source !== "web" || !["burst", "recovery"].includes(String(value.kind)) ||
+        !Number.isSafeInteger(value.requests) || !Number.isSafeInteger(value.rejected) ||
+        Number(value.requests) < 0 || Number(value.rejected) < 0 || value.windowSeconds !== 60) {
+      return reply.code(400).send({ error: "invalid_signal" });
+    }
+    if (webAlertPending || Date.now() < webAlertAfter) return reply.code(429).send({ delivered: false });
+    webAlertPending = true;
+    webAlertAfter = Date.now() + 60_000;
+    try {
+      const delivered = await sendSecurityAlert({ source: "web", kind: value.kind as "burst" | "recovery", requests: Number(value.requests), rejected: Number(value.rejected), windowSeconds: 60 });
+      return reply.code(delivered ? 200 : 503).send({ delivered });
+    } finally { webAlertPending = false; }
+  });
   const requestLifecycleByRequest = new WeakMap<
     FastifyRequest,
     {
@@ -354,7 +386,10 @@ export function createFastifyApp(context: FastifyAppContext): FastifyInstance {
   app.addHook("onRequest", async (request, reply) => {
     const requestId = readRequestId(request);
     const path = readRequestPath(request);
-    const logPath = sanitizeRequestLogPath(path);
+    const logPath = sanitizeRequestLogPath(request.routeOptions.url ?? "/:unmatched");
+    request.raw.headers["x-request-id"] = requestId;
+    const securityRequestId = randomUUID();
+    request.raw.headers["x-security-request-id"] = securityRequestId;
     setResponseHeaders(reply, requestId, context.env);
     if (shouldPreventResponseCaching(request.method, path)) {
       reply.header("cache-control", "no-store");
@@ -365,8 +400,14 @@ export function createFastifyApp(context: FastifyAppContext): FastifyInstance {
         logger: context.logger.child({
           component: "http",
           requestId,
+          securityRequestId,
           method: request.method,
-          path: logPath
+          path: logPath,
+          sourceHash: securityFingerprint(resolveClientIp(request.raw)),
+          sourceTrust: hasTrustedProxySecret(request.raw, process.env.HACHOZEH_PROXY_SECRET ?? "") ? "gateway" : "socket",
+          // Observation only: do not use this unproven ingress candidate for trust.
+          edgeCandidateHash: securityFingerprint(String(request.raw.headers["cf-connecting-ip"] ?? "missing").slice(0, 64)),
+          revision: process.env.RENDER_GIT_COMMIT ?? "local"
         }),
         path: logPath,
         startedAt: performance.now()
@@ -383,6 +424,9 @@ export function createFastifyApp(context: FastifyAppContext): FastifyInstance {
   });
 
   app.addHook("onResponse", async (request, reply) => {
+    if (!request.url.startsWith("/internal/") && !request.url.startsWith("/health")) traffic.observe(reply.statusCode);
+    const authPath = buildRequestUrl(request).pathname;
+    if (authPath === "/api/auth/start" || authPath === "/api/auth/verify" || authPath === "/api/me/data-export" || authPath === "/api/auth/google/callback") authTraffic.observe(reply.statusCode >= 400 ? 429 : 200);
     const lifecycle = requestLifecycleByRequest.get(request);
 
     if (!lifecycle) {
@@ -396,7 +440,7 @@ export function createFastifyApp(context: FastifyAppContext): FastifyInstance {
       statusCode: reply.statusCode,
       durationMs
     });
-    lifecycle.logger.info("request.completed", {
+    if (accessLogs.allow()) lifecycle.logger.info("request.completed", {
       statusCode: reply.statusCode,
       durationMs
     });
