@@ -17,5 +17,10 @@ production deployment target. Provider coordinates remain placeholders.
   public readiness/session/populated-HTML checks. This operational guard is not a
   claim of zero downtime or a proven provider-network root cause. Dashboard and
   environment-triggered deployments require equivalent operator verification.
+- Blueprint synchronization is separate from service auto-deploy: keep live auth
+  enable/pause controls manually managed so synchronization cannot undo containment
+  or an approved reopening. Instance-discovery routing can bypass a stale provider
+  virtual route; validate both gateway-to-upstream and SSR-to-backend paths through
+  actual instance replacement before claiming handover reliability.
 - No new logging subscription. Live infrastructure proof and incident records stay
   in private operations documentation, never in this evaluation snapshot.
