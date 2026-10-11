@@ -38,10 +38,7 @@
     "hygiene:report": "npm run hygiene:dead; npm run hygiene:dupes; npm run hygiene:cycles; npm run hygiene:deps; npm run hygiene:lint; npm run hygiene:deps:unused"
   },
   "overrides": {
-    "tailwindcss": {
-      "postcss-selector-parser": "7.1.6",
-      "postcss-nested": { "postcss-selector-parser": "7.1.6" }
-    },
+    "postcss-selector-parser": "7.1.6",
     "depcheck": {
       "js-yaml": "^4.2.0"
     }
