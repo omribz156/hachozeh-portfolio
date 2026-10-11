@@ -137,6 +137,7 @@ const repoRoot = inferRepoRoot("WATCHDOG_REPO_ROOT");
 // env, so this works from launchd without env plumbing. Delivery failures do
 // not stop the watchdog; they leave the alert eligible for the next tick.
 async function sendPlatformAlert(message: string): Promise<boolean> {
+  if (process.env.NODE_ENV === "test" || process.env.VITEST === "true") return false;
   try {
     const result = await execFileAsync(
       resolve(repoRoot, "workspace/scripts/platform-alert.sh"),

@@ -4,10 +4,9 @@ import { pathToFileURL } from 'node:url';
 
 const REVIEW_UNTIL = '2026-11-10T00:00:00Z';
 const TOOLCHAIN_PACKAGES = new Set(['braces', 'chokidar', 'depcheck', 'fast-glob',
-  'findup-sync', 'micromatch', 'postcss-nested', 'postcss-selector-parser', 'tailwindcss']);
+  'findup-sync', 'micromatch', 'tailwindcss']);
 const REVIEWED_ADVISORIES = new Set([
-  'https://github.com/advisories/GHSA-vfj7-8cjw-p6xm',
-  'https://github.com/advisories/GHSA-rj75-hqrm-r3gf'
+  'https://github.com/advisories/GHSA-vfj7-8cjw-p6xm'
 ]);
 
 export function checkDependencyAudit(report, lock, now = Date.now()) {

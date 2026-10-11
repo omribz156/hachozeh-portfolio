@@ -175,12 +175,14 @@ describe("platform watchdog", () => {
       cooldownUntil: new Map<string, number>()
     };
 
-    await runWatchdogTick(makeOptions(), state, { fetchImpl, restartTarget, readRuntimeSnapshot, appendReceipt });
+    const sendAlert = vi.fn(async () => true);
+    await runWatchdogTick(makeOptions(), state, { fetchImpl, restartTarget, readRuntimeSnapshot, appendReceipt, sendAlert });
     const receipts = await runWatchdogTick(makeOptions(), state, {
       fetchImpl,
       restartTarget,
       readRuntimeSnapshot,
-      appendReceipt
+      appendReceipt,
+      sendAlert
     });
 
     expect(receipts[0]).toMatchObject({
@@ -211,7 +213,7 @@ describe("platform watchdog", () => {
     };
     const options = makeOptions({ execute: true, failureThreshold: 1 });
 
-    const receipts = await runWatchdogTick(options, state, { fetchImpl, restartTarget, appendReceipt });
+    const receipts = await runWatchdogTick(options, state, { fetchImpl, restartTarget, appendReceipt, sendAlert: vi.fn(async () => true) });
 
     expect(receipts[0]).toMatchObject({
       name: "backend",
@@ -250,7 +252,8 @@ describe("platform watchdog", () => {
       fetchImpl,
       restartTarget,
       appendReceipt,
-      readRuntimeSnapshot
+      readRuntimeSnapshot,
+      sendAlert: vi.fn(async () => true)
     });
 
     expect(receipts[0]).toMatchObject({
@@ -276,8 +279,9 @@ describe("platform watchdog", () => {
       restartCooldownMs: 30_000
     });
 
-    const first = await runWatchdogTick(options, state, { fetchImpl, restartTarget, appendReceipt });
-    const second = await runWatchdogTick(options, state, { fetchImpl, restartTarget, appendReceipt });
+    const deps = { fetchImpl, restartTarget, appendReceipt, sendAlert: vi.fn(async () => true) };
+    const first = await runWatchdogTick(options, state, deps);
+    const second = await runWatchdogTick(options, state, deps);
 
     expect(first[0].action).toBe("restarted");
     expect(second[0]).toMatchObject({

@@ -1,6 +1,7 @@
 import { defineMiddleware } from 'astro:middleware';
 import { BACKEND_INTERNAL_URL } from './lib/backend.js';
 import { applySecurityHeaders } from './lib/security-headers.js';
+import { applyPageCache } from './lib/page-cache.js';
 import { backendFetch, withBackendRequest, recordWebResponse } from './lib/server-security';
 
 // Mirror the backend's AUTH_SESSION_COOKIE_NAME (default 'navi_session'). The
@@ -120,5 +121,6 @@ export const onRequest = defineMiddleware(async (context, next) => withBackendRe
   const response = await next();
   recordWebResponse(context.request, response.status, Math.round(performance.now() - startedAt), context.routePattern || '/:unmatched');
   applySecurityHeaders(response.headers, context.url);
+  applyPageCache(response.headers, context.request, context.url, response.status);
   return response;
 }));

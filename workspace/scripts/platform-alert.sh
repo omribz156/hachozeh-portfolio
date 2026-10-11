@@ -44,6 +44,12 @@
 
 set -euo pipefail
 
+# Never load real local credentials or send simulated test failures to operators.
+if [[ "${NODE_ENV:-}" == "test" || "${VITEST:-}" == "true" ]]; then
+  echo "[platform-alert] delivery blocked in test environment" >&2
+  exit 2
+fi
+
 # --- parse flags ---
 DRY_RUN=false
 REQUIRE_DELIVERY=false
