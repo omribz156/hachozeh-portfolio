@@ -1,6 +1,11 @@
+import { assertAllowedAuthEmail, normalizeEmail } from "../auth/email-identity";
+
 const baseUrl = process.env.BACKEND_BASE_URL ?? "http://127.0.0.1:3001";
-const identifier =
-  process.env.AUTH_SMOKE_IDENTIFIER ?? `auth-smoke+${Date.now()}@navi.local`;
+if (!process.env.AUTH_SMOKE_IDENTIFIER) {
+  throw new Error("Set AUTH_SMOKE_IDENTIFIER to an owner-controlled Gmail address; no recipient is invented.");
+}
+const identifier = normalizeEmail(process.env.AUTH_SMOKE_IDENTIFIER);
+assertAllowedAuthEmail(identifier);
 const configuredMarketKey = process.env.AUTH_SMOKE_MARKET_KEY;
 const configuredOutcomeKey = process.env.AUTH_SMOKE_OUTCOME_KEY;
 

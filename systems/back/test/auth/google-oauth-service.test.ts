@@ -128,7 +128,7 @@ function createGoogleIdToken(input: {
   }
 
   if (!input.omitEmail) {
-    claims.email = input.email ?? "User@example.com";
+    claims.email = input.email ?? "User@gmail.com";
   }
 
   if (input.name) {
@@ -393,6 +393,17 @@ describe("google oauth service", () => {
     expect(pool.connect).not.toHaveBeenCalled();
   });
 
+  it.each(["user@example.com", "user@gmail.com.evil.example", "user@googlemail.com"])("rejects verified non-Gmail Google identity %s before DB access", async (email) => {
+    const { pool } = createPoolForNewGoogleUser();
+    const state = new URL(buildGoogleAuthStartRedirect(BASE_ENV, "/")).searchParams.get("state")!;
+    const { nonce } = readStatePayload(state);
+    await expect(completeGoogleAuthCallback(pool, BASE_ENV, createRequest(), {
+      code: "google-code", state
+    }, { fetch: createGoogleFetch({ state, idToken: createGoogleIdToken({ nonce, email }) }) }))
+      .rejects.toMatchObject({ code: "email_domain_not_allowed", statusCode: 403 });
+    expect(pool.connect).not.toHaveBeenCalled();
+  });
+
   it("creates a first Google user through the existing session spine", async () => {
     const { pool, insertedIdentities } = createPoolForNewGoogleUser();
     const startRedirect = buildGoogleAuthStartRedirect(
@@ -425,7 +436,7 @@ describe("google oauth service", () => {
     expect(result.setCookie).toContain("navi_session=");
     expect(insertedIdentities[0]?.[2]).toBe("google");
     expect(insertedIdentities[0]?.[3]).toBe("google-sub-1");
-    expect(insertedIdentities[0]?.[4]).toBe("user@example.com");
+    expect(insertedIdentities[0]?.[4]).toBe("user@gmail.com");
   });
 
   it("does not publish Google profile name or photo while creating the public account", async () => {

@@ -12,7 +12,7 @@ import type { Pool } from "pg";
 
 import type { AppEnv } from "../config/env";
 import { withTransaction } from "../db/tx/with-transaction";
-import { normalizeEmail } from "./email-identity";
+import { assertAllowedAuthEmail, normalizeEmail } from "./email-identity";
 import {
   AuthSessionError,
   createAuthenticatedSessionForUser
@@ -324,10 +324,8 @@ async function verifyGoogleIdToken(
     throw new AuthSessionError(403, "google_email_unverified", "Google email is not verified.");
   }
 
-  return {
-    subject: claims.sub,
-    email: normalizeEmail(claims.email)
-  };
+  assertAllowedAuthEmail(claims.email);
+  return { subject: claims.sub, email: normalizeEmail(claims.email) };
 }
 
 export async function completeGoogleAuthCallback(

@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { AuthSessionError } from "./session/errors";
 
 const SingleEmailSchema = z.email().max(254);
 
@@ -10,6 +11,12 @@ export function normalizeEmail(identifier: string): string {
   }
 
   return normalized;
+}
+
+export function assertAllowedAuthEmail(identifier: string): void {
+  if (!SingleEmailSchema.safeParse(identifier).success || identifier.split("@")[1]?.toLowerCase() !== "gmail.com") {
+    throw new AuthSessionError(403, "email_domain_not_allowed", "Sign-in requires a gmail.com address.");
+  }
 }
 
 export function maskEmail(identifier: string): string {

@@ -4,7 +4,7 @@ import {
   parseObjectBody,
   parseRequiredStringField
 } from "../../shared/zod-request-body";
-import { normalizeEmail } from "../email-identity";
+import { assertAllowedAuthEmail, normalizeEmail } from "../email-identity";
 import { AuthSessionError } from "./errors";
 import type { AuthPurpose } from "./types";
 
@@ -32,16 +32,18 @@ export function parseStartBody(body: unknown): {
     throw new AuthSessionError(400, "invalid_request", "purpose must be login or signup.");
   }
 
+  let identifier: string;
+  try {
+    identifier = normalizeEmail(
+      parseRequiredStringField(record, "identifier", createAuthRequestError)
+    );
+  } catch {
+    throw new AuthSessionError(400, "invalid_request", "identifier must be a valid email.");
+  }
+  assertAllowedAuthEmail(identifier);
+
   return {
-    identifier: (() => {
-      try {
-        return normalizeEmail(
-          parseRequiredStringField(record, "identifier", createAuthRequestError)
-        );
-      } catch {
-        throw new AuthSessionError(400, "invalid_request", "identifier must be a valid email.");
-      }
-    })(),
+    identifier,
     purpose: purpose.data
   };
 }

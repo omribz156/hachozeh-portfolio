@@ -1202,7 +1202,7 @@ describe("createFastifyApp", () => {
         challengeId: "otp_test",
         purpose: (body as { purpose: "login" }).purpose,
         channel: "email",
-        identifierHint: "us***@e***.com",
+        identifierHint: "us***@g***.com",
         expiresAt: "2026-06-11T00:00:00.000Z",
         nextStep: "otp",
         devCode: "111111"
@@ -1213,7 +1213,7 @@ describe("createFastifyApp", () => {
       method: "POST",
       url: "/api/auth/start",
       payload: {
-        identifier: " USER@example.com ",
+        identifier: " USER@gmail.com ",
         purpose: "login"
       }
     });
@@ -1240,7 +1240,7 @@ describe("createFastifyApp", () => {
       method: "POST",
       url: "/api/auth/start",
       payload: {
-        identifier: "user@example.com",
+        identifier: "user@gmail.com",
         purpose: "reset"
       }
     });

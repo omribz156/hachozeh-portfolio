@@ -27,6 +27,7 @@ export default function LoginOverlay({ authState, onClose, onSubmit, onGoogleCli
       <h1 id="navi-overlay-title" class="navi-overlay-title">ברוך הבא חזרה</h1>
       <p class="navi-overlay-subtitle">התחבר כדי להמשיך לקרוא את השוק.</p>
       <GoogleButton label="המשך עם Google" onClick={onGoogleClick} />
+      <p class="navi-overlay-subtitle">הכניסה זמינה לכתובות Gmail בלבד.</p>
       {!emailEnabled && <p class="navi-overlay-subtitle">הכניסה באימייל אינה זמינה זמנית.</p>}
       {emailEnabled && <div class="navi-overlay-divider"><span>או</span></div>}
       {errorBanner}

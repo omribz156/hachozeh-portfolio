@@ -319,9 +319,34 @@ describe("auth session service", () => {
     expect(client.query).not.toHaveBeenCalled();
   });
 
+  it.each(["login", "signup"])("rejects non-Gmail %s before DB or mail delivery", async (purpose) => {
+    const db = createQueryable();
+    const fetchMock = vi.spyOn(globalThis, "fetch");
+    await expect(startAuthChallenge(db, BASE_ENV, { identifier: "user@example.com", purpose }))
+      .rejects.toMatchObject({ code: "email_domain_not_allowed", statusCode: 403 });
+    expect(db.query).not.toHaveBeenCalled();
+    expect(fetchMock).not.toHaveBeenCalled();
+  });
+
+  it("rejects a pre-policy non-Gmail challenge without consuming it or creating a session", async () => {
+    const { pool, client } = createPoolForVerify({
+      challengeRows: [{
+        id: "otp_legacy", identifier_type: "email", identifier_normalized: "user@example.com",
+        purpose: "login", code_hash: "unused", status: "pending", attempt_count: 0,
+        max_attempts: 5, last_sent_at: new Date(), expires_at: new Date(Date.now() + 60_000)
+      }],
+      existingIdentityRows: []
+    });
+    await expect(verifyAuthChallenge(pool, BASE_ENV, { headers: {} } as IncomingMessage, {
+      challengeId: "otp_legacy", code: "111111"
+    })).rejects.toMatchObject({ code: "email_domain_not_allowed", statusCode: 403 });
+    expect(client.query.mock.calls.some(([sql]) => /update otp_challenges|insert into (users|sessions)/.test(sql))).toBe(false);
+    expect(client.query).toHaveBeenCalledWith("rollback");
+  });
+
   it("starts an email OTP challenge with masked identity + dev code", async () => {
     const response = await startAuthChallenge(createQueryable(), BASE_ENV, {
-      identifier: "User@example.com",
+      identifier: "User@gmail.com",
       purpose: "login"
     });
 
@@ -329,7 +354,7 @@ describe("auth session service", () => {
       purpose: "login",
       channel: "email",
       nextStep: "otp",
-      identifierHint: "us***@e***.com",
+      identifierHint: "us***@g***.com",
       devCode: "111111"
     });
     expect(response.challengeId).toMatch(/^otp_/);
@@ -340,7 +365,7 @@ describe("auth session service", () => {
     const db = createPoolForAuthStart();
 
     const response = await startAuthChallenge(db.pool, BASE_ENV, {
-      identifier: "User@example.com",
+      identifier: "User@gmail.com",
       purpose: "login"
     });
 
@@ -355,7 +380,7 @@ describe("auth session service", () => {
     expect(lockIndex).toBeGreaterThan(-1);
     expect(recentReadIndex).toBeGreaterThan(lockIndex);
     expect(insertIndex).toBeGreaterThan(lockIndex);
-    expect(db.queries[lockIndex]?.values).toEqual(["auth_start", "user@example.com"]);
+    expect(db.queries[lockIndex]?.values).toEqual(["auth_start", "user@gmail.com"]);
     expect(db.queries.map((query) => query.sql)).toEqual(
       expect.arrayContaining(["begin", "commit"])
     );
@@ -367,7 +392,7 @@ describe("auth session service", () => {
         {
           id: "otp_existing",
           identifier_type: "email",
-          identifier_normalized: "user@example.com",
+          identifier_normalized: "user@gmail.com",
           purpose: "login",
           code_hash: "hash",
           status: "pending",
@@ -382,7 +407,7 @@ describe("auth session service", () => {
 
     await expect(
       startAuthChallenge(db, BASE_ENV, {
-        identifier: "user@example.com",
+        identifier: "user@gmail.com",
         purpose: "login"
       })
     ).rejects.toMatchObject({
@@ -402,7 +427,7 @@ describe("auth session service", () => {
 
     await expect(
       startAuthChallenge(db, BASE_ENV, {
-        identifier: "user@example.com",
+        identifier: "user@gmail.com",
         purpose: "login"
       })
     ).rejects.toMatchObject({
@@ -423,7 +448,7 @@ describe("auth session service", () => {
     });
 
     const response = await startAuthChallenge(db, BASE_ENV, {
-      identifier: "user@example.com",
+      identifier: "user@gmail.com",
       purpose: "login"
     });
 
@@ -436,7 +461,7 @@ describe("auth session service", () => {
         {
           id: "otp_pending",
           identifier_type: "email",
-          identifier_normalized: "user@example.com",
+          identifier_normalized: "user@gmail.com",
           purpose: "login",
           code_hash: "hash",
           status: "pending",
@@ -451,7 +476,7 @@ describe("auth session service", () => {
 
     await expect(
       startAuthChallenge(db, BASE_ENV, {
-        identifier: "user@example.com",
+        identifier: "user@gmail.com",
         purpose: "login"
       })
     ).rejects.toMatchObject({ statusCode: 429, code: "rate_limited" });
@@ -465,7 +490,7 @@ describe("auth session service", () => {
     });
 
     const response = await startAuthChallenge(db, BASE_ENV, {
-      identifier: "user@example.com",
+      identifier: "user@gmail.com",
       purpose: "login"
     });
 
@@ -480,7 +505,7 @@ describe("auth session service", () => {
 
     await expect(
       startAuthChallenge(db, BASE_ENV, {
-        identifier: "user@example.com",
+        identifier: "user@gmail.com",
         purpose: "login"
       })
     ).rejects.toMatchObject({ statusCode: 429, code: "rate_limited" });
@@ -501,7 +526,7 @@ describe("auth session service", () => {
           }
         },
         {
-          identifier: "user@example.com",
+          identifier: "user@gmail.com",
           purpose: "login"
         }
       )
@@ -537,7 +562,7 @@ describe("auth session service", () => {
         }
       },
       {
-        identifier: "user@example.com",
+        identifier: "user@gmail.com",
         purpose: "login"
       }
     );
@@ -546,7 +571,7 @@ describe("auth session service", () => {
     expect(response).toMatchObject({
       channel: "email",
       nextStep: "otp",
-      identifierHint: "us***@e***.com"
+      identifierHint: "us***@g***.com"
     });
     expect(response).not.toHaveProperty("devCode");
     expect(fetchMock).toHaveBeenCalledWith(
@@ -560,7 +585,7 @@ describe("auth session service", () => {
     );
     expect(requestBody).toMatchObject({
       from: "Hachozeh <noreply@email.hachozeh.com>",
-      to: ["user@example.com"],
+      to: ["user@gmail.com"],
       subject: "קוד הכניסה שלך להחוזה"
     });
     expect(requestBody.text).toContain("החוזה");
@@ -600,7 +625,7 @@ describe("auth session service", () => {
         }
       },
       {
-        identifier: "user@example.com",
+        identifier: "user@gmail.com",
         purpose: "signup"
       }
     );
@@ -627,7 +652,7 @@ describe("auth session service", () => {
           }
         },
         {
-          identifier: "user@example.com",
+          identifier: "user@gmail.com",
           purpose: "login"
         }
       )
@@ -649,7 +674,7 @@ describe("auth session service", () => {
           }
         },
         {
-          identifier: "user@example.com",
+          identifier: "user@gmail.com",
           purpose: "login"
         }
       )
@@ -688,7 +713,7 @@ describe("auth session service", () => {
           }
         },
         {
-          identifier: "user@example.com",
+          identifier: "user@gmail.com",
           purpose: "login"
         }
       )
@@ -742,7 +767,7 @@ describe("auth session service", () => {
     expect(response.setCookie).toContain("Max-Age=0");
   });
 
-	  it("touches last_seen_at for valid session summary", async () => {
+	  it("preserves an existing non-Gmail session and touches last_seen_at", async () => {
 	    const db = createQueryable({
 	      sessionSummaryRows: [
 	        {
@@ -785,7 +810,7 @@ describe("auth session service", () => {
 	          expires_at: new Date(Date.now() + 60_000),
 	          session_status: "active",
 	          user_status: "active",
-	          identifier_display: "user@example.com"
+	          identifier_display: "user@gmail.com"
 	        }
 	      ]
 	    });
@@ -834,7 +859,7 @@ describe("auth session service", () => {
               {
                 id: "otp_1",
                 identifier_type: "email",
-                identifier_normalized: "new-user@example.com",
+                identifier_normalized: "new-user@gmail.com",
                 purpose: "signup",
                 code_hash: "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",
                 status: "pending",
@@ -942,7 +967,7 @@ describe("auth session service", () => {
         {
           id: "otp_1",
           identifier_type: "email",
-          identifier_normalized: "returning@example.com",
+          identifier_normalized: "returning@gmail.com",
           purpose: "login",
           code_hash: "bcb15f821479b4d5772bd0ca866c00ad5f926e3580720659cc80d39c9d09802a",
           status: "pending",
@@ -994,7 +1019,7 @@ describe("auth session service", () => {
         {
           id: "otp_1",
           identifier_type: "email",
-          identifier_normalized: "new-user@example.com",
+          identifier_normalized: "new-user@gmail.com",
           purpose: "signup",
           code_hash:
             "8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92",

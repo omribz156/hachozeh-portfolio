@@ -6,6 +6,7 @@ import type { AppEnv } from "../config/env";
 import type { Queryable } from "../db/client/pool";
 import { withTransaction } from "../db/tx/with-transaction";
 import { withSavepoint } from "../shared/transaction-savepoint";
+import { assertAllowedAuthEmail } from "./email-identity";
 import { buildClearedSessionCookie, buildSessionCookie, readCookie } from "./session-cookie";
 import { AuthSessionError } from "./session/errors";
 import { hashValue } from "./session/hashing";
@@ -381,6 +382,8 @@ export async function verifyAuthChallenge(
     if (!challenge || challenge.status !== "pending" || challenge.expires_at.getTime() <= Date.now()) {
       throw new AuthSessionError(400, "invalid_code", "Verification code is invalid or expired.");
     }
+
+    assertAllowedAuthEmail(challenge.identifier_normalized);
 
     if (challenge.attempt_count >= challenge.max_attempts) {
       await client.query(

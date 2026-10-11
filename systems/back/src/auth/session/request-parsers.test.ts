@@ -19,10 +19,10 @@ function expectAuthError(fn: () => unknown, message: string): void {
 describe("auth session request parsers", () => {
   it("parses and normalizes auth start bodies", () => {
     expect(parseStartBody({
-      identifier: " USER@Example.COM ",
+      identifier: " USER@gmail.com ",
       purpose: "login"
     })).toEqual({
-      identifier: "user@example.com",
+      identifier: "user@gmail.com",
       purpose: "login"
     });
   });
@@ -33,11 +33,11 @@ describe("auth session request parsers", () => {
       "Auth start body must be a JSON object."
     );
     expectAuthError(
-      () => parseStartBody({ identifier: "user@example.com" }),
+      () => parseStartBody({ identifier: "user@gmail.com" }),
       "purpose is required."
     );
     expectAuthError(
-      () => parseStartBody({ identifier: "user@example.com", purpose: "reset" }),
+      () => parseStartBody({ identifier: "user@gmail.com", purpose: "reset" }),
       "purpose must be login or signup."
     );
     expectAuthError(

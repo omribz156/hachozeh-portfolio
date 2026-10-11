@@ -83,7 +83,7 @@ function buildSummaryRow(overrides: Partial<SessionSummaryRow>): SessionSummaryR
     expires_at: new Date(Date.now() + 60 * 60 * 1000),
     session_status: "active",
     user_status: "active",
-    identifier_display: "user@example.com",
+    identifier_display: "user@gmail.com",
     ...overrides
   };
 }
@@ -168,7 +168,7 @@ describe("readSessionSummary (rolling session)", () => {
   });
 });
 
-function buildPendingChallenge(identifier = "link-target@example.com"): AuthChallengeRow {
+function buildPendingChallenge(identifier = "link-target@gmail.com"): AuthChallengeRow {
   return {
     id: "otp_link_google",
     identifier_type: "email",
@@ -385,7 +385,7 @@ describe("verifyAuthChallenge (identity linking)", () => {
         query.params[2] === "email"
     );
     expect(emailLink).toBeDefined();
-    expect(emailLink?.params[3]).toBe("link-target@example.com");
+    expect(emailLink?.params[3]).toBe("link-target@gmail.com");
 
     const createUser = queries.find((query) => query.sql.includes("insert into users"));
     expect(createUser).toBeUndefined();

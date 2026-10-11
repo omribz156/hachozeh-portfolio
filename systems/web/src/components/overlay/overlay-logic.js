@@ -51,6 +51,7 @@ export function isValidOtpCode(value) {
 
 export function mapAuthErrorMessage(code) {
   const messages = {
+    email_domain_not_allowed: 'אפשר להתחבר רק עם כתובת Gmail המסתיימת ב-gmail.com.',
     email_auth_paused:       'הכניסה באימייל אינה זמינה זמנית. אפשר להמשיך עם Google.',
     challenge_required:      'יש להשלים את בדיקת האבטחה לפני בקשת הקוד.',
     challenge_failed:        'בדיקת האבטחה נכשלה. נסה שוב.',

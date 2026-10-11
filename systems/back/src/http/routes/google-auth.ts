@@ -107,6 +107,14 @@ export function registerGoogleAuthRoutes(
       return "";
     } catch (error) {
       if (error instanceof AuthSessionError) {
+        if (error.code === "email_domain_not_allowed") {
+          const requestUrl = buildRequestUrl(request);
+          reply.code(302).header("location", appendAuthError(
+            readGoogleAuthErrorReturnTo(context.env, requestUrl.searchParams.get("state")),
+            error.code
+          ));
+          return "";
+        }
         sendError(reply, error.statusCode, error.code, error.message);
         return undefined;
       }

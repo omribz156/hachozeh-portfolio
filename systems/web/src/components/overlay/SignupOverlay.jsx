@@ -26,6 +26,7 @@ export default function SignupOverlay({ authState, onClose, onSubmit, onGoogleCl
       <h1 id="navi-overlay-title" class="navi-overlay-title">פתח חשבון</h1>
       <p class="navi-overlay-subtitle">ניתוח שווקים מתחיל בפנים. דקה אחת.</p>
       <GoogleButton label="הרשם עם Google" onClick={onGoogleClick} />
+      <p class="navi-overlay-subtitle">ההרשמה זמינה לכתובות Gmail בלבד.</p>
       {!emailEnabled && <p class="navi-overlay-subtitle">הכניסה באימייל אינה זמינה זמנית.</p>}
       {emailEnabled && <div class="navi-overlay-divider"><span>או</span></div>}
       {errorBanner}

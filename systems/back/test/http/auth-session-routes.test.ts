@@ -146,7 +146,7 @@ describe("auth session routes", () => {
                 avatar_url: null,
                 showcase_categories: [],
                 identity_type: "email",
-                identifier_display: "reader@example.com",
+                identifier_display: "reader@gmail.com",
                 verified_at: new Date("2026-04-05T10:12:00.000Z")
               }
             ]
@@ -211,8 +211,8 @@ describe("auth session routes", () => {
       identity: {
         primary: {
           channel: "email",
-          identifierHint: "re***@e***.com",
-          email: "reader@example.com",
+          identifierHint: "re***@g***.com",
+          email: "reader@gmail.com",
           verifiedAt: "2026-04-05T10:12:00.000Z"
         }
       },
@@ -711,7 +711,7 @@ describe("auth session routes", () => {
               {
                 id: "otp_live_1",
                 identifier_type: "email",
-                identifier_normalized: "reader@example.com",
+                identifier_normalized: "reader@gmail.com",
                 purpose: "login",
                 code_hash: hashValue("111111"),
                 status: "pending",
@@ -730,7 +730,7 @@ describe("auth session routes", () => {
         }
 
         if (sql.includes("from user_identities ui") && sql.includes("ui.type = $1")) {
-          expect(values).toEqual(["email", "reader@example.com"]);
+          expect(values).toEqual(["email", "reader@gmail.com"]);
           return {
             rows: [
               {
@@ -747,7 +747,7 @@ describe("auth session routes", () => {
           sql.includes("ui.type = 'google'") &&
           sql.includes("lower(ui.identifier_display)")
         ) {
-          expect(values).toEqual(["reader@example.com"]);
+          expect(values).toEqual(["reader@gmail.com"]);
           return {
             rows: []
           };
@@ -797,7 +797,7 @@ describe("auth session routes", () => {
       },
       identity: {
         channel: "email",
-        identifierHint: "re***@e***.com"
+        identifierHint: "re***@g***.com"
       }
     });
   });

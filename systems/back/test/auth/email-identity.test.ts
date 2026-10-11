@@ -3,6 +3,20 @@ import { normalizeEmail } from "../../src/auth/email-identity";
 import { parseStartBody } from "../../src/auth/session/request-parsers";
 
 describe("single email identity boundary", () => {
+  it.each(["login", "signup"])("allows Gmail %s without merging aliases", (purpose) => {
+    expect(parseStartBody({ identifier: " User.Name+tag@GMAIL.COM ", purpose }).identifier)
+      .toBe("user.name+tag@gmail.com");
+  });
+
+  it.each([
+    "user@example.com", "user@googlemail.com", "user@gmail.com.evil.example",
+    "user@sub.gmail.com", "user@gmail.co", "user@gmaіl.com"
+  ])("rejects non-Gmail auth identities: %s", (identifier) => {
+    for (const purpose of ["login", "signup"]) {
+      expect(() => parseStartBody({ identifier, purpose })).toThrow();
+    }
+  });
+
   it("preserves ordinary and plus-addressed identities", () => {
     expect(normalizeEmail(" User.Name+tag@Example.com ")).toBe("user.name+tag@example.com");
   });

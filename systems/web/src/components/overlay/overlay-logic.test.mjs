@@ -38,6 +38,7 @@ assert.equal(sanitizeOtpCode(null),        '',       'null → empty string');
 assert.equal(sanitizeOtpCode(undefined),   '',       'undefined → empty string');
 
 // ── mapAuthErrorMessage ───────────────────────────────────────────────────────
+assert.equal(mapAuthErrorMessage('email_domain_not_allowed'), 'אפשר להתחבר רק עם כתובת Gmail המסתיימת ב-gmail.com.');
 assert.equal(mapAuthErrorMessage('access_denied'),   'הכניסה עם Google בוטלה.');
 assert.equal(mapAuthErrorMessage('invalid_code'),    'קוד האימות לא תקין או שפג תוקפו.');
 assert.equal(mapAuthErrorMessage('rate_limited'),    'יש להמתין רגע לפני ניסיון נוסף.');
