@@ -90,6 +90,10 @@ describe("privacy retention cleanup service", () => {
       });
       expect(await readFile(orphan, "utf8")).toBe("orphan");
       expect(calls.some((call) => call.sql.trim().startsWith("delete"))).toBe(false);
+      const audit = calls.find((call) => call.sql.includes("action <> 'risk.signal.recorded'"));
+      expect(audit?.sql).toContain("action = 'security.traffic.signal'");
+      expect(audit?.sql).toContain("greatest($1::timestamptz, $2::timestamptz)");
+      expect(audit?.values?.[1]).toBe("2026-05-19T10:00:00.000Z");
     } finally {
       await rm(dir, { recursive: true, force: true });
     }
@@ -115,6 +119,9 @@ describe("privacy retention cleanup service", () => {
       expect(result.counts.avatarOrphanFilesEligible).toBe(1);
       expect(result.counts.avatarOrphanFilesDeleted).toBe(0);
       expect(calls.some((call) => call.sql.includes("delete from sessions"))).toBe(true);
+      const audit = calls.find((call) => call.sql.includes("action <> 'risk.signal.recorded'"));
+      expect(audit?.sql).toContain("action = 'security.traffic.signal'");
+      expect(audit?.values?.[1]).toBe("2026-05-19T10:00:00.000Z");
       expect(await readFile(orphan, "utf8")).toBe("orphan");
     } finally {
       await rm(dir, { recursive: true, force: true });

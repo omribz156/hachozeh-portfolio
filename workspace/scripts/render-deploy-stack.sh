@@ -37,8 +37,8 @@ Usage:
   workspace/scripts/render-deploy-stack.sh [options]
 
 Options:
-  --backend            Deploy backend.
-  --web                Deploy web.
+  --backend            Deploy backend, then refresh gateway and verify both public origins.
+  --web                Deploy web, then refresh gateway and verify both public origins.
   --gateway            Deploy gateway.
   --horizon            Deploy horizon cron.
   --oracle             Deploy oracle cron.
@@ -54,7 +54,7 @@ Options:
   --migration-guard-bypass-reason <reason>
                        Add the guarded production migration bypass reason to --migrate-apply.
   --doctor             Run production-doctor one-off job on backend and poll status.
-  --smoke              Curl https://hachozeh.com/edge/health and https://hachozeh.com/.
+  --smoke              Curl https://example.com/edge/health and https://example.com/.
   --run-dir <path>     Receipt directory. Default: workspace/runtime/render-deploy/<timestamp>.
   --dry-run            Print command plan only; no Render or curl calls.
   --help               Show this help.
@@ -184,7 +184,7 @@ run_migration_job() {
 
   local job_status
   job_status="$(poll_job_status "$SERVICE_BACKEND" "$job_id" "$status_file" "$attempts" "$poll_seconds")"
-  render logs --resources "$job_id" --start "$start_time" --limit "$log_limit" --output text > "$log_file"
+  render logs --resources "$job_id" --start "$start_time" --end "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" --limit "$log_limit" --output text > "$log_file"
   printf "%s\n" "id=$job_id status=$job_status" > "$output_file"
 
   if [[ "$mode" == "plan" ]]; then
@@ -284,7 +284,7 @@ run_doctor_job() {
   local job_status
   job_status="$(poll_job_status "$SERVICE_BACKEND" "$job_id" "$status_file" "$attempts" "$poll_seconds")"
 
-  render logs --resources "$job_id" --start "$start_time" --limit "$log_limit" --output text > "$log_file"
+  render logs --resources "$job_id" --start "$start_time" --end "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" --limit "$log_limit" --output text > "$log_file"
   if [[ "$job_status" != "succeeded" ]]; then
     overall_success="false"
   fi
@@ -326,7 +326,7 @@ run_avatar_storage_gate() {
   start_time="$(date -u +"%Y-%m-%dT%H:%M:%SZ")"
   local job_status
   job_status="$(poll_job_status "$SERVICE_BACKEND" "$job_id" "$status_file")"
-  render logs --resources "$job_id" --start "$start_time" --limit 200 --output text > "$log_file"
+  render logs --resources "$job_id" --start "$start_time" --end "$(date -u +"%Y-%m-%dT%H:%M:%SZ")" --limit 200 --output text > "$log_file"
   printf "%s\n" "id=$job_id status=$job_status" > "$output_file"
 
   echo "avatar-storage-gate|${SERVICE_BACKEND}|${job_status}|${job_id}|${command_file}|${output_file}" >> "$run_dir/summary.txt"
@@ -338,14 +338,14 @@ run_avatar_storage_gate() {
 }
 
 run_smoke_checks() {
-  local urls=( "https://hachozeh.com/edge/health" "https://hachozeh.com/" )
+  local urls=( "https://example.com/edge/health" "https://example.com/" )
   local status="succeeded"
 
   for index in "${!urls[@]}"; do
     local url="${urls[$index]}"
     local file="$run_dir/smoke-$index.out.txt"
     local cmd_file="$run_dir/smoke-$index.cmd.txt"
-    local command_text="curl -sS -o ${file} -w '%{http_code}' ${url}"
+    local command_text="curl -sS --connect-timeout 5 --max-time 10 -o ${file} -w '%{http_code}' ${url}"
     printf "%s\n" "$command_text" > "$cmd_file"
 
     if [[ "$dry_run" == "true" ]]; then
@@ -356,8 +356,8 @@ run_smoke_checks() {
     fi
 
     local code
-    code="$(curl -sS -o "$file" -w "%{http_code}" "$url" || true)"
-    if [[ "$code" =~ ^[23] ]]; then
+    code="$(curl -sS --connect-timeout 5 --max-time 10 -o "$file" -w "%{http_code}" "$url" || true)"
+    if [[ "$code" == "200" ]]; then
       printf "smoke|%s|succeeded|%s|%s|%s\n" "$url" "$code" "$cmd_file" "$file" >> "$run_dir/summary.txt"
       summary_lines+=("smoke|${url}|succeeded|${code}|${cmd_file}|${file}")
       continue
@@ -383,8 +383,8 @@ print_summary() {
 
   local line
   for line in "${summary_lines[@]}"; do
-    local name service status target_id cmd output
-    IFS='|' read -r name service status target_id cmd output <<< "$line"
+    local name _service status target_id _cmd output
+    IFS='|' read -r name _service status target_id _cmd output <<< "$line"
     printf "%-20s %-12s %-26s %s\n" "$name" "$status" "$target_id" "$output"
   done
 }
@@ -523,6 +523,18 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
+# Render keeps old instances for 60s plus their shutdown delay (default 30s).
+# Refreshing the gateway after that handover is the proven routing recovery path.
+handover_seconds="${RENDER_HANDOVER_WAIT_SECONDS:-100}"
+[[ "$handover_seconds" =~ ^[0-9]+$ ]] || die "invalid RENDER_HANDOVER_WAIT_SECONDS"
+if [[ "$dry_run" == "false" && "$handover_seconds" -lt 90 ]]; then
+  die "handover wait must be at least 90 seconds; increase it for longer shutdown delays"
+fi
+if [[ "$deploy_backend" == "true" || "$deploy_web" == "true" ]]; then
+  deploy_gateway="true"
+  run_smoke="true"
+fi
+
 if [[ "$deploy_backend" != "true" && "$deploy_web" != "true" && "$deploy_gateway" != "true" && "$deploy_horizon" != "true" && "$deploy_oracle" != "true" && "$deploy_market_watch" != "true" && "$deploy_prod_doctor" != "true" && "$run_doctor" != "true" && "$run_smoke" != "true" ]]; then
   usage >&2
   exit 2
@@ -584,9 +596,21 @@ if [[ "$deploy_backend" == "true" ]]; then
 fi
 if [[ "$deploy_web" == "true" ]]; then
   deploy_target "web" "$SERVICE_WEB" "true"
+  if [[ "$overall_success" != "true" ]]; then
+    print_summary
+    die "web deploy failed; stop before refreshing gateway"
+  fi
+fi
+if [[ "$deploy_backend" == "true" || "$deploy_web" == "true" ]]; then
+  echo "Waiting ${handover_seconds}s for old-instance handover before gateway refresh."
+  if [[ "$dry_run" == "false" ]]; then sleep "$handover_seconds"; fi
 fi
 if [[ "$deploy_gateway" == "true" ]]; then
   deploy_target "gateway" "$SERVICE_GATEWAY" "true"
+  if [[ "$overall_success" != "true" ]]; then
+    print_summary
+    die "gateway deploy failed; inspect public routing before continuing"
+  fi
 fi
 if [[ "$deploy_horizon" == "true" ]]; then
   deploy_target "horizon" "$SERVICE_HORIZON" "false"
@@ -606,6 +630,9 @@ fi
 
 if [[ "$run_smoke" == "true" ]]; then
   run_smoke_checks || overall_success="false"
+  if [[ "$dry_run" == "false" ]]; then
+    node "$repo_root/workspace/scripts/render-public-health-check.mjs" | tee "$run_dir/public-health.jsonl" || overall_success="false"
+  fi
 fi
 
 print_summary

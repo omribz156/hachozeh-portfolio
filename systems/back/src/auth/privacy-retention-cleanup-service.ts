@@ -299,14 +299,18 @@ export async function cleanupPrivacyRetention(
       select count(*)::int as count
       from audit_events
       where action <> 'risk.signal.recorded'
-        and created_at < $1::timestamptz
+        and created_at < case when action = 'security.traffic.signal'
+          then greatest($1::timestamptz, $2::timestamptz)
+          else $1::timestamptz end
     `,
     deleteSql: `
       delete from audit_events
       where action <> 'risk.signal.recorded'
-        and created_at < $1::timestamptz
+        and created_at < case when action = 'security.traffic.signal'
+          then greatest($1::timestamptz, $2::timestamptz)
+          else $1::timestamptz end
     `,
-    values: [cutoffs.auditEventDays.toISOString()]
+    values: [cutoffs.auditEventDays.toISOString(), new Date(now.getTime() - 30 * DAY_MS).toISOString()]
   });
 
   counts.feedbackDeleted = await countOrDelete(db, {

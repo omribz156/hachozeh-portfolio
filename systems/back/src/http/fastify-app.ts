@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { createTrafficMonitor } from "../../../shared/security-traffic";
 import { sendSecurityAlert } from "../observability/security-alert";
+import { createSecurityIncidentRecorder } from "../observability/security-incident-recorder";
 import { takeRateLimitAuditSlot, flushRateLimitAuditSummary } from "../observability/rate-limit-audit-budget";
 import { hasTrustedProxySecret, resolveClientIp } from "./client-ip";
 import { createAccessLogBudget, securityFingerprint } from "../../../shared/security-log";
@@ -324,9 +325,10 @@ export function createFastifyApp(context: FastifyAppContext): FastifyInstance {
     bodyLimit: 32 * 1024
   });
   const rateLimiter = context.rateLimiter ?? DEFAULT_RATE_LIMITER;
-  const traffic = createTrafficMonitor({ source: "backend", send: sendSecurityAlert });
+  const recordAndAlert = createSecurityIncidentRecorder(context.dbPool, sendSecurityAlert);
+  const traffic = createTrafficMonitor({ source: "backend", send: recordAndAlert });
   const accessLogs = createAccessLogBudget("backend");
-  const authTraffic = createTrafficMonitor({ source: "backend", threshold: 20, rejectionThreshold: 10, send: (signal) => sendSecurityAlert({ ...signal, category: "auth" }) });
+  const authTraffic = createTrafficMonitor({ source: "backend", threshold: 20, rejectionThreshold: 10, send: (signal) => recordAndAlert({ ...signal, category: "auth" }) });
   const timer = setInterval(() => { traffic.tick(); authTraffic.tick(); accessLogs.flush(); flushRateLimitAuditSummary(context.dbPool); }, 30_000);
   timer.unref();
   app.addHook("onClose", async () => { clearInterval(timer); await traffic.drain(); await authTraffic.drain(); });
@@ -346,7 +348,7 @@ export function createFastifyApp(context: FastifyAppContext): FastifyInstance {
     webAlertPending = true;
     webAlertAfter = Date.now() + 60_000;
     try {
-      const delivered = await sendSecurityAlert({ source: "web", kind: value.kind as "burst" | "recovery", requests: Number(value.requests), rejected: Number(value.rejected), windowSeconds: 60 });
+      const delivered = await recordAndAlert({ source: "web", kind: value.kind as "burst" | "recovery", requests: Number(value.requests), rejected: Number(value.rejected), windowSeconds: 60 });
       return reply.code(delivered ? 200 : 503).send({ delivered });
     } finally { webAlertPending = false; }
   });
