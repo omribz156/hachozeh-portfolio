@@ -1,5 +1,5 @@
 import { createServer, type AddressInfo, type Server as TcpServer } from "node:net";
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import type { Pool } from "pg";
 
 import { createFastifyApp, sanitizeRequestLogPath } from "./fastify-app";
@@ -66,6 +66,51 @@ function createDbPool(rows: unknown[]): Pool {
     query: async () => ({ rows })
   } as unknown as Pool;
 }
+
+describe("internal traffic signal intake", () => {
+  afterEach(() => { vi.unstubAllEnvs(); vi.restoreAllMocks(); });
+  const base = { source: "web", kind: "burst", requests: 500, rejected: 500, windowSeconds: 60 };
+  async function post(payload: object, trusted = true) {
+    vi.stubEnv("HACHOZEH_PROXY_SECRET", "synthetic-proxy-secret");
+    vi.stubEnv("PLATFORM_ALERT_TELEGRAM_BOT_TOKEN", "synthetic-token");
+    vi.stubEnv("PLATFORM_ALERT_TELEGRAM_CHAT_ID", "synthetic-chat");
+    const fetch = vi.spyOn(globalThis, "fetch").mockResolvedValue(new Response('{"ok":true}'));
+    const query = vi.fn().mockResolvedValue({ rows: [] });
+    const app = createFastifyApp({ env, logger: createLogger("error"), dbPool: { query } as unknown as Pool });
+    try {
+      const response = await app.inject({ method: "POST", url: "/internal/security-traffic", payload,
+        headers: trusted ? { "x-hachozeh-proxy-secret": "synthetic-proxy-secret" } : {} });
+      return { response, fetch, query };
+    } finally { await app.close(); }
+  }
+  it("accepts old web signals during rolling deployment", async () => {
+    const { response } = await post(base);
+    expect(response.statusCode).toBe(200);
+    expect(response.json()).toEqual({ delivered: true });
+  });
+  it("preserves validated breakdowns in Telegram and durable audit", async () => {
+    const { response, fetch, query } = await post({ ...base, notFound: 500, rateLimited: 0, serverErrors: 0 });
+    expect(response.statusCode).toBe(200);
+    expect(String(fetch.mock.calls[0]?.[1]?.body)).toContain("404=500; 429=0; 5xx=0");
+    expect(JSON.stringify(query.mock.calls)).toContain('notFound');
+  });
+  it.each([
+    { notFound: 500 },
+    { notFound: -1, rateLimited: 501, serverErrors: 0 },
+    { notFound: "500", rateLimited: 0, serverErrors: 0 },
+    { notFound: 499, rateLimited: 0, serverErrors: 0 },
+    { requests: 1, notFound: 500, rateLimited: 0, serverErrors: 0 }
+  ])("rejects malformed breakdowns before delivery: %j", async (counts) => {
+    const { response, fetch } = await post({ ...base, ...counts });
+    expect(response.statusCode).toBe(400);
+    expect(fetch).not.toHaveBeenCalled();
+  });
+  it("still rejects callers without the trusted proxy secret", async () => {
+    const { response, fetch } = await post(base, false);
+    expect(response.statusCode).toBe(403);
+    expect(fetch).not.toHaveBeenCalled();
+  });
+});
 
 function createSessionDbPool(): Pool {
   return {

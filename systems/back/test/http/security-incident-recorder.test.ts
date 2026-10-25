@@ -3,7 +3,7 @@ import type { Queryable } from "../../src/db/client/pool";
 import { createSecurityIncidentRecorder } from "../../src/observability/security-incident-recorder";
 
 afterEach(() => vi.restoreAllMocks());
-const signal = { source: "web" as const, kind: "burst" as const, requests: 101, rejected: 100, windowSeconds: 60 };
+const signal = { source: "web" as const, kind: "burst" as const, requests: 101, rejected: 100, notFound: 0, rateLimited: 50, serverErrors: 50, windowSeconds: 60 };
 
 describe("durable security summaries", () => {
   it("bounds writes while preserving alert delivery and recovery", async () => {
@@ -26,7 +26,7 @@ describe("durable security summaries", () => {
     expect(await record({ ...signal, cookie: "private-cookie" } as typeof signal)).toBe(false);
     const values = query.mock.calls[0]?.[1];
     expect(values?.[2]).toBe("security.traffic.signal");
-    expect(JSON.parse(values?.[5])).toMatchObject({ requests: 101, rejected: 100, source: "web", kind: "burst" });
+    expect(JSON.parse(values?.[5])).toMatchObject({ requests: 101, rejected: 100, notFound: 0, rateLimited: 50, serverErrors: 50, source: "web", kind: "burst" });
     expect(JSON.stringify(values)).not.toContain("private-cookie");
   });
   it("still delivers when database persistence fails, without logging raw errors", async () => {

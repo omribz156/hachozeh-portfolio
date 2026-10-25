@@ -328,7 +328,7 @@ export function createFastifyApp(context: FastifyAppContext): FastifyInstance {
   const recordAndAlert = createSecurityIncidentRecorder(context.dbPool, sendSecurityAlert);
   const traffic = createTrafficMonitor({ source: "backend", send: recordAndAlert });
   const accessLogs = createAccessLogBudget("backend");
-  const authTraffic = createTrafficMonitor({ source: "backend", threshold: 20, rejectionThreshold: 10, send: (signal) => recordAndAlert({ ...signal, category: "auth" }) });
+  const authTraffic = createTrafficMonitor({ source: "backend", threshold: 20, rejectionThreshold: 10, includeNotFoundInRejections: true, send: (signal) => recordAndAlert({ ...signal, category: "auth" }) });
   const timer = setInterval(() => { traffic.tick(); authTraffic.tick(); accessLogs.flush(); flushRateLimitAuditSummary(context.dbPool); }, 30_000);
   timer.unref();
   app.addHook("onClose", async () => { clearInterval(timer); await traffic.drain(); await authTraffic.drain(); });
@@ -344,11 +344,17 @@ export function createFastifyApp(context: FastifyAppContext): FastifyInstance {
         Number(value.requests) < 0 || Number(value.rejected) < 0 || value.windowSeconds !== 60) {
       return reply.code(400).send({ error: "invalid_signal" });
     }
+    const hasBreakdown = [value.notFound, value.rateLimited, value.serverErrors].some((count) => count !== undefined);
+    if (hasBreakdown && (![value.notFound, value.rateLimited, value.serverErrors].every((count) => Number.isSafeInteger(count) && Number(count) >= 0) ||
+        Number(value.notFound) + Number(value.rateLimited) + Number(value.serverErrors) !== value.rejected || Number(value.rejected) > Number(value.requests))) {
+      return reply.code(400).send({ error: "invalid_signal" });
+    }
     if (webAlertPending || Date.now() < webAlertAfter) return reply.code(429).send({ delivered: false });
     webAlertPending = true;
     webAlertAfter = Date.now() + 60_000;
     try {
-      const delivered = await recordAndAlert({ source: "web", kind: value.kind as "burst" | "recovery", requests: Number(value.requests), rejected: Number(value.rejected), windowSeconds: 60 });
+      const delivered = await recordAndAlert({ source: "web", kind: value.kind as "burst" | "recovery", requests: Number(value.requests), rejected: Number(value.rejected), windowSeconds: 60,
+        ...(hasBreakdown ? { notFound: Number(value.notFound), rateLimited: Number(value.rateLimited), serverErrors: Number(value.serverErrors) } : {}) });
       return reply.code(delivered ? 200 : 503).send({ delivered });
     } finally { webAlertPending = false; }
   });

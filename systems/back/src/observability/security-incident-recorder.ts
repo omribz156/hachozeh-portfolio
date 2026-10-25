@@ -27,6 +27,7 @@ export function createSecurityIncidentRecorder(
           payload: {
             source, kind, category, requests: signal.requests,
             rejected: signal.rejected, windowSeconds: signal.windowSeconds,
+            notFound: signal.notFound, rateLimited: signal.rateLimited, serverErrors: signal.serverErrors,
             observedAt: new Date(time).toISOString(),
             revision: process.env.RENDER_GIT_COMMIT || "local"
           }
