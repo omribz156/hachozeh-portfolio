@@ -125,6 +125,31 @@ no claim of zero remaining provider charges. Private recovery details stay out
 of this repository. The small follow-up also hides a nonfunctional dispute button
 on archived market pages, without changing the original SSR default behavior.
 
+## Final Application Release Receipt
+
+Production deployment `3da7a683` serves clean source
+`ab50b0f6ecd1576a3b2495c11158d994a4370d6c` (public PR #3 merged as
+`a2e343dd21cb7d43a8430b56057433de75a5fd64`). All six hosted checks passed,
+including [showcase QA](https://github.com/omribz156/hachozeh-portfolio/actions/runs/42008686567)
+and [platform/security checks](https://github.com/omribz156/hachozeh-portfolio/actions/runs/42008686611).
+Preview `aeda4996` passed without console/resource errors. Main-domain QA rerun
+at 10:16 UTC passed all three viewport flows, 37 routes, 14 redirects and 404,
+with the previously described provider warnings recorded. Archived dispute action
+is absent. Source and output secret scans pass with reviewed public-slug exclusions.
+
+Fresh-browser-context homepage first-contentful paint measured 1,028ms desktop,
+628ms at 390px and 540ms at 320px on the maintenance Mac's network. These are
+individual unthrottled samples, not real-phone measurements or a performance SLA.
+Homepage share metadata and its JPEG were verified; messaging-app cache refresh
+was not exercised. Both Israeli host variants redirect over HTTP and HTTPS using
+public DNS answers; the Mac's prior negative www lookup can remain cached.
+
+A fresh post-write-freeze recovery archive was checksum-verified and restored
+privately at 10:22 UTC. No blocker-level integrity failures; historical unresolved
+markets remain preserved. Temporary restore database stopped. Permanent Render
+deletion and live monitor adaptation await owner approvals. Site deployment is
+complete; provider retirement and elimination of all charges are not yet claimed.
+
 ## Reproduce
 
 ```sh
