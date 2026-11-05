@@ -10,10 +10,14 @@ const receipts = fileURLToPath(new URL('../../../../test-results/showcase/', imp
 await mkdir(receipts, { recursive: true });
 const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.ico': 'image/x-icon', '.woff2': 'font/woff2' };
 const headers = (await readFile(join(root, '_headers'), 'utf8')).split('\n\n')[0].split('\n').slice(1).filter(Boolean).map(line => { const colon = line.indexOf(':'); return [line.slice(0, colon).trim(), line.slice(colon + 1).trim()]; });
+const redirects = new Map((await readFile(join(root, '_redirects'), 'utf8')).trim().split('\n').map(line => { const [from, to, status] = line.split(/\s+/); return [from, { to, status: Number(status) }]; }));
 const server = createServer(async (req, res) => {
   for (const [name, value] of headers) res.setHeader(name, value);
   try {
-    let path = resolve(root, `.${decodeURIComponent(new URL(req.url, 'http://localhost').pathname)}`);
+    const url = new URL(req.url, 'http://localhost');
+    const redirect = redirects.get(url.pathname);
+    if (redirect) { res.writeHead(redirect.status, { Location: `${redirect.to}${url.search}` }); res.end(); return; }
+    let path = resolve(root, `.${decodeURIComponent(url.pathname)}`);
     if (path !== resolve(root) && !path.startsWith(root)) throw new Error('path');
     if ((await stat(path)).isDirectory()) path = join(path, 'index.html');
     res.setHeader('Content-Type', mime[extname(path)] || 'application/octet-stream');
@@ -98,6 +102,12 @@ try {
     }
   }
   await collect(root);
+  for (const [from, { to, status }] of redirects) {
+    const response = await fetch(`${origin}${from}`, { redirect: 'manual' });
+    assert.equal(response.status, status, from);
+    assert.equal(response.headers.get('location'), to, from);
+    assert.equal((await fetch(`${origin}${to}`)).status, 200, `${from}: redirect destination`);
+  }
   const context = await browser.newContext({ viewport: { width: 320, height: 740 }, reducedMotion: 'reduce' });
   const page = await context.newPage();
   const routeErrors = [];
@@ -112,6 +122,6 @@ try {
   assert.equal((await page.goto(`${origin}/missing-showcase-route/`)).status(), 404);
   assert.deepEqual(routeErrors, [], 'Route matrix JS errors');
   await context.close();
-  await writeFile(`${receipts}/receipt.json`, JSON.stringify({ testedAt: new Date().toISOString(), results, routesChecked: routes.length, missingRouteStatus: 404 }, null, 2));
+  await writeFile(`${receipts}/receipt.json`, JSON.stringify({ testedAt: new Date().toISOString(), results, routesChecked: routes.length, redirectsChecked: redirects.size, missingRouteStatus: 404 }, null, 2));
   console.log(JSON.stringify(results, null, 2));
 } finally { await browser.close(); await new Promise(resolve => server.close(resolve)); }

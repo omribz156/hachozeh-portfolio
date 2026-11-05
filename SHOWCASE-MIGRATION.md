@@ -76,6 +76,12 @@ snapshot date and build date. Cloudflare project `hachozeh-showcase` was created
 artifact upload is pending browser permission/manual upload. No preview URL is
 claimed functional yet.
 
+Follow-up compatibility check: legacy discovery URLs (`/new-markets`,
+`/breaking-markets`, `/closing-markets`, `/markets`, `/trending`) and old Q&A
+links redirect to the matching archive surfaces. Fourteen literal redirect rules
+and their destinations pass local QA. These rules still need verification on
+Cloudflare after upload; local emulation is not edge-provider proof.
+
 No preview deployment, domain cutover, infrastructure retirement or cost reduction
 is claimed yet. Private backup details remain outside this repository.
 
