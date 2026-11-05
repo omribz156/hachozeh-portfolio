@@ -1,5 +1,6 @@
 import { readFile, readdir, writeFile, stat } from 'node:fs/promises';
 import { createHash } from 'node:crypto';
+import { execFileSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
 import { join, relative } from 'node:path';
 import { parse } from 'parse5';
@@ -51,4 +52,8 @@ await writeFile(join(root, '_redirects'), '/trending / 301\n/trending/ / 301\n')
 await writeFile(join(root, 'robots.txt'), 'User-agent: *\nAllow: /\nSitemap: https://hachozeh.com/sitemap.xml\n');
 const paths = all.filter(f => f.endsWith('index.html')).map(f => `/${relative(root, f).replace(/index\.html$/, '')}`);
 await writeFile(join(root, 'sitemap.xml'), `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${paths.filter(p => p !== '/trending/').map(p => `<url><loc>https://hachozeh.com${p}</loc></url>`).join('')}</urlset>`);
+const revision = execFileSync('git', ['rev-parse', 'HEAD'], { encoding: 'utf8' }).trim();
+const dirty = Boolean(execFileSync('git', ['status', '--porcelain', '--untracked-files=normal'], { encoding: 'utf8' }).trim());
+const snapshot = JSON.parse(await readFile(new URL('../data/snapshot.json', import.meta.url), 'utf8'));
+await writeFile(join(root, 'showcase-release.json'), `${JSON.stringify({ mode: 'static-showcase', revision, dirty, builtAt: new Date().toISOString(), capturedAt: snapshot.capturedAt, pages }, null, 2)}\n`);
 console.log(`Sealed ${pages} pages; ${broken.length} local links/assets resolve; ${hashes.size} inline-script hashes; backend connections blocked by CSP.`);
