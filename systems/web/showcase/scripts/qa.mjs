@@ -6,7 +6,14 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright';
 
 const root = fileURLToPath(new URL('../../showcase-dist/', import.meta.url));
-const receipts = fileURLToPath(new URL('../../../../test-results/showcase/', import.meta.url));
+const remoteOrigin = process.env.SHOWCASE_QA_ORIGIN;
+if (remoteOrigin) {
+  const target = new URL(remoteOrigin);
+  assert.equal(target.protocol, 'https:', 'Remote QA requires HTTPS');
+  assert.equal(target.origin, remoteOrigin, 'Provide an origin without a path or trailing slash');
+  assert.ok(target.hostname === 'hachozeh-showcase.pages.dev' || target.hostname.endsWith('.hachozeh-showcase.pages.dev'), 'Remote QA is limited to showcase Pages deployments');
+}
+const receipts = fileURLToPath(new URL(remoteOrigin ? '../../../../test-results/showcase/remote/' : '../../../../test-results/showcase/', import.meta.url));
 await mkdir(receipts, { recursive: true });
 const mime = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg', '.ico': 'image/x-icon', '.woff2': 'font/woff2' };
 const headers = (await readFile(join(root, '_headers'), 'utf8')).split('\n\n')[0].split('\n').slice(1).filter(Boolean).map(line => { const colon = line.indexOf(':'); return [line.slice(0, colon).trim(), line.slice(colon + 1).trim()]; });
@@ -24,8 +31,8 @@ const server = createServer(async (req, res) => {
     res.end(await readFile(path));
   } catch { res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' }); res.end(await readFile(join(root, '404.html'))); }
 });
-await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
-const origin = `http://127.0.0.1:${server.address().port}`;
+if (!remoteOrigin) await new Promise(resolve => server.listen(0, '127.0.0.1', resolve));
+const origin = remoteOrigin || `http://127.0.0.1:${server.address().port}`;
 const browser = await chromium.launch();
 const results = [];
 try {
@@ -105,7 +112,7 @@ try {
   for (const [from, { to, status }] of redirects) {
     const response = await fetch(`${origin}${from}`, { redirect: 'manual' });
     assert.equal(response.status, status, from);
-    assert.equal(response.headers.get('location'), to, from);
+    assert.equal(new URL(response.headers.get('location'), origin).href, new URL(to, origin).href, from);
     assert.equal((await fetch(`${origin}${to}`)).status, 200, `${from}: redirect destination`);
   }
   const context = await browser.newContext({ viewport: { width: 320, height: 740 }, reducedMotion: 'reduce' });
@@ -122,6 +129,6 @@ try {
   assert.equal((await page.goto(`${origin}/missing-showcase-route/`)).status(), 404);
   assert.deepEqual(routeErrors, [], 'Route matrix JS errors');
   await context.close();
-  await writeFile(`${receipts}/receipt.json`, JSON.stringify({ testedAt: new Date().toISOString(), results, routesChecked: routes.length, redirectsChecked: redirects.size, missingRouteStatus: 404 }, null, 2));
+  await writeFile(`${receipts}/receipt.json`, JSON.stringify({ testedAt: new Date().toISOString(), origin, results, routesChecked: routes.length, redirectsChecked: redirects.size, missingRouteStatus: 404 }, null, 2));
   console.log(JSON.stringify(results, null, 2));
-} finally { await browser.close(); await new Promise(resolve => server.close(resolve)); }
+} finally { await browser.close(); if (server.listening) await new Promise(resolve => server.close(resolve)); }

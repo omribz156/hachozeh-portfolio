@@ -29,7 +29,7 @@ must never be included in this repository or deployment.
 - [x] Explicit read-only/archive states instead of misleading live controls.
 - [x] Local desktop/mobile click-and-scroll QA and narrow-screen overflow checks.
 - [x] Output privacy/security checks and repository CI.
-- [ ] Cloudflare preview verification.
+- [x] Cloudflare preview verification.
 - [ ] Public domain cutover and redirect/share-preview verification.
 - [ ] Original infrastructure retirement confirmed in the private ops record.
 - [ ] Final commit/deployment receipts and documented limitations.
@@ -82,8 +82,26 @@ links redirect to the matching archive surfaces. Fourteen literal redirect rules
 and their destinations pass local QA. These rules still need verification on
 Cloudflare after upload; local emulation is not edge-provider proof.
 
-No preview deployment, domain cutover, infrastructure retirement or cost reduction
-is claimed yet. Private backup details remain outside this repository.
+### Deployed Preview (2026-11-05)
+
+Public PR #1 merged as `b10eed9c29a82ef9bd12ad09fb68dbdc2b68aa1b`.
+Cloudflare preview: https://8484734e.hachozeh-showcase.pages.dev
+Branch alias: https://migration-preview.hachozeh-showcase.pages.dev
+Deployment: `8484734e-5391-40ca-b851-30a89bbce7fa`, environment Preview.
+
+The served `/showcase-release.json` matches that clean source revision. HTTPS,
+CSP (`connect-src 'none'`), nosniff and permissions headers verified at the edge.
+Cloudflare marks this preview noindex. Remote QA passes at 1440px, 390px and
+320px: actual filters/search/sort, click-through, chart ranges/series, portfolio,
+sticky header, 37 page routes, 14 legacy redirects and intentional 404. No
+JavaScript/resource errors, backend requests or horizontal overflow in the tests.
+Additional Brave click/scroll proof covered search, card-to-market, market-to-
+portfolio and mobile range/navigation. These are sampled checks, not continuous
+monitoring or real-device mobile coverage. Sampled portfolio navigation paint was
+188-264ms from the maintenance Mac, not a global latency or cold-load guarantee.
+
+Main-domain cutover, infrastructure retirement and cost reduction remain pending.
+Private backup details remain outside this repository.
 
 ## Reproduce
 
@@ -94,6 +112,11 @@ npm run showcase:build --workspace @navi/web
 npx playwright install chromium
 npm run showcase:qa --workspace @navi/web
 ```
+
+For the same checks against a deployed preview, set `SHOWCASE_QA_ORIGIN` to its
+HTTPS origin (no trailing slash). Only this project's Pages hosts are accepted.
+Remote receipts live in ignored `test-results/showcase/remote/`; no local server
+starts in remote mode. The local build is still required for the route inventory.
 
 Deploy only `systems/web/showcase-dist`, never the repository root or SSR output.
 The QA runner serves an ephemeral loopback-only site and stops it on completion.
