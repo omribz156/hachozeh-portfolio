@@ -30,7 +30,7 @@ must never be included in this repository or deployment.
 - [x] Local desktop/mobile click-and-scroll QA and narrow-screen overflow checks.
 - [x] Output privacy/security checks and repository CI.
 - [x] Cloudflare preview verification.
-- [ ] Public domain cutover and redirect/share-preview verification.
+- [x] Public domain cutover, redirects and share metadata/image verification.
 - [ ] Original infrastructure retirement confirmed in the private ops record.
 - [ ] Final commit/deployment receipts and documented limitations.
 
