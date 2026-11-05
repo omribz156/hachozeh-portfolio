@@ -28,7 +28,7 @@ must never be included in this repository or deployment.
 - [x] Local functional browsing, filters, search, market detail and charts.
 - [x] Explicit read-only/archive states instead of misleading live controls.
 - [x] Local desktop/mobile click-and-scroll QA and narrow-screen overflow checks.
-- [ ] Output privacy/security checks and repository CI.
+- [x] Output privacy/security checks and repository CI.
 - [ ] Cloudflare preview verification.
 - [ ] Public domain cutover and redirect/share-preview verification.
 - [ ] Original infrastructure retirement confirmed in the private ops record.
@@ -62,7 +62,19 @@ Migration branch: codex/static-showcase.
 - Clean install, full npm audit (zero advisories), dependency compatibility tests,
   original SSR build and static check/build pass. Grouped chart identities are
   distinct; series selection, range switching and settings are exercised by QA.
-  Hosted CI and final staged review remain release gates.
+  Final staged review and hosted CI passed for the candidate below.
+
+Candidate: `d4920fc01e743eeb5977b791e01858326d3026b8`.
+Hosted verification: [platform tests/security](https://github.com/omribz156/hachozeh-portfolio/actions/runs/41996141186),
+[static showcase QA](https://github.com/omribz156/hachozeh-portfolio/actions/runs/41996141198).
+Includes 256 backend test files / 1,756 tests passing; original web check/build,
+security gates, and static responsive/browser checks passing. The first CI run
+caught a missing optional YAML lockfile entry; restored and verified on Node 22.
+
+The clean candidate artifact contains `/showcase-release.json` with its revision,
+snapshot date and build date. Cloudflare project `hachozeh-showcase` was created;
+artifact upload is pending browser permission/manual upload. No preview URL is
+claimed functional yet.
 
 No preview deployment, domain cutover, infrastructure retirement or cost reduction
 is claimed yet. Private backup details remain outside this repository.
