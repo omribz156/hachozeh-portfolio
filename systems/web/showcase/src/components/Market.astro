@@ -26,7 +26,7 @@ const outcomes = children.length ? children.map(c => ({ key: c.key, label: c.lab
       <section class="showcase-outcomes" aria-label="תוצאות אפשריות">
         {outcomes.map(o => <div class="showcase-outcome">{o.href ? <a href={o.href}>{o.label}</a> : <span>{o.label}</span>}<strong dir="ltr">{Math.round(o.price * 100)}%</strong></div>)}
       </section>
-      <section class="market-detail-dossier"><div class="market-detail-dossier-main"><section class="market-detail-trust-shell">{group ? <p class="showcase-group-rules">כל אפשרות היא שוק נפרד, עם כללי הכרעה משלו. כללי השוק מופיעים בעמוד האפשרות המתאימה.</p> : <TrustSection snapshot={{ ...market, marketStatus: market.status }} />}</section></div></section>
+      <section class="market-detail-dossier"><div class="market-detail-dossier-main"><section class="market-detail-trust-shell">{group ? <p class="showcase-group-rules">כל אפשרות היא שוק נפרד, עם כללי הכרעה משלו. כללי השוק מופיעים בעמוד האפשרות המתאימה.</p> : <TrustSection snapshot={{ ...market, marketStatus: market.status }} allowDisputes={false} />}</section></div></section>
     </div>
     <div class="market-detail-stage-side"><aside class="market-detail-stage-rail" aria-label="מצב ארכיון"><div class="market-detail-stage-order-widget showcase-ticket">
       <h2>תמונת מצב של השוק</h2><p>{market.status === 'resolved' ? 'הוכרע לפני צילום הארכיון' : market.status === 'closed' ? 'נסגר; ההכרעה לא הושלמה בתמונת המצב' : 'היה פתוח בזמן צילום הארכיון'}</p>

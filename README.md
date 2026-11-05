@@ -10,8 +10,8 @@ Users discover markets, trade positions, track a portfolio, and see outcomes
 resolved against recorded evidence. The currency, **V₪**, is virtual: it cannot
 be purchased, withdrawn, or converted into real money.
 
-**Project status:** maintenance-only portfolio demonstration. The production
-service runs independently of the developer workstation. New product development
+**Project status:** maintenance-only portfolio demonstration. The public site is
+now a static Cloudflare showcase, independent of the developer workstation. New product development
 is paused. Historical task notes describe earlier milestones, not a commitment
 to implement the remaining roadmap. This is a curated portfolio source snapshot, not the production deployment repository.
 Production history, operational records, and unreviewed media are intentionally omitted.
@@ -19,9 +19,9 @@ See [snapshot notes](SNAPSHOT.md) for the exact differences and verification lim
 
 **Static showcase migration:** this repository now also contains a standalone
 archive build with dated public market/chart snapshots and a synthetic portfolio.
-It needs no backend, database, login, email or trading service. Deployment and
-domain cutover are still pending; see [migration status](SHOWCASE-MIGRATION.md)
-for verified milestones rather than assuming the live URL already uses this build.
+It needs no backend, database, login, email or trading service. The domain cutover
+is verified; old infrastructure retirement is still in progress. See
+[migration status](SHOWCASE-MIGRATION.md) for exact receipts and remaining gates.
 
 ## Engineering Highlights
 
@@ -37,6 +37,9 @@ for verified milestones rather than assuming the live URL already uses this buil
   test automation, and documented operational procedures.
 
 ## System Map
+
+The source platform below is retained for local evaluation. The public showcase
+uses a separate path: browser -> Cloudflare Pages -> static HTML/assets.
 
 ```text
 Browser -> Gateway -> Astro SSR + Preact

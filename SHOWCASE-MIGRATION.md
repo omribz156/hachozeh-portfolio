@@ -1,7 +1,7 @@
 # Static Showcase Migration
 
 Started: 2026-11-05
-Status: in progress. The live domain has NOT switched to the static showcase yet.
+Status: static showcase live on the main domain; infrastructure retirement in progress.
 
 ## Purpose
 
@@ -9,7 +9,7 @@ Preserve Hachozeh as a browsable portfolio project without operating a live
 prediction-market service. Keep the established Hebrew/RTL design, mobile
 navigation, representative market pages and charts, and a synthetic portfolio.
 
-The planned Cloudflare deployment will serve static HTML/assets with selected
+The Cloudflare deployment serves static HTML/assets with selected
 browser-local interactions. Login, email codes, real account balances, trading,
 live feeds and automated settlement will not run on the showcase. Historical
 values will be labelled as a dated snapshot; demo values will be labelled as such.
@@ -30,7 +30,7 @@ must never be included in this repository or deployment.
 - [x] Local desktop/mobile click-and-scroll QA and narrow-screen overflow checks.
 - [x] Output privacy/security checks and repository CI.
 - [x] Cloudflare preview verification.
-- [ ] Public domain cutover and redirect/share-preview verification.
+- [x] Public domain cutover, redirects and share metadata/image verification.
 - [ ] Original infrastructure retirement confirmed in the private ops record.
 - [ ] Final commit/deployment receipts and documented limitations.
 
@@ -100,8 +100,30 @@ portfolio and mobile range/navigation. These are sampled checks, not continuous
 monitoring or real-device mobile coverage. Sampled portfolio navigation paint was
 188-264ms from the maintenance Mac, not a global latency or cold-load guarantee.
 
-Main-domain cutover, infrastructure retirement and cost reduction remain pending.
-Private backup details remain outside this repository.
+### Production Cutover (2026-11-05)
+
+Cloudflare production deployment `af653519` serves the same clean `b10eed9`
+artifact. `hachozeh.com` and `www.hachozeh.com` are active Pages custom domains
+with SSL. A Cloudflare 301 canonicalizes www to the HTTPS apex and preserves path
+and query. The Israeli apex keeps its existing 301; missing www DNS coverage was
+added and its edge redirect verified. Local negative DNS caching may take time
+to expire. Email DNS was not changed.
+
+Main-domain click/scroll QA passed at 1440px, 390px and 320px, including all 37
+index routes, 14 legacy redirects and 404. Brave search and card-to-market
+navigation also passed. No live API requests or horizontal overflow observed.
+Strict CSP blocked Cloudflare-injected detection/analytics scripts; those console
+warnings remain in the receipt, not reclassified as a clean console. The QA runner
+only recognizes exact injected-script hashes from the tested HTML. Separately,
+Cloudflare Speed Brain returned 503 for speculative prefetch cache misses, while
+actual navigation returned 200. Required-resource failures still fail QA.
+See [Cloudflare Speed Brain behavior](https://developers.cloudflare.com/speed/optimization/content/speed-brain/).
+
+Original app services and schedules are suspended, not deleted. Final frozen-state
+backup, monitoring adaptation and paid-resource retirement remain in progress;
+no claim of zero remaining provider charges. Private recovery details stay out
+of this repository. The small follow-up also hides a nonfunctional dispute button
+on archived market pages, without changing the original SSR default behavior.
 
 ## Reproduce
 
@@ -114,7 +136,8 @@ npm run showcase:qa --workspace @navi/web
 ```
 
 For the same checks against a deployed preview, set `SHOWCASE_QA_ORIGIN` to its
-HTTPS origin (no trailing slash). Only this project's Pages hosts are accepted.
+HTTPS origin (no trailing slash). Only this project's Pages hosts and exact
+production apex/www hosts are accepted.
 Remote receipts live in ignored `test-results/showcase/remote/`; no local server
 starts in remote mode. The local build is still required for the route inventory.
 

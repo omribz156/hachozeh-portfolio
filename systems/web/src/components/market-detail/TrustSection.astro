@@ -6,7 +6,7 @@
 // Static content; one small accordion island toggles the folds.
 import { safeHttpsUrl } from '../../lib/safe-url.js';
 
-const { snapshot } = Astro.props;
+const { snapshot, allowDisputes = true } = Astro.props;
 const snap = snapshot || {};
 const contract = snap.contract || {};
 const trust = snap.trust || {};
@@ -158,7 +158,7 @@ const folds = [
               </aside>
             </div>
             <div class="hz-rule-actions">
-              <button class="hz-rule-action" type="button" data-market-dispute>דיווח על בעיה</button>
+              {allowDisputes && <button class="hz-rule-action" type="button" data-market-dispute>דיווח על בעיה</button>}
               <a class="hz-rule-action hz-rule-action--learn" href="/help/markets/how-markets-resolve" target="_blank" rel="noopener">איך שווקים נפתרים</a>
               <a class="hz-rule-action hz-rule-action--learn" href="/help/markets/how-prices-work" target="_blank" rel="noopener">איך נקבעים המחירים</a>
               <a class="hz-rule-action" href="/help" target="_blank" rel="noopener">מרכז עזרה</a>
