@@ -967,6 +967,7 @@
 
     function _restartRefreshTimer() {
       _clearRefreshTimer();
+      if (options.staticSnapshot) return;
       if (_destroyed) return;
       if (document.visibilityState !== "visible") return;
       const interval = REFRESH_INTERVAL_MS[state.range];

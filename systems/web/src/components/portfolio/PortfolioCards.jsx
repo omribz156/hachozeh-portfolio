@@ -17,7 +17,7 @@ import usePortfolioModel from './usePortfolioModel.js';
 // ─── TotalCard ───────────────────────────────────────────────────────────────
 // Port of total-card.js · render(summary, asOfLabel).
 
-function TotalCard({ summary, asOfLabel }) {
+export function TotalCard({ summary, asOfLabel }) {
   if (!summary) return null;
 
   return (
@@ -387,7 +387,7 @@ function glyphForTone(tone) {
   return '·';
 }
 
-function ChangeCard({ change, activeTimeframeId, pendingTf, onTimeframeSelect }) {
+export function ChangeCard({ change, activeTimeframeId, pendingTf, onTimeframeSelect }) {
   const svgRef = useRef(null);
 
   // Hover-driven hero override. null = show defaults from `view`.

@@ -116,7 +116,7 @@ if (variant === 'binary') {
 const ringClass = ring && ring.tone ? ` hz-chance-ring--${ring.tone}` : '';
 ---
 
-<article class={`hz-card${teamMatch ? ' hz-card--teammatch' : ''}`} data-market-key={market?.marketKey || ''} data-feed-key={dataFeedKey} data-market-href={href} data-category={dataCategory} data-volume={dataVolume} data-new={dataNew} data-has-close={dataHasClose} data-close-at={dataCloseAt}>
+<article class={`hz-card${teamMatch ? ' hz-card--teammatch' : ''}`} data-market-key={market?.marketKey || ''} data-feed-key={dataFeedKey} data-market-href={href} data-category={dataCategory} data-volume={dataVolume} data-new={dataNew} data-published-at={Date.parse(market?.publishedAt) || 0} data-has-close={dataHasClose} data-close-at={dataCloseAt}>
   <a class="hz-card__link" href={href} aria-label={title}></a>
   {!teamMatch && (
   <div class="hz-card__head">

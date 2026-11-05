@@ -1,0 +1,28 @@
+---
+import Layout from './Layout.astro';
+import MarketCard from '../../../src/components/MarketCard.astro';
+import HeroCarousel from '../../../src/components/HeroCarousel.astro';
+import '../../../src/styles/pages/trending-stage.css';
+import '../../../src/styles/patterns/market-card.css';
+import '../../../src/styles/patterns/hero-card.css';
+import '../../../src/styles/patterns/hero-carousel.css';
+import snapshot from '../../data/snapshot.json';
+const { feed = 'trending', title = 'החוזה · שוק תחזיות עברי' } = Astro.props;
+const ids = snapshot.feeds[feed] || [];
+const items = ids.map(id => snapshot.cards.find(c => c.id === id)).filter(Boolean).map(card => ({ ...card, href: card.children.length ? `${Object.entries(snapshot.redirects).find(([, target]) => target === card.href)?.[0] || card.href}/`.replace(/\/\/$/, '/') : card.href }));
+const categories = [...new Map<string, { key: string; label: string }>(items.map(c => [c.category.key, c.category])).values()];
+const histories = Object.fromEntries(Object.entries(snapshot.markets).map(([key, m]) => [key, Object.fromEntries(m.history.seriesByOutcome.map(s => [s.outcomeKey || s.outcomeId, s.points]))]));
+---
+<Layout title={title} active={feed}>
+  <div class="hz-trending" data-archive-feed>
+    <h1 class="sr-only">{title}</h1>
+    {items.length > 0 && <section class="hz-trending__hero-zone"><HeroCarousel items={items.slice(0, 5)} snapshotHistories={histories} /></section>}
+    <nav class="hz-trending__filters" aria-label="סינון">
+      <div class="hz-trending__chips"><button class="hz-trending__chip is-active" data-category-filter="" aria-pressed="true">הכל</button>{categories.map(c => <button class="hz-trending__chip" data-category-filter={c.key} aria-pressed="false">{c.label}</button>)}</div>
+      <label class="hz-trending__sort">מיון <select class="hz-trending__sort-trigger" data-sort aria-label="מיון שווקים"><option value="trending">טרנדי</option><option value="new">חדש</option><option value="volume">נפח</option><option value="closing">מועד סגירה</option></select></label>
+    </nav>
+    <form class="showcase-mobile-search" action="/" role="search"><input type="search" name="q" aria-label="חיפוש בארכיון" placeholder="חיפוש בארכיון השווקים..." /></form>
+    <section class="hz-trending__stream" data-market-stream aria-label="שווקים">{items.map((market, i) => <MarketCard market={market} eager={i < 4} />)}</section>
+    <p class="hz-trending__empty" data-empty hidden={items.length > 0}>{items.length ? 'לא נמצאו שווקים התואמים לחיפוש.' : 'לא היו שווקים בפיד הזה בזמן צילום הארכיון.'}</p>
+  </div>
+</Layout>

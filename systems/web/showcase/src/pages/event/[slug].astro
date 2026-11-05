@@ -1,0 +1,11 @@
+---
+import Market from '../../components/Market.astro';
+import snapshot from '../../../data/snapshot.json';
+export function getStaticPaths() {
+  return Object.entries(snapshot.redirects).map(([path, target]) => {
+    const key = target.split('/')[2];
+    return { params: { slug: path.split('/')[2] }, props: { market: snapshot.markets[key], group: snapshot.cards.find(c => c.marketKey === key && c.children.length) || null } };
+  });
+}
+---
+<Market {...Astro.props} />

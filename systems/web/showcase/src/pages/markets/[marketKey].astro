@@ -1,0 +1,6 @@
+---
+import Market from '../../components/Market.astro';
+import snapshot from '../../../data/snapshot.json';
+export function getStaticPaths() { return Object.entries(snapshot.markets).map(([marketKey, market]) => ({ params: { marketKey }, props: { market } })); }
+---
+<Market market={Astro.props.market} />

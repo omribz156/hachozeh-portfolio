@@ -17,6 +17,12 @@ to implement the remaining roadmap. This is a curated portfolio source snapshot,
 Production history, operational records, and unreviewed media are intentionally omitted.
 See [snapshot notes](SNAPSHOT.md) for the exact differences and verification limits.
 
+**Static showcase migration:** this repository now also contains a standalone
+archive build with dated public market/chart snapshots and a synthetic portfolio.
+It needs no backend, database, login, email or trading service. Deployment and
+domain cutover are still pending; see [migration status](SHOWCASE-MIGRATION.md)
+for verified milestones rather than assuming the live URL already uses this build.
+
 ## Engineering Highlights
 
 - **Market engine:** LMSR pricing, exclusive multi-outcome markets, binary and
@@ -56,7 +62,22 @@ Backend -> authorized mutation, ledger, and settlement
 The product name is **Hachozeh**. `Navi` remains the internal repository/package
 namespace; it does not identify a separate product.
 
-## Local Evaluation
+## Static Showcase
+
+```sh
+npm ci --ignore-scripts
+npm run showcase:check --workspace @navi/web
+npm run showcase:build --workspace @navi/web
+npx playwright install chromium
+npm run showcase:qa --workspace @navi/web
+```
+
+Only `systems/web/showcase-dist` is deployable static output. The browser QA
+runner starts and stops an isolated local server; it does not boot the platform.
+The build uses the committed sanitized snapshot, not a production connection.
+The original application below remains available for engineering evaluation.
+
+## Local Platform Evaluation
 
 Requirements: Node.js 22.12+ (Node 24 also supported), npm, and Docker for a
 local PostgreSQL instance. Use an isolated database, never production credentials.

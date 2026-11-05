@@ -1,0 +1,27 @@
+name: Verify Static Showcase
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  showcase:
+    runs-on: ubuntu-latest
+    env:
+      NAVI_ENV_FILE: /dev/null
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --ignore-scripts
+      - run: node workspace/security/check-dependency-audit.mjs
+      - run: node --test workspace/security/dependency-compat.test.mjs
+      - run: npm run showcase:check --workspace @navi/web
+      - run: npm run showcase:build --workspace @navi/web
+      - run: npx playwright install --with-deps chromium
+      - run: npm run showcase:qa --workspace @navi/web

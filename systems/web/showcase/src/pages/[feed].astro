@@ -1,0 +1,5 @@
+---
+import Feed from '../components/Feed.astro';
+export function getStaticPaths() { return [['new', 'חדש'], ['breaking', 'מתפרץ'], ['closing', 'נסגרים'], ['trending', 'טרנדי']].map(([feed, label]) => ({ params: { feed }, props: { feed: feed === 'trending' ? 'trending' : feed, title: `${label} · החוזה` } })); }
+---
+<Feed {...Astro.props} />
