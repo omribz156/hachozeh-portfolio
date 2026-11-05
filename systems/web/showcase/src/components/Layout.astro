@@ -1,0 +1,62 @@
+---
+import '../../../src/styles/global.css';
+import '../../../src/styles/patterns/site-shell.css';
+import '../../../src/styles/patterns/vshekel.css';
+import '../styles/showcase.css';
+import snapshot from '../../data/snapshot.json';
+const { title = 'החוזה', active = 'trending' } = Astro.props;
+const categories = [...new Map(snapshot.cards.map(c => [c.category.key, c.category])).values()];
+const feeds = [['trending', '/', 'טרנדי', 'local_fire_department'], ['new', '/new/', 'חדש', 'auto_awesome'], ['breaking', '/breaking/', 'מתפרץ', 'bolt'], ['closing', '/closing/', 'נסגרים', 'schedule']];
+const canonical = new URL(Astro.url.pathname === '/404/' ? '/404.html' : Astro.url.pathname, 'https://hachozeh.com');
+const captured = new Date(snapshot.capturedAt).toLocaleDateString('he-IL', { timeZone: 'Asia/Jerusalem' });
+---
+<!doctype html>
+<html class="dark" lang="he" dir="rtl" data-showcase>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>{title}</title>
+    <meta name="description" content="החוזה · שוק תחזיות עברי. ארכיון אינטראקטיבי של הפרויקט." />
+    {Astro.url.pathname === '/404/' && <meta name="robots" content="noindex" />}
+    <link rel="canonical" href={canonical} />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content="ארכיון אינטראקטיבי · החוזה, שוק תחזיות עברי" />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:locale" content="he_IL" />
+    <meta property="og:image" content="https://hachozeh.com/og-image.jpg" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="theme-color" content="#101512" />
+    <link rel="icon" href="/favicon.ico" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Arimo:wght@400;500;600;700;800;900&family=IBM+Plex+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&icon_names=account_balance_wallet,auto_awesome,bolt,bookmark,bookmark_border,chevron_left,close,expand_more,home,info,local_fire_department,menu,more_horiz,query_stats,schedule,search,settings,share,sort,trending_down,trending_up&display=block" rel="stylesheet" />
+  </head>
+  <body class="bg-background-dark text-off-white font-display min-h-screen flex flex-col">
+    <a class="skip-link" href="#main-content">דלג לתוכן הראשי</a>
+    <div class="hz-shell-wrap" data-site-shell>
+      <header class="hz-shell__bar"><div class="hz-shell__inner">
+        <div class="hz-shell__lead">
+          <a class="hz-shell__brand hz-brand" href="/"><span class="hz-brand__mark" aria-hidden="true"></span><span class="hz-brand__name">החוזה</span></a>
+          <form class="hz-shell__search showcase-search" action="/" role="search">
+            <span class="material-symbols-outlined hz-shell__search-icon" aria-hidden="true">search</span>
+            <input class="hz-shell__search-input" type="search" name="q" placeholder="חיפוש בארכיון השווקים..." aria-label="חיפוש בארכיון" />
+          </form>
+        </div>
+        <div class="hz-shell__actions"><a class="hz-shell__cta hz-shell__cta--ghost" href="/about/">על הפרויקט</a><a class="hz-shell__cta hz-shell__cta--primary" href="/portfolio/">תיק לדוגמה</a></div>
+      </div></header>
+      <nav class="hz-shell__nav" aria-label="שווקים"><div class="hz-shell__nav-inner"><div class="hz-shell__nav-track">
+        {feeds.map(([key, href, label, icon]) => <a class={`hz-shell__feed-item${active === key ? ' is-active' : ''}`} href={href} aria-current={active === key ? 'page' : undefined}><span class="material-symbols-outlined hz-shell__feed-icon" aria-hidden="true">{icon}</span><span class="hz-shell__feed-label">{label}</span></a>)}
+        <div class="hz-shell__nav-divider"></div>
+        {categories.map(c => <a class="hz-shell__cat-item" href={`/?category=${c.key}`}>{c.label}</a>)}
+      </div></div></nav>
+    </div>
+    <p class="showcase-notice">ארכיון הפרויקט · תמונת מצב מ־{captured} · ללא מסחר או הרשמה</p>
+    <main class="flex-1 w-full" id="main-content"><slot /></main>
+    <footer class="showcase-footer"><a href="/about/">על הפרויקט</a><a href="/portfolio/">תיק לדוגמה</a><a href="https://github.com/omribz156/hachozeh-portfolio" target="_blank" rel="noopener noreferrer">קוד הפרויקט</a><span>V₪ הוא מטבע וירטואלי בלבד</span></footer>
+    <nav class="hz-shell__tabs" aria-label="ניווט תחתון">
+      {[[ '/', 'בית', 'home'], ['/?search=1', 'חיפוש', 'search'], ['/about/', 'הפרויקט', 'info'], ['/portfolio/', 'תיק לדוגמה', 'account_balance_wallet']].map(([href, label, icon]) => <a class={`hz-shell__tab${Astro.url.pathname === href ? ' is-active' : ''}`} href={href}><span class="material-symbols-outlined hz-shell__tab-icon" aria-hidden="true">{icon}</span><span class="hz-shell__tab-label">{label}</span></a>)}
+    </nav>
+    <script>import '../client/showcase.js';</script>
+  </body>
+</html>

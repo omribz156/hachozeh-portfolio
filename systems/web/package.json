@@ -8,6 +8,10 @@
     "dev": "node ./scripts/dev-build-serve.mjs",
     "dev:hot": "astro dev --host 127.0.0.1 --port 6969",
     "build": "astro build",
+    "showcase:build": "node showcase/scripts/assets.mjs && astro build --config astro.showcase.config.mjs && node showcase/scripts/seal.mjs",
+    "showcase:qa": "node showcase/scripts/qa.mjs",
+    "showcase:check": "astro check --config astro.showcase.config.mjs --tsconfig showcase/tsconfig.json --minimumFailingSeverity error --minimumSeverity error",
+    "showcase:capture": "node showcase/scripts/capture.mjs",
     "rebuild:safe": "bash ../../workspace/scripts/rebuild-web-safe.sh",
     "check": "astro check",
     "preview": "astro preview --host 127.0.0.1 --port 6969",
@@ -30,6 +34,7 @@
     "@tailwindcss/container-queries": "^0.1.1",
     "@tailwindcss/forms": "^0.5.11",
     "autoprefixer": "^10.5.2",
+    "parse5": "^8.0.0",
     "postcss": "^8.5.28",
     "tailwindcss": "^3.4.17",
     "typescript": "^6.0.3"

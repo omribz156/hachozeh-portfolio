@@ -1,0 +1,13 @@
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Reviewed public market slugs, not authentication keys"
+condition = "AND"
+paths = [
+  '''systems/web/showcase/data/snapshot\.json$''',
+  '''systems/web/showcase-dist/markets/disc-gta-6-(kupa-rashit-season-6|major-global-pandemic|usd-ils-below-275)/index\.html$''',
+  '''systems/web/showcase-dist/event/what-will-happen-in-israel-before-gta-6/index\.html$'''
+]
+regexTarget = "secret"
+regexes = ['''^disc-gta-6-(kupa-rashit-season-6|hachozeh-major-media-mention|major-global-pandemic|usd-ils-below-275)$''']

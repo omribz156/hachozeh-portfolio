@@ -1,0 +1,33 @@
+---
+import Layout from '../components/Layout.astro';
+import DemoPortfolio from '../components/DemoPortfolio.jsx';
+import '../../../src/styles/pages/portfolio.css';
+import '../../../src/styles/patterns/pnl-sparkline.css';
+import snapshot from '../../data/snapshot.json';
+const money = n => `V₪ ${n.toLocaleString('he-IL', { maximumFractionDigits: 2 })}`;
+const markets = Object.values(snapshot.markets).filter(m => ['politics', 'travel', 'entertainment'].includes(m.category.key)).filter((m, i, all) => all.findIndex(a => a.category.key === m.category.key) === i);
+// Deliberately invented holdings, quantities and entry prices. No user export.
+const positions = markets.map((m, i) => {
+  const quantity = 100 * (i + 1), entry = 0.4 + i * 0.05, price = m.current[m.outcomes[0].id];
+  const cost = quantity * entry, value = quantity * price, pnl = value - cost;
+  return { marketKey: m.key, marketTitle: m.title, outcomeLabel: m.outcomes[0].label, imageSrc: m.image.src,
+    quantityLabel: `${quantity} יחידות`, currentStateLabel: m.outcomes[0].label, currentStateTone: 'buy',
+    quantity, averageEntryPrice: entry, currentPrice: price, costBasis: cost, toWin: quantity - cost, currentValue: value, dayPnl: pnl,
+    costBasisLabel: money(cost), toWinLabel: money(quantity - cost), currentValueLabel: money(value), pnlSubLabel: money(pnl), pnlTone: pnl >= 0 ? 'buy' : 'sell',
+  };
+});
+const total = positions.reduce((n, p) => n + p.currentValue, 0);
+const pnl = positions.reduce((n, p) => n + p.dayPnl, 0);
+const end = Date.parse(snapshot.capturedAt);
+const timeframes = [{ id: 'week', label: 'שבוע' }, { id: 'month', label: 'חודש' }, { id: 'all', label: 'הכל' }];
+const change = { timeframes, viewsByTimeframe: Object.fromEntries(timeframes.map(({ id }, index) => [id, {
+  totalMovementTone: pnl >= 0 ? 'buy' : 'sell', totalMovementLabel: money(pnl), subEyebrowLabel: 'נתוני הדגמה סינתטיים', chartHasData: true,
+  chartPoints: Array.from({ length: 32 }, (_, i) => ({ t: end - (31 - i) * 86400000 * (index + 1), value: pnl * i / 31 + Math.sin(i / 3) * 2 })),
+}])) };
+---
+<Layout title="תיק לדוגמה · החוזה" active="portfolio"><div class="portfolio-page-shell mx-auto showcase-portfolio">
+  <h1 class="showcase-portfolio-title">תיק לדוגמה</h1>
+  <p class="showcase-portfolio-note">כל הפוזיציות והביצועים בתיק הזה סינתטיים. אין חשבון, יתרה אמיתית או אפשרות מסחר.</p>
+  <script is:inline src="/scripts/components/pnl-sparkline-renderer.js"></script>
+  <DemoPortfolio client:load positions={positions} change={change} summary={{ totalValue: money(1000 + total), availableValue: money(1000), positionsValue: money(total) }} />
+</div></Layout>

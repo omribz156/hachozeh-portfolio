@@ -1,0 +1,36 @@
+---
+import '../../../src/styles/patterns/probability-chart.css';
+import '../../../src/styles/patterns/market-detail-chart.css';
+import { serializeJsonForHtmlScript } from '../../../src/lib/json-script.js';
+const { market, children = [] } = Astro.props;
+const series = children.length ? children.map(child => ({ outcomeId: child.key, outcomeKey: child.key, label: child.label, points: child.history.seriesByOutcome.find(s => s.outcomeId === child.outcomes[0]?.id)?.points || [] })) : market.history.seriesByOutcome;
+const data = { key: market.key, history: { range: 'all', seriesByOutcome: series }, meta: { volume: market.volumeLabel || '—', closeDate: market.closeLabel, statusLabel: 'ארכיון', canonicalOutcomeId: children.length ? null : market.outcomes[0]?.id, namedOpponents: children.length > 0, isResolved: market.status === 'resolved' } };
+---
+<div data-archive-chart><script type="application/json" set:html={serializeJsonForHtmlScript(data)} /></div>
+<script is:inline defer src="/scripts/probability-chart-renderer.js"></script>
+<script is:inline defer src="/scripts/market-detail-chart.js"></script>
+<script>
+  function mountCharts() {
+    document.querySelectorAll('[data-archive-chart]').forEach(host => {
+      const data = JSON.parse(host.querySelector('script').textContent);
+      const history = data.history;
+      const end = Math.max(...history.seriesByOutcome.flatMap(s => s.points.map(p => p.t)));
+      const seconds = { '1H': 3600, '6H': 21600, '1D': 86400, '1W': 604800, '1M': 2592000 };
+      const rangeData = range => ({ range, seriesByOutcome: history.seriesByOutcome.map(s => {
+        if (!seconds[range]) return s;
+        const start = end - seconds[range];
+        const points = s.points.filter(p => p.t >= start);
+        const preceding = s.points.filter(p => p.t < start).at(-1);
+        return { ...s, points: preceding ? [{ ...preceding, t: start }, ...points] : points };
+      }) });
+      window.HzMarketDetailChart.mount(host, {
+        marketKey: data.key, staticSnapshot: true,
+        initialRange: 'all', initialData: history, marketMeta: data.meta,
+        palette: ['#d8b66d', '#71b9d5', '#6ed5b2', '#cd8fbc'],
+        fetchHistory: async (_key, range) => rangeData(range),
+      });
+    });
+  }
+  if (document.readyState === 'complete') mountCharts();
+  else window.addEventListener('load', mountCharts, { once: true });
+</script>

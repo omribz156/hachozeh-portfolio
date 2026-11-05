@@ -3,6 +3,8 @@ Thumbs.db
 
 node_modules/
 dist/
+systems/web/showcase-dist/
+systems/web/showcase/public/
 build/
 coverage/
 playwright-report/

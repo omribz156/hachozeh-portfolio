@@ -10,7 +10,7 @@ import { ASSET_VERSION } from '../lib/asset-version.js';
 import { BACKEND_INTERNAL_URL } from '../lib/backend.js';
 import '../styles/patterns/probability-chart.css';
 
-const { items = [] } = Astro.props;
+const { items = [], snapshotHistories = null } = Astro.props;
 const HERO_SLIDE_LIMIT = 10;
 const HERO_CHART_SCRIPT_URLS = [
   `/scripts/probability-chart-renderer.js?v=${ASSET_VERSION}`,
@@ -178,7 +178,12 @@ const slides = items.slice(0, HERO_SLIDE_LIMIT).map((m) => {
 // Slide 0 loads WITH the page: resolve its series server-side and embed (instant
 // paint, no client fetch). Slides 1-9 resolve client-side after first paint.
 // Degrades gracefully — if the SSR fetch fails, the client resolves slide 0 on load too.
-if (slides[0]) {
+if (snapshotHistories) {
+  for (const slide of slides) {
+    slide.config.staticSnapshot = true;
+    slide.seed = await resolveSeries(slide.config, (key) => snapshotHistories[key] || {});
+  }
+} else if (slides[0]) {
   const seed = await resolveSeries(slides[0].config, (k) => ssrHist(k, slides[0].config.range));
   if (seed.some((s) => (s.points || []).length >= 2)) slides[0].seed = seed;
 }
@@ -431,6 +436,7 @@ const navTitles = slides.map((s) => shortenTitle(s.title));
         return ks.length ? byKey[ks[0]] : [];
       }
       async function resolve(cfg) {
+        if (cfg.staticSnapshot) return cfg.seed || [];
         // First paint of slide 0 uses the SSR-embedded seed (no fetch). On a
         // live refresh (doorbell), fall through to a fresh /history fetch so the
         // chart actually updates instead of redrawing the stale seed.

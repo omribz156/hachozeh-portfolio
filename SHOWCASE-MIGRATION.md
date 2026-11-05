@@ -23,11 +23,11 @@ must never be included in this repository or deployment.
 ## Checklist
 
 - [x] Migration scope and public/private documentation boundary recorded.
-- [ ] Static build with no production API, credentials or database dependency.
-- [ ] Curated public data and synthetic portfolio; reviewed media only.
-- [ ] Functional browsing, filters, search, market detail and chart interactions.
-- [ ] Explicit read-only/archive states instead of misleading live controls.
-- [ ] Desktop/mobile click-and-scroll QA, usable loading and no overflow.
+- [x] Static build with no production API, credentials or database dependency.
+- [x] Curated public data and synthetic portfolio; reviewed media only.
+- [x] Local functional browsing, filters, search, market detail and charts.
+- [x] Explicit read-only/archive states instead of misleading live controls.
+- [x] Local desktop/mobile click-and-scroll QA and narrow-screen overflow checks.
 - [ ] Output privacy/security checks and repository CI.
 - [ ] Cloudflare preview verification.
 - [ ] Public domain cutover and redirect/share-preview verification.
@@ -39,7 +39,45 @@ must never be included in this repository or deployment.
 Initial source revision: 3f199098652eaf4ca2bb4ee5c65743299b983ae9.
 Migration branch: codex/static-showcase.
 
-No migration build, preview deployment, domain cutover or cost reduction is
-claimed yet. Update this section with actual tested revisions and results as
-each gate passes. Private backup/restore and retirement details are recorded
-separately by the maintainer; only sanitized completion status belongs here.
+2026-11-05 local candidate:
+
+- Separate static Astro entrypoint: `systems/web/astro.showcase.config.mjs`.
+  Original SSR application remains available, not converted in place.
+- Allowlisted public snapshot: 17 cards, 22 markets, five event routes; no user
+  records, sessions, private trades, emails or production credentials. Portfolio
+  positions/history are synthetic. Images use the reviewed project-owned buckets.
+- 38 generated pages; 1,234 local link/asset references validated at build time.
+- CSP blocks all backend connections (`connect-src 'none'`); inline scripts use
+  hashes. No live authentication, orders, polling or analytics in this build.
+- Click/scroll QA at 1440px, 390px and 320px: sticky header, filters, search,
+  sorting, event-to-market navigation, trust accordion, portfolio search/range.
+  No JavaScript/resource errors or API/non-GET requests in those flows.
+  All generated index routes checked at 320px, plus an intentional 404.
+- Timing receipts are local-only, not evidence of internet performance. Browser
+  verification against the deployed preview is still required.
+- Fresh production backup restored privately in isolation; no blocker-level
+  integrity findings. Historical lifecycle warnings remain archived, not settled.
+- Secret scan of showcase source passed with exact, path-scoped false-positive
+  exceptions for four public market slugs; the generated artifact also passes.
+- Clean install, full npm audit (zero advisories), dependency compatibility tests,
+  original SSR build and static check/build pass. Grouped chart identities are
+  distinct; series selection, range switching and settings are exercised by QA.
+  Hosted CI and final staged review remain release gates.
+
+No preview deployment, domain cutover, infrastructure retirement or cost reduction
+is claimed yet. Private backup details remain outside this repository.
+
+## Reproduce
+
+```sh
+npm ci --ignore-scripts
+npm run showcase:check --workspace @navi/web
+npm run showcase:build --workspace @navi/web
+npx playwright install chromium
+npm run showcase:qa --workspace @navi/web
+```
+
+Deploy only `systems/web/showcase-dist`, never the repository root or SSR output.
+The QA runner serves an ephemeral loopback-only site and stops it on completion.
+Capture is explicit (`showcase:capture`), not part of the offline build; review
+every refreshed snapshot before publishing. Do not add private database exports.

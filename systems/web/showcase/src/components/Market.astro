@@ -1,0 +1,37 @@
+---
+import Layout from './Layout.astro';
+import Chart from './Chart.astro';
+import TrustSection from '../../../src/components/market-detail/TrustSection.astro';
+import '../../../src/styles/pages/market-detail.css';
+import '../../../src/styles/pages/event-mode.css';
+import '../../../src/styles/patterns/probability-hero.css';
+import '../../../src/styles/patterns/breadcrumb.css';
+import '../../../src/styles/patterns/trust-fold.css';
+import '../../../src/styles/patterns/rule-card.css';
+import '../../../src/styles/patterns/timeline.css';
+import snapshot from '../../data/snapshot.json';
+const { market, group = null } = Astro.props;
+const title = group?.title || market.title;
+const children = group ? group.children.map(key => ({ ...snapshot.markets[key], label: group.outcomes.find(o => o.outcomeKey === key)?.label || snapshot.markets[key].title })) : [];
+const outcomes = children.length ? children.map(c => ({ key: c.key, label: c.label, price: c.current[c.outcomes[0].id], href: `/markets/${c.key}/` })) : market.outcomes.map(o => ({ key: o.id, label: o.label, price: market.current[o.id] }));
+---
+<Layout title={`${title} · החוזה`}>
+  <div class="market-detail-page"><div class="market-detail-stage-page-shell mx-auto w-full"><section class="market-detail-stage">
+    <div class="market-detail-stage-main">
+      <header class="market-detail-stage-head"><div class="market-detail-stage-head-grid"><div class="market-detail-topbar"><div class="market-detail-heading">
+        <div class="market-detail-brand-mark"><img src={market.image.src} alt="" width="64" height="64" /></div>
+        <div class="market-detail-title-block"><nav class="hz-breadcrumb" aria-label="פירורי לחם"><a href="/">שווקים</a><span>‹</span><a href={`/?category=${market.category.key}`}>{market.category.label}</a></nav><h1 class="market-detail-page-title">{title}</h1></div>
+      </div></div></div></header>
+      <Chart market={market} children={children} />
+      <section class="showcase-outcomes" aria-label="תוצאות אפשריות">
+        {outcomes.map(o => <div class="showcase-outcome">{o.href ? <a href={o.href}>{o.label}</a> : <span>{o.label}</span>}<strong dir="ltr">{Math.round(o.price * 100)}%</strong></div>)}
+      </section>
+      <section class="market-detail-dossier"><div class="market-detail-dossier-main"><section class="market-detail-trust-shell">{group ? <p class="showcase-group-rules">כל אפשרות היא שוק נפרד, עם כללי הכרעה משלו. כללי השוק מופיעים בעמוד האפשרות המתאימה.</p> : <TrustSection snapshot={{ ...market, marketStatus: market.status }} />}</section></div></section>
+    </div>
+    <div class="market-detail-stage-side"><aside class="market-detail-stage-rail" aria-label="מצב ארכיון"><div class="market-detail-stage-order-widget showcase-ticket">
+      <h2>תמונת מצב של השוק</h2><p>{market.status === 'resolved' ? 'הוכרע לפני צילום הארכיון' : market.status === 'closed' ? 'נסגר; ההכרעה לא הושלמה בתמונת המצב' : 'היה פתוח בזמן צילום הארכיון'}</p>
+      {outcomes.slice(0, 4).map(o => <div class="showcase-outcome"><span>{o.label}</span><strong dir="ltr">{Math.round(o.price * 100)}%</strong></div>)}
+      <p>המסחר אינו פעיל. המחירים והגרף נשמרו לצפייה בלבד.</p><a class="hz-shell__cta hz-shell__cta--primary" href="/portfolio/">לתיק לדוגמה</a>
+    </div></aside></div>
+  </section></div></div>
+</Layout>

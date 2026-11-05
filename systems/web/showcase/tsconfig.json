@@ -1,0 +1,5 @@
+{
+  "extends": "../tsconfig.json",
+  "include": ["src/**/*", "../.astro/types.d.ts"],
+  "exclude": ["public", "../showcase-dist", "../node_modules"]
+}
